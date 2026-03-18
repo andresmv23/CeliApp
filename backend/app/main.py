@@ -7,6 +7,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
 
+from fastapi import Request
+from typing import Optional
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+
 from app.analizador import analisis_rapido
 from app.schemas import (
     AnalisisRequest,
@@ -37,7 +43,14 @@ from app.auth import (
 )
 
 app = FastAPI(title="CeliApp API")
+
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl="auth/login", auto_error=False)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173"],
@@ -71,6 +84,26 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
     return user
+
+
+def get_optional_user(token: Optional[str] = Depends(oauth2_scheme_optional)):
+    if not token:
+        return None  # Es un usuario anónimo
+    try:
+        # Reutilizamos tu lógica, pero si falla, no rompemos la app, lo tratamos como anónimo
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
+            return None
+
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute("SELECT id, email, full_name FROM users WHERE email = %s", (email,))
+        user = cur.fetchone()
+        conn.close()
+        return user
+    except Exception:
+        return None
 
 
 @app.get("/")
@@ -211,13 +244,22 @@ def analizar_ingredientes(request: AnalisisRequest):
 
 
 @app.get("/producto/{ean}")
-def buscar_producto_inteligente(ean: str, current_user=Depends(get_current_user)):
+@limiter.limit("10/minute")
+def buscar_producto_inteligente(
+    request: Request,
+    ean: str,
+    current_user=Depends(get_optional_user),
+):
     """
     Flujo Maestro: DB Local -> OpenFoodFacts -> IA Deep Search
-    NOTA: Ahora recibe 'current_user' para poder guardar en el historial.
+    NOTA: Soporta usuarios anónimos (current_user = None)
     """
 
     def guardar_en_historial(ean_encontrado):
+        if not current_user:
+            # Si es invitado, no guardamos historial
+            return
+
         try:
             c = get_db_connection()
             cur = c.cursor()

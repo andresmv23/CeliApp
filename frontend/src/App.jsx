@@ -77,23 +77,27 @@ function MainLayout() {
     const [vista, setVista] = useState('buscador'); 
 
     return (
-        // Se eliminó el "absolute top-0 left-0" y se añadió overflow-x-hidden para evitar scroll lateral por los blobs
         <div className="min-h-screen w-full bg-slate-50 relative overflow-x-hidden font-sans">
             
-            {/* Elementos decorativos de fondo (Blobs). pointer-events-none evita que interfieran con clics */}
+            {/* Blobs de fondo */}
             <div className="absolute top-0 -left-4 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob pointer-events-none"></div>
             <div className="absolute top-0 -right-4 w-72 h-72 bg-teal-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000 pointer-events-none"></div>
             <div className="absolute -bottom-8 left-20 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000 pointer-events-none"></div>
 
             <div className="relative z-10 flex flex-col min-h-screen">
-                {/* Ahora le pasamos vistaActual a la Navbar para que sepa qué botón iluminar */}
-                {isAuthenticated && <Navbar setVista={setVista} vistaActual={vista} />}
+                {/* 1. LA NAVBAR AHORA SIEMPRE ES VISIBLE, esté logueado o no */}
+                <Navbar setVista={setVista} vistaActual={vista} isAuthenticated={isAuthenticated} />
                 
-                <ProtectedRoute>
-                     <main className="flex-1 flex justify-center py-10 w-full px-4 sm:px-6 lg:px-8">
-                        {vista === 'buscador' ? <Buscador /> : <Perfil />}
-                     </main>
-                </ProtectedRoute>
+                <main className="flex-1 flex justify-center py-10 w-full px-4 sm:px-6 lg:px-8">
+                    {/* 2. LÓGICA DE RUTAS MEJORADA */}
+                    {vista === 'buscador' ? (
+                        <Buscador /> // El buscador es libre para todos
+                    ) : (
+                        <ProtectedRoute>
+                            <Perfil /> // El perfil requiere login
+                        </ProtectedRoute>
+                    )}
+                </main>
             </div>
         </div>
     )
