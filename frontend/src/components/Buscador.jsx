@@ -15,13 +15,14 @@ function Buscador() {
   const [error, setError] = useState(null);
   const [esFavorito, setEsFavorito] = useState(false);
   const [mostrarScanner, setMostrarScanner] = useState(false);
+  const [toastMsg, setToastMsg] = useState('');
 
   const handleScan = (codigoEscaneado) => {
     setEan(codigoEscaneado);
     setMostrarScanner(false);
   };
 
-  // LÓGICA DE BÚSQUEDA REAL RESTAURADA
+  // LÓGICA DE BÚSQUEDA REAL
   const buscarProducto = async (e) => {
     e.preventDefault();
     if (!ean.trim()) return;
@@ -54,31 +55,34 @@ function Buscador() {
     }
   };
 
-  // LÓGICA DE FAVORITOS RESTAURADA
+  // LÓGICA DE FAVORITOS
   const toggleFavorito = async () => {
-      if (!resultado) return;
-      if (!token) {
-          alert("Debes iniciar sesión para guardar favoritos.");
-          return;
+    if (!resultado) return;
+    if (!token) {
+      setToastMsg("Debes iniciar sesión para guardar favoritos");
+      setTimeout(() => setToastMsg(''), 3000);
+      return;
+    }
+    
+    try {
+      if (esFavorito) {
+        setToastMsg("Ya está en favoritos");
+        setTimeout(() => setToastMsg(''), 3000);
+        return;
       }
       
-      try {
-          if (esFavorito) {
-              alert("Ya está en favoritos");
-              return;
-          } 
-          
-          await axios.post(`${API_URL}/favoritos`, 
-              { ean: ean },
-              { headers: { Authorization: `Bearer ${token}` } }
-          );
-          setEsFavorito(true);
-          alert("❤️ ¡Añadido a tus favoritos!");
-          
-      } catch (err) {
-          console.error('Error al guardar favorito:', err);
-          alert("Error gestionando favoritos");
-      }
+      await axios.post(`${API_URL}/favoritos`, 
+        { ean: ean }, 
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setEsFavorito(true);
+      setToastMsg("❤️ ¡Añadido a tus favoritos!");
+      setTimeout(() => setToastMsg(''), 3000);
+    } catch (err) {
+      console.error('Error al guardar favorito:', err);
+      setToastMsg("Error gestionando favoritos");
+      setTimeout(() => setToastMsg(''), 3000);
+    }
   };
 
   // LÓGICA DE ESTILOS VISUALES RESTAURADA
@@ -226,8 +230,14 @@ function Buscador() {
             </div>
           </div>
       )}
-
-    </div>
+      {/* Toast Notification */}
+      {toastMsg && (
+        <div className="fixed bottom-4 right-4 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3 animate-fade-in-up z-50">
+        <span>{toastMsg}</span>
+        <button onClick={() => setToastMsg('')} className="text-gray-400 hover:text-white">✕</button>
+        </div>
+      )}
+    </div>  
   );
 }
 
