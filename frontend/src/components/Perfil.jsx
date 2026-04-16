@@ -9,6 +9,7 @@ function Perfil() {
     const [perfil, setPerfil] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [toastMsg, setToastMsg] = useState('');
 
     useEffect(() => {
         const fetchPerfil = async () => {
@@ -33,21 +34,22 @@ function Perfil() {
     }, [token]);
 
     const eliminarFavorito = async (ean) => {
-        if (!window.confirm("¿Seguro que quieres quitar este producto de favoritos?")) return;
-        
         try {
             await axios.delete(`${API_URL}/favoritos/${ean}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setPerfil(prev => ({
-                ...prev,
-                favoritos: prev.favoritos.filter(p => p.ean !== ean)
-            }));
-        } catch (err) {
-            console.error('Error deleting favorite:', err);
-            alert("No se pudo eliminar el favorito. Inténtalo de nuevo.");
-        }
-    };
+            ...prev,
+            favoritos: prev.favoritos.filter(p => p.ean !== ean)
+        }));
+        setToastMsg("✅ Favorito eliminado");
+        setTimeout(() => setToastMsg(''), 3000);
+    } catch (err) {
+        console.error('Error deleting favorite:', err);
+        setToastMsg("No se pudo eliminar el favorito. Inténtalo de nuevo.");
+        setTimeout(() => setToastMsg(''), 3000);
+    }
+};
 
     const getBadgeStyle = (estado) => {
         const base = "px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm";
@@ -181,6 +183,12 @@ function Perfil() {
                 </div>
 
             </div>
+        {toastMsg && (
+            <div className="fixed bottom-4 right-4 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3 z-50">
+            <span>{toastMsg}</span>
+            <button onClick={() => setToastMsg('')} className="text-gray-400 hover:text-white ml-2">✕</button>
+            </div>
+        )}
         </div>
     );
 }
