@@ -4,11 +4,15 @@ import { useAuth } from '../context/AuthContext';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
-function Login() {
+// 1. AÑADIMOS onLoginSuccess COMO PROP
+function Login({ onLoginSuccess }) {
   const { login } = useAuth();
   const [isRegistering, setIsRegistering] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  
+  // 2. NUEVO ESTADO PARA EL MENSAJE DE ÉXITO
+  const [successMsg, setSuccessMsg] = useState('');
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -17,6 +21,7 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccessMsg(''); // Limpiamos mensajes previos
     setLoading(true);
 
     try {
@@ -26,9 +31,12 @@ function Login() {
           password: password,
           full_name: fullName.trim()
         });
+        
         setIsRegistering(false);
         setPassword('');
-        alert("¡Cuenta creada! Ahora inicia sesión.");
+        // Mostrar mensaje en verde en vez de un 'alert' feo
+        setSuccessMsg("¡Cuenta creada con éxito! Por favor, inicia sesión.");
+        
       } else {
         const formData = new URLSearchParams();
         formData.append('username', email.trim());
@@ -37,7 +45,19 @@ function Login() {
         const response = await axios.post(`${API_URL}/auth/login`, formData, {
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
         });
+        
+        // Ejecutamos el login del contexto (guarda el token)
         login(response.data.access_token);
+        
+        // 3. MOSTRAMOS FEEDBACK VISUAL Y REDIRIGIMOS
+        setSuccessMsg("¡Acceso correcto! Redirigiendo...");
+        
+        // Damos medio segundo para que el usuario lea el mensaje y luego ejecutamos la redirección
+        setTimeout(() => {
+            if (onLoginSuccess) {
+                onLoginSuccess();
+            }
+        }, 800);
       }
     } catch (err) {
       console.error('Error de autenticación:', err);
@@ -103,9 +123,17 @@ function Login() {
                 />
             </div>
 
+            {/* 4. SECCIÓN PARA MOSTRAR ERRORES */}
             {error && (
                 <div className="bg-red-500/10 text-red-200 p-3 rounded-lg text-sm text-center border border-red-500/20">
                     ⚠️ {error}
+                </div>
+            )}
+
+            {/* 5. SECCIÓN PARA MOSTRAR ÉXITO */}
+            {successMsg && (
+                <div className="bg-green-500/20 text-green-200 p-3 rounded-lg text-sm text-center border border-green-500/30">
+                    ✅ {successMsg}
                 </div>
             )}
 
@@ -124,9 +152,9 @@ function Login() {
                 <button 
                     type="button"
                     className="text-blue-400 hover:text-blue-300 font-bold ml-1 transition-colors"
-                    onClick={() => { setIsRegistering(!isRegistering); setError(''); setPassword(''); }}
+                    onClick={() => { setIsRegistering(!isRegistering); setError(''); setSuccessMsg(''); setPassword(''); }}
                 >
-                {isRegistering ? 'Inicia Sesión' : 'Regístrate gratis'}
+                {isRegistering ? 'Inicia sesión' : 'Regístrate gratis'}
                 </button>
             </p>
         </div>

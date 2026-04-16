@@ -4,13 +4,9 @@ import Login from './components/Login'
 import Perfil from './components/Perfil'
 import { AuthProvider, useAuth } from './context/AuthContext'
 
-const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated } = useAuth();
-  return isAuthenticated ? children : <Login />;
-};
-
 const Navbar = ({ setVista, vistaActual }) => {
-    const { logout } = useAuth();
+    // 1. EXTRAEMOS ISAUTHENTICATED DIRECTAMENTE DEL CONTEXTO AQUÍ
+    const { logout, isAuthenticated } = useAuth();
     
     return (
         <nav className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-gray-200/50 shadow-sm transition-all">
@@ -56,15 +52,28 @@ const Navbar = ({ setVista, vistaActual }) => {
                         </button>
                     </div>
 
-                    {/* Botón Salir */}
+                    {/* 2. BOTÓN SALIR / ENTRAR DINÁMICO REPARADO */}
                     <div className="flex-shrink-0">
-                        <button 
-                            onClick={logout} 
-                            className="text-sm font-medium text-gray-500 hover:text-red-600 transition-colors px-3 py-2 rounded-lg hover:bg-red-50 flex items-center gap-2"
-                        >
-                            <span className="hidden sm:block">Cerrar sesión</span>
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-                        </button>
+                        {isAuthenticated ? (
+                            <button 
+                                onClick={() => {
+                                    logout();
+                                    setVista('buscador');
+                                }} 
+                                className="text-sm font-medium text-gray-500 hover:text-red-600 transition-colors px-3 py-2 rounded-lg hover:bg-red-50 flex items-center gap-2"
+                            >
+                                <span className="hidden sm:block">Cerrar sesión</span>
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                            </button>
+                        ) : (
+                            <button 
+                                onClick={() => setVista('login')} // 3. AHORA HAY UNA VISTA EXPLÍCITA PARA EL LOGIN
+                                className="text-sm font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 transition-colors px-4 py-2 rounded-lg flex items-center gap-2"
+                            >
+                                <span className="hidden sm:block">Iniciar sesión</span>
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
@@ -72,41 +81,52 @@ const Navbar = ({ setVista, vistaActual }) => {
     )
 }
 
-function MainLayout() {
-    const { isAuthenticated } = useAuth();
-    const [vista, setVista] = useState('buscador'); 
-
+// 4. NUEVO MAINLAYOUT LIMPIO QUE ENVOLVERÁ SÓLO BUSCADOR O PERFIL
+function MainLayout({ vista, setVista }) {
     return (
         <div className="min-h-screen w-full bg-slate-50 relative overflow-x-hidden font-sans">
-            
-            {/* Blobs de fondo */}
             <div className="absolute top-0 -left-4 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob pointer-events-none"></div>
             <div className="absolute top-0 -right-4 w-72 h-72 bg-teal-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000 pointer-events-none"></div>
             <div className="absolute -bottom-8 left-20 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000 pointer-events-none"></div>
 
             <div className="relative z-10 flex flex-col min-h-screen">
-                {/* 1. LA NAVBAR AHORA SIEMPRE ES VISIBLE, esté logueado o no */}
-                <Navbar setVista={setVista} vistaActual={vista} isAuthenticated={isAuthenticated} />
+                <Navbar setVista={setVista} vistaActual={vista} />
                 
                 <main className="flex-1 flex justify-center py-10 w-full px-4 sm:px-6 lg:px-8">
-                    {/* 2. LÓGICA DE RUTAS MEJORADA */}
-                    {vista === 'buscador' ? (
-                        <Buscador /> // El buscador es libre para todos
-                    ) : (
-                        <ProtectedRoute>
-                            <Perfil /> // El perfil requiere login
-                        </ProtectedRoute>
-                    )}
+                    {vista === 'buscador' ? <Buscador /> : <Perfil />}
                 </main>
             </div>
         </div>
     )
 }
 
+// 5. COMPONENTE APP: AQUÍ SE DECIDE SI PINTAR LA APP ENTERA O SÓLO EL LOGIN COMPLETO
+function AppRouter() {
+    const { isAuthenticated } = useAuth();
+    const [vista, setVista] = useState('buscador'); 
+
+    // Si el usuario clica en Perfil pero no está logueado, lo forzamos al login
+    if (vista === 'perfil' && !isAuthenticated) {
+        setVista('login');
+    }
+
+    // Si la vista es login, renderizamos el componente Login a PANTALLA COMPLETA
+    if (vista === 'login') {
+        return (
+            <div className="h-screen w-screen m-0 p-0 absolute inset-0 overflow-hidden">
+                 <Login onLoginSuccess={() => setVista('perfil')} />
+            </div>
+        );
+    }
+
+    // Si no es login, mostramos la estructura normal de la app (Navbar + Blobs + Contenido)
+    return <MainLayout vista={vista} setVista={setVista} />;
+}
+
 function App() {
   return (
     <AuthProvider>
-      <MainLayout />
+      <AppRouter />
     </AuthProvider>
   )
 }

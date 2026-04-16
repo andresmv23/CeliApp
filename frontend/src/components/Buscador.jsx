@@ -7,35 +7,110 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
 function Buscador() {
   const { token } = useAuth();
+  
+  // ESTADOS RESTAURADOS
   const [ean, setEan] = useState('');
+  const [resultado, setResultado] = useState(null);
   const [loading, setLoading] = useState(false);
-  // ... (mantén tus otros estados y funciones buscarProducto, etc.)
+  const [error, setError] = useState(null);
+  const [esFavorito, setEsFavorito] = useState(false);
+  const [mostrarScanner, setMostrarScanner] = useState(false);
 
+  const handleScan = (codigoEscaneado) => {
+    setEan(codigoEscaneado);
+    setMostrarScanner(false);
+  };
+
+  // LÓGICA DE BÚSQUEDA REAL RESTAURADA
   const buscarProducto = async (e) => {
     e.preventDefault();
+    if (!ean.trim()) return;
+
     setLoading(true);
-    // Simulación de carga para que veas el diseño
-    setTimeout(() => setLoading(false), 2000);
+    setError(null);
+    setResultado(null);
+    setEsFavorito(false);
+
+    try {
+      // Configuramos los headers dinámicamente. Si hay token, lo mandamos. Si no, va vacío.
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      
+      const response = await axios.get(`${API_URL}/producto/${ean}`, { headers });
+      setResultado(response.data);
+      
+    } catch (err) {
+      if (err.response?.status === 401) {
+          setError('Sesión caducada. Por favor, sal y vuelve a entrar.');
+      } else if (err.response?.status === 404) {
+          setError('Producto no encontrado. Revisa el código EAN.');
+      } else if (err.response?.status === 429) {
+          setError('Has alcanzado el límite de búsquedas. Espera un minuto.');
+      } else {
+          setError('Error de conexión con el servidor.');
+      }
+      console.error('Error buscando producto:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // LÓGICA DE FAVORITOS RESTAURADA
+  const toggleFavorito = async () => {
+      if (!resultado) return;
+      if (!token) {
+          alert("Debes iniciar sesión para guardar favoritos.");
+          return;
+      }
+      
+      try {
+          if (esFavorito) {
+              alert("Ya está en favoritos");
+              return;
+          } 
+          
+          await axios.post(`${API_URL}/favoritos`, 
+              { ean: ean },
+              { headers: { Authorization: `Bearer ${token}` } }
+          );
+          setEsFavorito(true);
+          alert("❤️ ¡Añadido a tus favoritos!");
+          
+      } catch (err) {
+          console.error('Error al guardar favorito:', err);
+          alert("Error gestionando favoritos");
+      }
+  };
+
+  // LÓGICA DE ESTILOS VISUALES RESTAURADA
+  const getStatusStyles = (analisis) => {
+    // Protección en caso de que el análisis falle
+    if (!analisis) return { borderColor: 'border-gray-500', bgHeader: 'bg-gray-50', textColor: 'text-gray-800', icon: '❓ DESCONOCIDO', titleColor: 'text-gray-700' };
+    
+    return analisis.es_apto 
+      ? { borderColor: 'border-green-500', bgHeader: 'bg-green-50', textColor: 'text-green-800', icon: '✅ APTO', titleColor: 'text-green-700' }
+      : { borderColor: 'border-red-500', bgHeader: 'bg-red-50', textColor: 'text-red-800', icon: '🚫 NO APTO', titleColor: 'text-red-700' };
   };
 
   return (
     <div className="w-full max-w-5xl mx-auto flex flex-col items-center justify-center min-h-[80vh] px-4 sm:px-6 lg:px-8">
       
-      {/* Sección Hero / Contexto */}
-      <div className="text-center w-full max-w-3xl mb-12">
-        <span className="inline-block py-1 px-3 rounded-full bg-blue-50 text-blue-600 text-sm font-semibold tracking-wide mb-4 border border-blue-100">
-          Versión Beta 1.0
-        </span>
-        <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">
-          Tu aliado contra el <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-teal-500">Gluten</span>
-        </h1>
-        <p className="text-lg text-gray-600 leading-relaxed max-w-2xl mx-auto">
-          Escanea o introduce el código de barras de cualquier producto. Nuestra inteligencia artificial analizará los ingredientes en segundos para decirte si es seguro para tu dieta.
-        </p>
-      </div>
+      {/* Sección Hero / Contexto (Se oculta cuando hay un resultado para centrar la atención) */}
+      {!resultado && (
+          <div className="text-center w-full max-w-3xl mb-12 animate-fade-in">
+            <span className="inline-block py-1 px-3 rounded-full bg-blue-50 text-blue-600 text-sm font-semibold tracking-wide mb-4 border border-blue-100">
+              Versión Beta 1.0
+            </span>
+            <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">
+              Tu aliado contra el <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-teal-500">Gluten</span>
+            </h1>
+            <p className="text-lg text-gray-600 leading-relaxed max-w-2xl mx-auto">
+              Escanea o introduce el código de barras de cualquier producto. Nuestra inteligencia artificial analizará los ingredientes en segundos para decirte si es seguro para tu dieta.
+            </p>
+          </div>
+      )}
 
       {/* Tarjeta Principal del Buscador */}
-      <div className="w-full max-w-2xl bg-white rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100 p-2 sm:p-4 transition-all hover:shadow-2xl">
+      <div className={`w-full max-w-2xl bg-white rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100 p-2 sm:p-4 transition-all hover:shadow-2xl ${resultado ? 'mb-8' : ''}`}>
         <form onSubmit={buscarProducto} className="flex flex-col sm:flex-row gap-3">
           
           <div className="relative flex-1 flex items-center">
@@ -57,6 +132,7 @@ function Buscador() {
           <div className="flex gap-2 sm:w-auto w-full">
             <button 
               type="button" 
+              onClick={() => setMostrarScanner(true)}
               className="flex-1 sm:flex-none p-4 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded-xl transition-colors flex items-center justify-center border-2 border-transparent hover:border-gray-200 focus:outline-none focus:ring-4 focus:ring-gray-200"
               title="Usar cámara"
             >
@@ -80,26 +156,76 @@ function Buscador() {
             </button>
           </div>
         </form>
+        
+        {/* Mostrar Errores */}
+        {error && <div className="mt-4 p-3 bg-red-50 text-red-600 text-center rounded-lg border border-red-100 font-medium">{error}</div>}
       </div>
 
-      {/* Indicadores de confianza (Social Proof / Features) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16 w-full max-w-4xl">
-        <div className="flex flex-col items-center text-center p-4">
-          <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-4 text-xl">⚡</div>
-          <h3 className="font-bold text-gray-900 mb-2">Resultados al instante</h3>
-          <p className="text-sm text-gray-500">Conexión directa con la base de datos de OpenFoodFacts.</p>
+      {/* Renderizado de la tarjeta de Resultados */}
+      {resultado && !loading && (
+        <div className={`w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden border-2 relative transform transition-all animate-fade-in-up ${getStatusStyles(resultado.analisis).borderColor}`}>
+            
+            <button 
+                onClick={toggleFavorito}
+                className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-full w-12 h-12 flex items-center justify-center shadow-md hover:shadow-lg transition-all z-10 text-2xl group hover:scale-110"
+                title={token ? "Añadir a favoritos" : "Inicia sesión para guardar"}
+            >
+                <span className="group-hover:scale-125 transition-transform">
+                {esFavorito ? '❤️' : '🤍'}
+                </span>
+            </button>
+
+            <div className={`p-6 border-b border-gray-100 ${getStatusStyles(resultado.analisis).bgHeader}`}>
+                <h2 className={`m-0 text-3xl font-black tracking-tight ${getStatusStyles(resultado.analisis).titleColor} flex items-center gap-3`}>
+                    {getStatusStyles(resultado.analisis).icon}
+                </h2>
+                <p className={`mt-3 font-bold text-lg ${getStatusStyles(resultado.analisis).textColor} uppercase tracking-wide opacity-90`}>
+                    {resultado.analisis?.motivo || "Análisis no disponible"}
+                </p>
+            </div>
+
+            <div className="p-8">
+                <h2 className="text-3xl font-bold text-gray-900 mb-2 leading-tight">{resultado.producto?.nombre || "Producto sin nombre"}</h2>
+                <p className="text-lg text-gray-500 mb-8 font-medium">
+                    Marca: <span className="text-gray-800 bg-gray-100 px-2 py-1 rounded-md">{resultado.producto?.marca || "Desconocida"}</span>
+                </p>
+
+                <div className="bg-gray-50 p-6 rounded-xl border border-gray-200/60">
+                    <h4 className="flex items-center gap-2 text-gray-700 font-bold mb-3 uppercase text-sm tracking-wider">
+                        📝 Ingredientes
+                    </h4>
+                    <p className="leading-relaxed text-gray-700 text-lg">
+                        {resultado.producto?.ingredientes || 'No hay información de ingredientes disponible.'}
+                    </p>
+                </div>
+                
+                <div className="mt-4 text-right text-xs text-gray-400">
+                    Fuente de datos: {resultado.fuente || "Desconocida"}
+                </div>
+            </div>
         </div>
-        <div className="flex flex-col items-center text-center p-4">
-          <div className="w-12 h-12 bg-teal-50 text-teal-600 rounded-full flex items-center justify-center mb-4 text-xl">🤖</div>
-          <h3 className="font-bold text-gray-900 mb-2">IA Especializada</h3>
-          <p className="text-sm text-gray-500">Analiza ingredientes ambiguos para evitar falsos positivos.</p>
-        </div>
-        <div className="flex flex-col items-center text-center p-4">
-          <div className="w-12 h-12 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center mb-4 text-xl">📱</div>
-          <h3 className="font-bold text-gray-900 mb-2">Historial y Favoritos</h3>
-          <p className="text-sm text-gray-500">Guarda tus productos seguros para consultarlos en el supermercado.</p>
-        </div>
-      </div>
+      )}
+
+      {/* Indicadores de confianza (Se ocultan si hay resultado) */}
+      {!resultado && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16 w-full max-w-4xl opacity-80">
+            <div className="flex flex-col items-center text-center p-4">
+              <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-4 text-xl">⚡</div>
+              <h3 className="font-bold text-gray-900 mb-2">Resultados al instante</h3>
+              <p className="text-sm text-gray-500">Conexión directa con la base de datos de OpenFoodFacts.</p>
+            </div>
+            <div className="flex flex-col items-center text-center p-4">
+              <div className="w-12 h-12 bg-teal-50 text-teal-600 rounded-full flex items-center justify-center mb-4 text-xl">🤖</div>
+              <h3 className="font-bold text-gray-900 mb-2">IA Especializada</h3>
+              <p className="text-sm text-gray-500">Analiza ingredientes ambiguos para evitar falsos positivos.</p>
+            </div>
+            <div className="flex flex-col items-center text-center p-4">
+              <div className="w-12 h-12 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center mb-4 text-xl">📱</div>
+              <h3 className="font-bold text-gray-900 mb-2">Historial y Favoritos</h3>
+              <p className="text-sm text-gray-500">Guarda tus productos seguros para consultarlos en el supermercado.</p>
+            </div>
+          </div>
+      )}
 
     </div>
   );

@@ -25,15 +25,16 @@ def consultar_ia_experto_total(ean: str, nombre_producto: str = ""):
     url = "https://api.perplexity.ai/chat/completions"
 
     prompt = f"""
-    Tu misión es investigar en internet este producto y determinar si es APTO PARA CELÍACOS.
+    Tu misión es investigar en internet este producto y determinar si es APTO PARA CELÍACOS, es decir de estar seguros que no tiene gluten o contiene gluten.
     
     OBJETIVO DE BÚSQUEDA: "{query_busqueda}"
     
     INSTRUCCIONES CRÍTICAS:
     1. Busca específicamente el código EAN {ean} y el nombre "{nombre_producto}".
-    2. Prioriza fuentes oficiales (web del fabricante, web del supermercado, certificados).
-    3. Si encuentras el producto pero NO tienes certeza de sus ingredientes o sello, marca como DUDOSO.
-    4. Si el producto NO es comida (ej: champú), marca NO APTO.
+    2. Una vez con el EAN proporcionado y el nombre del producto busca a partir de la marca del fabricante y los sitios donde se venda el producto.
+    3. Tienes que estar seguro de que los ingredientes no contienen gluten ni tienen gluten, si dudas busca en la empresa que proporciona los ingredientes.
+    4. Si encuentras el producto pero NO tienes certeza de sus ingredientes o sello, marca como DUDOSO.
+    5. Si el producto NO es comida (ej: champú), marca NO APTO.
 
     SI EN EL MISMO PRODUCTO DICE QUE ES SIN GLUTEN ENTONCES MARCALO COMO SIN GLUTEN PORQUE CLARAMENTE LO DICE EL FABRICANTE
     
@@ -54,7 +55,7 @@ def consultar_ia_experto_total(ean: str, nombre_producto: str = ""):
     """
 
     payload = {
-        "model": "sonar-pro",
+        "model": "sonar  ",
         "messages": [{"role": "user", "content": prompt}],
         "temperature": 0.1,
     }
