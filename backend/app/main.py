@@ -14,13 +14,6 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
 from app.analizador import analisis_rapido
-from app.schemas import (
-    AnalisisRequest,
-    AnalisisResponse,
-    UserCreate,
-    UserResponse,
-    Token,
-)
 from app.servicios import obtener_producto_por_ean
 from app.database import get_db_connection, guardar_producto
 from app.ia_client import consultar_ia_experto_total
