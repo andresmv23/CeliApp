@@ -6,11 +6,30 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [user, setUser] = useState(null);
 
-  // Al cargar la app, si hay token, intentamos recuperar al usuario (opcional por ahora)
-  useEffect(() => {
+  //Si hay un token activo guardado intentamos cargar la información del usuario
+    useEffect(() => {
     if (token) {
       localStorage.setItem('token', token);
-      // Aquí podrías llamar a /users/me para traer datos del usuario
+      
+      // Llamada real a /users/me en lugar de un comentario
+      const fetchUser = async () => {
+        try {
+          const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+          const response = await fetch(`${API_URL}/users/me`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (response.ok) {
+            const userData = await response.json();
+            setUser(userData);
+          } else if (response.status === 401) {
+            logout(); // Si el token caducó, forzamos cierre de sesión
+          }
+        } catch (error) {
+          console.error('Error cargando usuario:', error);
+        }
+      };
+      fetchUser();
+      
     } else {
       localStorage.removeItem('token');
       setUser(null);
