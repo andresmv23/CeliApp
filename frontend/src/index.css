@@ -2,7 +2,87 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Fuente Satoshi desde Fontshare */
+@import url('https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,700,900&display=swap');
+
+/* ─── Reset & Base ─────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
+}
+
 body {
-  @apply bg-gray-100 text-gray-900;
-  font-family: system-ui, -apple-system, sans-serif;
+  @apply bg-cream-100 text-gray-900;
+  font-family: 'Satoshi', system-ui, sans-serif;
+  min-height: 100dvh;
+}
+
+/* ─── Tokens de estado de gluten ───────────────────────── */
+.status-apto {
+  @apply bg-brand-50 text-brand-700 border border-brand-200;
+}
+.status-noapto {
+  @apply bg-red-50 text-red-700 border border-red-200;
+}
+.status-dudoso {
+  @apply bg-amber-50 text-amber-700 border border-amber-200;
+}
+
+/* ─── Botón primario ───────────────────────────────────── */
+.btn-primary {
+  @apply bg-brand-500 hover:bg-brand-600 active:bg-brand-700
+         text-white font-semibold rounded-xl
+         px-6 py-3 transition-all duration-150
+         focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-200
+         disabled:opacity-40 disabled:cursor-not-allowed;
+}
+
+/* ─── Input de búsqueda ────────────────────────────────── */
+.search-input {
+  @apply w-full py-4 pl-12 pr-4 rounded-xl
+         border-2 border-transparent bg-cream-50
+         text-gray-900 placeholder-gray-400
+         text-base font-medium
+         focus:bg-white focus:border-brand-400 focus:outline-none
+         transition-all duration-150;
+}
+.search-input:focus {
+  box-shadow: 0 0 0 4px rgba(1,162,105,0.10);
+}
+
+/* ─── Card base ────────────────────────────────────────── */
+.card {
+  @apply bg-white rounded-2xl border border-gray-100;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+}
+.card-hover {
+  @apply transition-all duration-200;
+}
+.card-hover:hover {
+  box-shadow: 0 4px 8px rgba(0,0,0,0.08), 0 12px 32px rgba(0,0,0,0.08);
+  @apply -translate-y-0.5;
+}
+
+/* ─── Scrollbar discreta ───────────────────────────────── */
+.scroll-area {
+  scrollbar-width: thin;
+  scrollbar-color: #e8e2d5 transparent;
+}
+.scroll-area::-webkit-scrollbar { width: 5px; }
+.scroll-area::-webkit-scrollbar-track { background: transparent; }
+.scroll-area::-webkit-scrollbar-thumb {
+  background: #e8e2d5;
+  border-radius: 99px;
+}
+
+/* ─── Reducir movimiento ───────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

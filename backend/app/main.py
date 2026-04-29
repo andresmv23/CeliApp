@@ -1,5 +1,6 @@
 import psycopg2
 import uvicorn
+import os
 from fastapi import FastAPI, HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from psycopg2.extras import RealDictCursor
@@ -44,9 +45,14 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl="auth/login", auto_error=False)
 
+ALLOWED_ORIGINS = os.getenv(
+    "ALLOWED_ORIGINS", 
+    "http://localhost:5173"
+).split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -380,9 +386,19 @@ def buscar_producto_inteligente(
         }
 
     return {
-        "mensaje": "Producto imposible de identificar",
-        "codigo": ean,
-        "consejo": "Por seguridad, asuma que NO es apto.",
+        "fuente": "NO_ENCONTRADO",
+        "producto": {
+            "nombre": "Producto no identificado",
+            "marca": "Desconocida",
+            "ingredientes": "No se encontraron ingredientes para este código EAN."
+        },
+        "analisis": {
+            "es_apto": False,
+            "necesita_ia": False,
+            "motivo": "Este producto no está en ninguna base de datos conocida. Por seguridad, asume que NO es apto para celíacos.",
+            "estado": "NO_APTO",
+            "confianza": "baja"
+        }
     }
 
 

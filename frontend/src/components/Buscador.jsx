@@ -1,244 +1,584 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
-// import Scanner from './Scanner'; // Descomenta esto cuando lo necesites
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
-function Buscador() {
+/* ─── Demo data ─────────────────────────────────────────── */
+const DEMO_RESULTS = {
+  apto: {
+    producto: { nombre: 'Queso Crema Light Hacendado', marca: 'Hacendado', ingredientes: 'Leche pasteurizada, nata, proteínas de leche, sal, corrector de acidez (ácido cítrico), espesantes (goma guar, goma xantana). Sin gluten. Sin trazas declaradas.' },
+    analisis: { es_apto: true, motivo: 'No contiene gluten ni trazas declaradas en etiqueta.' },
+    fuente: 'OpenFoodFacts',
+  },
+  noapto: {
+    producto: { nombre: 'Príncipe Galletas de Chocolate', marca: 'LU', ingredientes: 'Harina de trigo, azúcar, aceite de palma, cacao en polvo (7%), suero de leche, sal, gasificante (carbonato de sodio). Contiene GLUTEN (trigo).' },
+    analisis: { es_apto: false, motivo: 'Contiene harina de trigo. Ingrediente con gluten directo.' },
+    fuente: 'OpenFoodFacts',
+  },
+  dudoso: {
+    producto: { nombre: 'Orbit Spearmint Sugar Free', marca: 'Wrigley', ingredientes: 'Edulcorantes (sorbitol, manitol, maltitol), goma base, aromas, estabilizador (goma arábiga). Posibles trazas de gluten no confirmadas.' },
+    analisis: { es_apto: null, motivo: 'Trazas de gluten no confirmadas. Consulta con tu médico.' },
+    fuente: 'OpenFoodFacts',
+  },
+};
+
+const RECENT_SEARCHES = [
+  { label: 'Avena Quaker', estado: false },
+  { label: 'Maizena', estado: true },
+  { label: 'Pan Bimbo', estado: false },
+];
+
+const REVIEWS = [
+  { nombre: 'María G.', ciudad: 'Madrid', texto: 'Desde que uso CeliApp hago la compra sin estrés. Antes tardaba el doble leyendo etiquetas con lupa.', estrellas: 5, tiempo: 'hace 2 días' },
+  { nombre: 'Carlos R.', ciudad: 'Barcelona', texto: 'Por fin una app que entiende que "puede contener trazas" no es lo mismo que "sin gluten". Muy precisa.', estrellas: 5, tiempo: 'hace 1 semana' },
+  { nombre: 'Ana P.', ciudad: 'Sevilla', texto: 'Mi hija tiene celiaquía y esta app nos ha cambiado la vida. Escaneamos todo antes de comprar.', estrellas: 5, tiempo: 'hace 2 semanas' },
+  { nombre: 'David M.', ciudad: 'Valencia', texto: 'Interfaz clarísima. El código de colores APTO/NO APTO se ve de un vistazo aunque tengas prisa.', estrellas: 4, tiempo: 'hace 3 semanas' },
+  { nombre: 'Laura S.', ciudad: 'Bilbao', texto: 'Llevo años buscando algo así. La base de datos es enorme, casi todos los productos que escaneo están.', estrellas: 5, tiempo: 'hace 1 mes' },
+  { nombre: 'Javier T.', ciudad: 'Zaragoza', texto: 'El análisis de ingredientes ambiguos es lo que me convenció. No te da un sí/no sin más, te explica por qué.', estrellas: 5, tiempo: 'hace 1 mes' },
+];
+
+/* ─── Helpers ────────────────────────────────────────────── */
+function getStatusConfig(analisis) {
+  if (!analisis) return { label: 'DESCONOCIDO', badge: 'bg-gray-100 text-gray-600 border-gray-200', headerBg: 'bg-gray-50', headerBorder: 'border-gray-100', cardBorder: 'border-gray-200', textColor: 'text-gray-600', dotColor: 'bg-gray-400', icon: '?' };
+  if (analisis.es_apto === null) return { label: 'DUDOSO', badge: 'bg-amber-50 text-amber-700 border-amber-200', headerBg: 'bg-amber-50', headerBorder: 'border-amber-100', cardBorder: 'border-amber-200', textColor: 'text-amber-700', dotColor: 'bg-amber-400', icon: '!' };
+  return analisis.es_apto
+    ? { label: 'APTO', badge: 'bg-brand-50 text-brand-700 border-brand-200', headerBg: 'bg-brand-50', headerBorder: 'border-brand-100', cardBorder: 'border-brand-200', textColor: 'text-brand-700', dotColor: 'bg-brand-500', icon: '✓' }
+    : { label: 'NO APTO', badge: 'bg-red-50 text-red-700 border-red-200', headerBg: 'bg-red-50', headerBorder: 'border-red-100', cardBorder: 'border-red-200', textColor: 'text-red-700', dotColor: 'bg-red-500', icon: '✕' };
+}
+
+function Stars({ n }) {
+  return (
+    <div className="flex gap-0.5">
+      {[1,2,3,4,5].map(i => (
+        <svg key={i} className={`w-4 h-4 ${i <= n ? 'text-amber-400' : 'text-gray-200'}`}
+             fill="currentColor" viewBox="0 0 20 20">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+        </svg>
+      ))}
+    </div>
+  );
+}
+
+/* ─── Componente principal ───────────────────────────────── */
+export default function Buscador() {
   const { token } = useAuth();
-  
-  // ESTADOS RESTAURADOS
   const [ean, setEan] = useState('');
   const [resultado, setResultado] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [esFavorito, setEsFavorito] = useState(false);
-  const [mostrarScanner, setMostrarScanner] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
+  const [demoMode, setDemoMode] = useState(false);
+  const resultRef = useRef(null);
 
-  const handleScan = (codigoEscaneado) => {
-    setEan(codigoEscaneado);
-    setMostrarScanner(false);
-  };
+  const showToast = (msg) => { setToastMsg(msg); setTimeout(() => setToastMsg(''), 3000); };
 
-  // LÓGICA DE BÚSQUEDA REAL
   const buscarProducto = async (e) => {
-    e.preventDefault();
+    e?.preventDefault();
     if (!ean.trim()) return;
+    setLoading(true); setError(null); setResultado(null); setEsFavorito(false);
+    const q = ean.trim().toLowerCase();
 
-    setLoading(true);
-    setError(null);
-    setResultado(null);
-    setEsFavorito(false);
+    const runDemo = async (data) => {
+      await new Promise(r => setTimeout(r, 900));
+      setResultado(data); setDemoMode(true); setLoading(false);
+      setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+    };
+
+    if (q === 'demo' || q === 'apto')   return runDemo(DEMO_RESULTS.apto);
+    if (q === 'noapto' || q === 'malo') return runDemo(DEMO_RESULTS.noapto);
+    if (q === 'dudoso')                 return runDemo(DEMO_RESULTS.dudoso);
 
     try {
-      // Configuramos los headers dinámicamente. Si hay token, lo mandamos. Si no, va vacío.
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      
-      const response = await axios.get(`${API_URL}/producto/${ean}`, { headers });
-      setResultado(response.data);
-      
+      const res = await axios.get(`${API_URL}/producto/${ean}`, { headers });
+      setResultado(res.data); setDemoMode(false);
+      setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
     } catch (err) {
-      if (err.response?.status === 401) {
-          setError('Sesión caducada. Por favor, sal y vuelve a entrar.');
-      } else if (err.response?.status === 404) {
-          setError('Producto no encontrado. Revisa el código EAN.');
-      } else if (err.response?.status === 429) {
-          setError('Has alcanzado el límite de búsquedas. Espera un minuto.');
-      } else {
-          setError('Error de conexión con el servidor.');
-      }
-      console.error('Error buscando producto:', err);
-    } finally {
-      setLoading(false);
-    }
+      if      (err.response?.status === 401) setError('Sesión caducada. Vuelve a entrar.');
+      else if (err.response?.status === 404) setError('Producto no encontrado. Prueba: demo · noapto · dudoso');
+      else if (err.response?.status === 429) setError('Límite alcanzado. Espera un momento.');
+      else                                   setError('Sin conexión. Prueba: demo · noapto · dudoso');
+    } finally { setLoading(false); }
   };
 
-  // LÓGICA DE FAVORITOS
   const toggleFavorito = async () => {
     if (!resultado) return;
-    if (!token) {
-      setToastMsg("Debes iniciar sesión para guardar favoritos");
-      setTimeout(() => setToastMsg(''), 3000);
-      return;
-    }
-    
+    if (!token) { showToast('Inicia sesión para guardar favoritos'); return; }
+    if (esFavorito) { showToast('Ya está en tus favoritos'); return; }
+    if (demoMode)   { setEsFavorito(true); showToast('Añadido a favoritos'); return; }
     try {
-      if (esFavorito) {
-        setToastMsg("Ya está en favoritos");
-        setTimeout(() => setToastMsg(''), 3000);
-        return;
-      }
-      
-      await axios.post(`${API_URL}/favoritos`, 
-        { ean: ean }, 
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setEsFavorito(true);
-      setToastMsg("❤️ ¡Añadido a tus favoritos!");
-      setTimeout(() => setToastMsg(''), 3000);
-    } catch (err) {
-      console.error('Error al guardar favorito:', err);
-      setToastMsg("Error gestionando favoritos");
-      setTimeout(() => setToastMsg(''), 3000);
-    }
+      await axios.post(`${API_URL}/favoritos`, { ean }, { headers: { Authorization: `Bearer ${token}` } });
+      setEsFavorito(true); showToast('Añadido a favoritos');
+    } catch { showToast('No se pudo guardar el favorito'); }
   };
 
-  // LÓGICA DE ESTILOS VISUALES RESTAURADA
-  const getStatusStyles = (analisis) => {
-    // Protección en caso de que el análisis falle
-    if (!analisis) return { borderColor: 'border-gray-500', bgHeader: 'bg-gray-50', textColor: 'text-gray-800', icon: '❓ DESCONOCIDO', titleColor: 'text-gray-700' };
-    
-    return analisis.es_apto 
-      ? { borderColor: 'border-green-500', bgHeader: 'bg-green-50', textColor: 'text-green-800', icon: '✅ APTO', titleColor: 'text-green-700' }
-      : { borderColor: 'border-red-500', bgHeader: 'bg-red-50', textColor: 'text-red-800', icon: '🚫 NO APTO', titleColor: 'text-red-700' };
-  };
+  const cfg = getStatusConfig(resultado?.analisis);
 
   return (
-    <div className="w-full max-w-5xl mx-auto flex flex-col items-center justify-center min-h-[80vh] px-4 sm:px-6 lg:px-8">
-      
-      {/* Sección Hero / Contexto (Se oculta cuando hay un resultado para centrar la atención) */}
-      {!resultado && (
-          <div className="text-center w-full max-w-3xl mb-12 animate-fade-in">
-            <span className="inline-block py-1 px-3 rounded-full bg-blue-50 text-blue-600 text-sm font-semibold tracking-wide mb-4 border border-blue-100">
-              Versión Beta 1.0
+    <div className="w-full">
+
+      {/* ══════════════════════════════════════════════════
+          SECCIÓN 1 — HERO + BUSCADOR
+      ══════════════════════════════════════════════════ */}
+      <section className="relative overflow-hidden bg-white">
+        {/* Blob decorativo de fondo */}
+        <div className="absolute -top-32 -right-32 w-[600px] h-[600px] rounded-full
+                        bg-brand-50 opacity-60 blur-3xl pointer-events-none"/>
+        <div className="absolute -bottom-16 -left-16 w-[300px] h-[300px] rounded-full
+                        bg-blue-50 opacity-40 blur-2xl pointer-events-none"/>
+
+        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 pt-16 pb-20">
+          <div className="max-w-2xl">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full
+                             bg-brand-50 text-brand-600 text-xs font-semibold tracking-widest
+                             uppercase border border-brand-100 mb-6">
+              <span className="w-1.5 h-1.5 rounded-full bg-brand-400 animate-pulse"/>
+              Beta 1.0 — Gratis
             </span>
-            <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">
-              Tu aliado contra el <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-teal-500">Gluten</span>
+            <h1 className="text-4xl sm:text-5xl font-black text-gray-900 tracking-tight
+                           leading-[1.05] mb-5">
+              ¿Este producto<br/>
+              es <span className="text-brand-500">seguro</span> para ti?
             </h1>
-            <p className="text-lg text-gray-600 leading-relaxed max-w-2xl mx-auto">
-              Escanea o introduce el código de barras de cualquier producto. Nuestra inteligencia artificial analizará los ingredientes en segundos para decirte si es seguro para tu dieta.
+            <p className="text-gray-500 text-lg leading-relaxed mb-10 max-w-lg">
+              Introduce el código de barras y nuestra IA analiza los ingredientes
+              al instante. Sin dudas, sin riesgos.
             </p>
-          </div>
-      )}
 
-      {/* Tarjeta Principal del Buscador */}
-      <div className={`w-full max-w-2xl bg-white rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100 p-2 sm:p-4 transition-all hover:shadow-2xl ${resultado ? 'mb-8' : ''}`}>
-        <form onSubmit={buscarProducto} className="flex flex-col sm:flex-row gap-3">
-          
-          <div className="relative flex-1 flex items-center">
-            {/* Ícono decorativo dentro del input */}
-            <div className="absolute left-4 text-gray-400">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
+            {/* Barra de búsqueda */}
+            <form onSubmit={buscarProducto}>
+              <div className="flex gap-2 bg-white rounded-2xl p-2 border border-gray-200
+                              shadow-[0_2px_12px_rgba(0,0,0,0.07)] focus-within:border-brand-300
+                              focus-within:shadow-[0_2px_20px_rgba(1,162,105,0.13)]
+                              transition-all duration-200 max-w-xl">
+                <div className="relative flex-1">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                  </span>
+                  <input
+                    type="text"
+                    placeholder="Código EAN · prueba: demo · noapto"
+                    value={ean}
+                    onChange={e => setEan(e.target.value)}
+                    className="w-full py-3.5 pl-11 pr-4 rounded-xl bg-transparent text-gray-900
+                               placeholder-gray-400 text-sm font-medium focus:outline-none"
+                  />
+                </div>
+                <button type="button" title="Cámara"
+                  className="p-3.5 text-gray-400 hover:text-brand-500 hover:bg-brand-50 rounded-xl transition-all">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  </svg>
+                </button>
+                <button type="submit" disabled={loading || !ean.trim()}
+                  className="btn-primary px-6 py-3 text-sm flex items-center gap-2 whitespace-nowrap">
+                  {loading
+                    ? <><svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>Analizando…</>
+                    : 'Verificar'}
+                </button>
+              </div>
+            </form>
+
+            {error && (
+              <div className="mt-3 max-w-xl px-4 py-3 bg-red-50 text-red-700 text-sm rounded-xl border border-red-100 flex items-start gap-2">
+                <svg className="w-4 h-4 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>
+                {error}
+              </div>
+            )}
+
+            {/* Chips recientes */}
+            <div className="mt-5 flex flex-wrap gap-2">
+              <span className="text-xs text-gray-400 font-semibold self-center">Recientes:</span>
+              {RECENT_SEARCHES.map(s => (
+                <button key={s.label} onClick={() => { setEan(s.label); }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white
+                             border border-gray-200 text-xs text-gray-600 font-medium
+                             hover:border-brand-300 hover:text-brand-600 transition-all shadow-sm">
+                  <span className={`w-1.5 h-1.5 rounded-full ${s.estado ? 'bg-brand-400' : 'bg-red-400'}`}/>
+                  {s.label}
+                </button>
+              ))}
             </div>
-            <input 
-              type="text" 
-              placeholder="Ej: 8410100012345" 
-              value={ean}
-              onChange={(e) => setEan(e.target.value)}
-              className="w-full py-4 pl-12 pr-4 rounded-xl border-2 border-transparent bg-gray-50 text-gray-900 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all text-lg font-medium placeholder-gray-400 outline-none"
-            />
           </div>
-          
-          <div className="flex gap-2 sm:w-auto w-full">
-            <button 
-              type="button" 
-              onClick={() => setMostrarScanner(true)}
-              className="flex-1 sm:flex-none p-4 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded-xl transition-colors flex items-center justify-center border-2 border-transparent hover:border-gray-200 focus:outline-none focus:ring-4 focus:ring-gray-200"
-              title="Usar cámara"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-            </button>
 
-            <button 
-              type="submit" 
-              disabled={loading || !ean.trim()} 
-              className={`flex-[2] sm:flex-none px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-md hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-500/30 text-lg ${loading || !ean.trim() ? 'opacity-50 cursor-not-allowed' : 'active:scale-[0.98]'}`}
-            >
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                  Analizando...
-                </span>
-              ) : 'Verificar'}
-            </button>
+          {/* Stats flotantes */}
+          <div className="mt-12 flex flex-wrap gap-6 max-w-xl">
+            {[
+              { valor: '+50.000', label: 'productos analizados' },
+              { valor: '99%', label: 'de precisión' },
+              { valor: 'Gratis', label: 'sin suscripción' },
+            ].map(s => (
+              <div key={s.label}>
+                <p className="text-2xl font-black text-gray-900">{s.valor}</p>
+                <p className="text-xs text-gray-400 font-medium">{s.label}</p>
+              </div>
+            ))}
           </div>
-        </form>
-        
-        {/* Mostrar Errores */}
-        {error && <div className="mt-4 p-3 bg-red-50 text-red-600 text-center rounded-lg border border-red-100 font-medium">{error}</div>}
-      </div>
+        </div>
+      </section>
 
-      {/* Renderizado de la tarjeta de Resultados */}
+      {/* ══════════════════════════════════════════════════
+          SECCIÓN 2 — RESULTADO (aparece al buscar)
+      ══════════════════════════════════════════════════ */}
       {resultado && !loading && (
-        <div className={`w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden border-2 relative transform transition-all animate-fade-in-up ${getStatusStyles(resultado.analisis).borderColor}`}>
-            
-            <button 
-                onClick={toggleFavorito}
-                className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-full w-12 h-12 flex items-center justify-center shadow-md hover:shadow-lg transition-all z-10 text-2xl group hover:scale-110"
-                title={token ? "Añadir a favoritos" : "Inicia sesión para guardar"}
-            >
-                <span className="group-hover:scale-125 transition-transform">
-                {esFavorito ? '❤️' : '🤍'}
-                </span>
-            </button>
-
-            <div className={`p-6 border-b border-gray-100 ${getStatusStyles(resultado.analisis).bgHeader}`}>
-                <h2 className={`m-0 text-3xl font-black tracking-tight ${getStatusStyles(resultado.analisis).titleColor} flex items-center gap-3`}>
-                    {getStatusStyles(resultado.analisis).icon}
+        <section ref={resultRef} className="bg-cream-100 border-y border-cream-200 py-12">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">
+              Resultado del análisis
+            </p>
+            <div className={`bg-white rounded-2xl border-2 ${cfg.cardBorder} overflow-hidden
+                             shadow-[0_4px_24px_rgba(0,0,0,0.07)] max-w-2xl animate-fade-in-up`}>
+              {/* Header estado */}
+              <div className={`${cfg.headerBg} ${cfg.headerBorder} border-b px-6 py-5
+                               flex items-start justify-between gap-4`}>
+                <div>
+                  <div className="flex items-center gap-2.5 mb-2">
+                    <span className={`w-7 h-7 rounded-full ${
+                        cfg.label === 'APTO' ? 'bg-brand-500' :
+                        cfg.label === 'NO APTO' ? 'bg-red-500' : 'bg-amber-500'
+                      } text-white text-xs font-black flex items-center justify-center`}>
+                      {cfg.icon}
+                    </span>
+                    <span className={`text-sm font-black uppercase tracking-widest ${cfg.textColor}`}>
+                      {cfg.label}
+                    </span>
+                  </div>
+                  <p className={`text-sm leading-relaxed ${cfg.textColor} opacity-90 max-w-md`}>
+                    {resultado.analisis?.motivo ?? 'Análisis no disponible'}
+                  </p>
+                </div>
+                <button onClick={toggleFavorito}
+                  className="shrink-0 w-9 h-9 rounded-full bg-white shadow-sm border border-gray-100
+                             flex items-center justify-center hover:scale-110 transition-all">
+                  {esFavorito
+                    ? <svg className="w-4 h-4 fill-red-500" viewBox="0 0 24 24"><path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z"/></svg>
+                    : <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/></svg>
+                  }
+                </button>
+              </div>
+              {/* Cuerpo */}
+              <div className="p-6 sm:p-8">
+                <h2 className="text-xl font-black text-gray-900 leading-tight mb-1">
+                  {resultado.producto?.nombre ?? 'Producto sin nombre'}
                 </h2>
-                <p className={`mt-3 font-bold text-lg ${getStatusStyles(resultado.analisis).textColor} uppercase tracking-wide opacity-90`}>
-                    {resultado.analisis?.motivo || "Análisis no disponible"}
-                </p>
-            </div>
-
-            <div className="p-8">
-                <h2 className="text-3xl font-bold text-gray-900 mb-2 leading-tight">{resultado.producto?.nombre || "Producto sin nombre"}</h2>
-                <p className="text-lg text-gray-500 mb-8 font-medium">
-                    Marca: <span className="text-gray-800 bg-gray-100 px-2 py-1 rounded-md">{resultado.producto?.marca || "Desconocida"}</span>
-                </p>
-
-                <div className="bg-gray-50 p-6 rounded-xl border border-gray-200/60">
-                    <h4 className="flex items-center gap-2 text-gray-700 font-bold mb-3 uppercase text-sm tracking-wider">
-                        📝 Ingredientes
-                    </h4>
-                    <p className="leading-relaxed text-gray-700 text-lg">
-                        {resultado.producto?.ingredientes || 'No hay información de ingredientes disponible.'}
-                    </p>
+                <span className="inline-block text-xs font-semibold text-gray-500 bg-gray-100 px-2.5 py-0.5 rounded-full mb-6">
+                  {resultado.producto?.marca ?? 'Marca desconocida'}
+                </span>
+                <div className="bg-cream-100 rounded-xl p-5 border border-cream-200 mb-4">
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Ingredientes</p>
+                  <p className="text-gray-700 text-sm leading-relaxed">{resultado.producto?.ingredientes ?? 'No disponible.'}</p>
                 </div>
-                
-                <div className="mt-4 text-right text-xs text-gray-400">
-                    Fuente de datos: {resultado.fuente || "Desconocida"}
+                <div className="flex items-center justify-between">
+                  <button onClick={() => { setResultado(null); setEan(''); }}
+                    className="text-xs text-gray-400 hover:text-brand-500 font-medium flex items-center gap-1.5 transition-colors">
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
+                    Nueva búsqueda
+                  </button>
+                  <span className="text-xs text-gray-400">Fuente: {resultado.fuente ?? 'Desconocida'}</span>
                 </div>
-            </div>
-        </div>
-      )}
-
-      {/* Indicadores de confianza (Se ocultan si hay resultado) */}
-      {!resultado && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16 w-full max-w-4xl opacity-80">
-            <div className="flex flex-col items-center text-center p-4">
-              <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-4 text-xl">⚡</div>
-              <h3 className="font-bold text-gray-900 mb-2">Resultados al instante</h3>
-              <p className="text-sm text-gray-500">Conexión directa con la base de datos de OpenFoodFacts.</p>
-            </div>
-            <div className="flex flex-col items-center text-center p-4">
-              <div className="w-12 h-12 bg-teal-50 text-teal-600 rounded-full flex items-center justify-center mb-4 text-xl">🤖</div>
-              <h3 className="font-bold text-gray-900 mb-2">IA Especializada</h3>
-              <p className="text-sm text-gray-500">Analiza ingredientes ambiguos para evitar falsos positivos.</p>
-            </div>
-            <div className="flex flex-col items-center text-center p-4">
-              <div className="w-12 h-12 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center mb-4 text-xl">📱</div>
-              <h3 className="font-bold text-gray-900 mb-2">Historial y Favoritos</h3>
-              <p className="text-sm text-gray-500">Guarda tus productos seguros para consultarlos en el supermercado.</p>
+              </div>
             </div>
           </div>
+        </section>
       )}
-      {/* Toast Notification */}
+
+      {/* ══════════════════════════════════════════════════
+          SECCIÓN 3 — CÓMO FUNCIONA
+      ══════════════════════════════════════════════════ */}
+      <section className="py-20 bg-white">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <div className="max-w-xl mb-12">
+            <p className="text-xs font-bold text-brand-500 uppercase tracking-widest mb-2">Cómo funciona</p>
+            <h2 className="text-3xl font-black text-gray-900 leading-tight">
+              Tres pasos. Resultado inmediato.
+            </h2>
+          </div>
+
+          {/* Pasos */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                num: '01',
+                titulo: 'Introduce el código',
+                desc: 'Escribe o escanea el código de barras de cualquier producto alimentario con tu cámara.',
+                color: 'brand',
+                icon: (
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z"/>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75zM6.75 17.25h.75v.75h-.75v-.75zM16.5 6.75h.75v.75h-.75v-.75zM13.5 13.5h.75v.75h-.75v-.75zM13.5 19.5h.75v.75h-.75v-.75zM19.5 13.5h.75v.75h-.75v-.75zM19.5 19.5h.75v.75h-.75v-.75zM16.5 16.5h.75v.75h-.75v-.75z"/>
+                  </svg>
+                ),
+              },
+              {
+                num: '02',
+                titulo: 'La IA lo analiza',
+                desc: 'Nuestra inteligencia artificial revisa cada ingrediente, aditivo y posible traza de gluten.',
+                color: 'blue',
+                icon: (
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5"/>
+                  </svg>
+                ),
+              },
+              {
+                num: '03',
+                titulo: 'Respuesta clara',
+                desc: 'Recibes un resultado APTO, NO APTO o DUDOSO con explicación detallada del motivo.',
+                color: 'green',
+                icon: (
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                ),
+              },
+            ].map(({ num, titulo, desc, color, icon }) => (
+              <div key={num} className="relative">
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-5
+                  ${color === 'brand' ? 'bg-brand-50 text-brand-600' :
+                    color === 'blue'  ? 'bg-blue-50 text-blue-600'   :
+                                        'bg-green-50 text-green-600'}`}>
+                  {icon}
+                </div>
+                <span className="absolute top-0 right-0 text-5xl font-black text-gray-100 leading-none select-none">
+                  {num}
+                </span>
+                <h3 className="font-black text-gray-900 text-lg mb-2">{titulo}</h3>
+                <p className="text-gray-500 text-sm leading-relaxed">{desc}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Demo interactiva de resultado */}
+          <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-6 items-center
+                          bg-cream-100 rounded-3xl border border-cream-200 p-8 sm:p-10">
+            <div>
+              <p className="text-xs font-bold text-brand-500 uppercase tracking-widest mb-3">
+                Ejemplo real
+              </p>
+              <h3 className="text-2xl font-black text-gray-900 mb-3">
+                Así se ve una respuesta de CeliApp
+              </h3>
+              <p className="text-gray-500 text-sm leading-relaxed mb-6">
+                Cada análisis te muestra el veredicto, el motivo exacto y los ingredientes
+                completos del producto. Sin ambigüedades.
+              </p>
+              <button
+                onClick={() => { setEan('demo'); setTimeout(() => buscarProducto({ preventDefault: () => {} }), 50); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                className="btn-primary text-sm px-6 py-3 inline-flex items-center gap-2"
+              >
+                Probar con un ejemplo
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
+                </svg>
+              </button>
+            </div>
+
+            {/* Mock de tarjeta de resultado */}
+            <div className="bg-white rounded-2xl border-2 border-brand-200 overflow-hidden shadow-lg">
+              <div className="bg-brand-50 border-b border-brand-100 px-5 py-4">
+                <div className="flex items-center gap-2.5 mb-2">
+                  <span className="w-7 h-7 rounded-full bg-brand-500 text-white text-xs font-black flex items-center justify-center">✓</span>
+                  <span className="text-sm font-black text-brand-700 uppercase tracking-widest">APTO</span>
+                </div>
+                <p className="text-sm text-brand-700 opacity-90">No contiene gluten ni trazas declaradas en etiqueta.</p>
+              </div>
+              <div className="p-5">
+                <p className="font-black text-gray-900 text-base mb-1">Queso Crema Light Hacendado</p>
+                <span className="inline-block text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full mb-4">Hacendado</span>
+                <div className="bg-cream-100 rounded-xl p-4 border border-cream-200">
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1.5">Ingredientes</p>
+                  <p className="text-xs text-gray-600 leading-relaxed">Leche pasteurizada, nata, proteínas de leche, sal, corrector de acidez (ácido cítrico)…</p>
+                </div>
+                <p className="mt-3 text-right text-xs text-gray-400">Fuente: OpenFoodFacts</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════
+          SECCIÓN 4 — REVIEWS
+      ══════════════════════════════════════════════════ */}
+      <section className="py-20 bg-cream-100 border-y border-cream-200">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
+            <div>
+              <p className="text-xs font-bold text-brand-500 uppercase tracking-widest mb-2">Opiniones</p>
+              <h2 className="text-3xl font-black text-gray-900 leading-tight">
+                Lo que dicen<br/>nuestros usuarios
+              </h2>
+            </div>
+            <div className="flex items-center gap-3 bg-white rounded-2xl border border-gray-100 px-5 py-3 shadow-sm w-fit">
+              <div>
+                <p className="text-2xl font-black text-gray-900 leading-none">4.9</p>
+                <Stars n={5} />
+              </div>
+              <div className="pl-3 border-l border-gray-100">
+                <p className="text-xs text-gray-500 font-medium">Valoración media</p>
+                <p className="text-xs text-gray-400">+1.200 reseñas</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {REVIEWS.map((r, i) => (
+              <div key={i} className="bg-white rounded-2xl p-5 border border-gray-100
+                                      shadow-sm hover:shadow-md hover:-translate-y-0.5
+                                      transition-all duration-200">
+                <div className="flex items-start justify-between gap-2 mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-brand-100 flex items-center justify-center
+                                    text-brand-700 font-black text-sm shrink-0">
+                      {r.nombre.charAt(0)}
+                    </div>
+                    <div>
+                      <p className="font-bold text-gray-900 text-sm">{r.nombre}</p>
+                      <p className="text-xs text-gray-400">{r.ciudad}</p>
+                    </div>
+                  </div>
+                  <span className="text-xs text-gray-400 shrink-0">{r.tiempo}</span>
+                </div>
+                <Stars n={r.estrellas} />
+                <p className="mt-3 text-gray-600 text-sm leading-relaxed">"{r.texto}"</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════
+          SECCIÓN 5 — CONTACTO
+      ══════════════════════════════════════════════════ */}
+      <section className="py-20 bg-white">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
+
+            {/* Info */}
+            <div>
+              <p className="text-xs font-bold text-brand-500 uppercase tracking-widest mb-2">Contacto</p>
+              <h2 className="text-3xl font-black text-gray-900 leading-tight mb-4">
+                ¿Tienes alguna<br/>pregunta?
+              </h2>
+              <p className="text-gray-500 text-base leading-relaxed mb-8">
+                Estamos aquí para ayudarte. Si tienes dudas sobre un producto,
+                quieres reportar un error o simplemente quieres saber más sobre
+                cómo funciona CeliApp, escríbenos.
+              </p>
+              <div className="space-y-4">
+                {[
+                  { icon: '✉', label: 'Email', val: 'hola@celiapp.es' },
+                  { icon: '📍', label: 'Ubicación', val: 'Madrid, España' },
+                  { icon: '⚡', label: 'Respuesta en', val: 'menos de 24 horas' },
+                ].map(c => (
+                  <div key={c.label} className="flex items-center gap-3">
+                    <span className="w-10 h-10 rounded-xl bg-cream-100 border border-cream-200
+                                     flex items-center justify-center text-base">
+                      {c.icon}
+                    </span>
+                    <div>
+                      <p className="text-xs text-gray-400 font-semibold">{c.label}</p>
+                      <p className="text-sm font-semibold text-gray-800">{c.val}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Formulario */}
+            <div className="bg-cream-50 rounded-2xl border border-cream-200 p-6 sm:p-8">
+              <form className="space-y-4" onSubmit={e => { e.preventDefault(); showToast('¡Mensaje enviado! Te respondemos pronto.'); e.target.reset(); }}>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-semibold text-gray-600 block mb-1.5">Nombre</label>
+                    <input type="text" placeholder="Tu nombre" required
+                      className="w-full px-3.5 py-3 rounded-xl border border-gray-200 bg-white
+                                 text-sm text-gray-900 placeholder-gray-400 font-medium
+                                 focus:outline-none focus:border-brand-400
+                                 focus:shadow-[0_0_0_3px_rgba(1,162,105,0.10)]
+                                 transition-all"/>
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-gray-600 block mb-1.5">Email</label>
+                    <input type="email" placeholder="tu@email.com" required
+                      className="w-full px-3.5 py-3 rounded-xl border border-gray-200 bg-white
+                                 text-sm text-gray-900 placeholder-gray-400 font-medium
+                                 focus:outline-none focus:border-brand-400
+                                 focus:shadow-[0_0_0_3px_rgba(1,162,105,0.10)]
+                                 transition-all"/>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-gray-600 block mb-1.5">Asunto</label>
+                  <select className="w-full px-3.5 py-3 rounded-xl border border-gray-200 bg-white
+                                     text-sm text-gray-900 font-medium
+                                     focus:outline-none focus:border-brand-400
+                                     focus:shadow-[0_0_0_3px_rgba(1,162,105,0.10)]
+                                     transition-all appearance-none">
+                    <option>Duda sobre un producto</option>
+                    <option>Reportar un error</option>
+                    <option>Sugerencia de mejora</option>
+                    <option>Colaboración</option>
+                    <option>Otro</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-gray-600 block mb-1.5">Mensaje</label>
+                  <textarea rows={4} placeholder="Cuéntanos en qué podemos ayudarte…" required
+                    className="w-full px-3.5 py-3 rounded-xl border border-gray-200 bg-white
+                               text-sm text-gray-900 placeholder-gray-400 font-medium
+                               focus:outline-none focus:border-brand-400
+                               focus:shadow-[0_0_0_3px_rgba(1,162,105,0.10)]
+                               transition-all resize-none"/>
+                </div>
+                <button type="submit" className="btn-primary w-full py-3.5 text-sm font-semibold">
+                  Enviar mensaje
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════
+          FOOTER
+      ══════════════════════════════════════════════════ */}
+      <footer className="bg-gray-900 text-white py-10">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row
+                        items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <span className="w-8 h-8 rounded-xl bg-brand-500 flex items-center justify-center
+                             text-white text-sm font-black">C</span>
+            <span className="font-black text-white">CeliApp</span>
+          </div>
+          <p className="text-xs text-gray-500 text-center">
+            © 2026 CeliApp · Hecho con ❤️ para la comunidad celíaca
+          </p>
+          <div className="flex gap-4 text-xs text-gray-500">
+            <a href="#" className="hover:text-gray-300 transition-colors">Privacidad</a>
+            <a href="#" className="hover:text-gray-300 transition-colors">Términos</a>
+          </div>
+        </div>
+      </footer>
+
+      {/* ── Toast ─────────────────────────────────────────── */}
       {toastMsg && (
-        <div className="fixed bottom-4 right-4 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3 animate-fade-in-up z-50">
-        <span>{toastMsg}</span>
-        <button onClick={() => setToastMsg('')} className="text-gray-400 hover:text-white">✕</button>
+        <div className="fixed bottom-6 right-6 z-50 animate-fade-in-up">
+          <div className="bg-gray-900 text-white px-5 py-3 rounded-xl shadow-xl
+                          flex items-center gap-3 text-sm font-medium">
+            <span>{toastMsg}</span>
+            <button onClick={() => setToastMsg('')} className="text-gray-400 hover:text-white">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
         </div>
       )}
-    </div>  
+    </div>
   );
 }
-
-export default Buscador;
