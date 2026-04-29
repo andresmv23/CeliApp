@@ -289,6 +289,7 @@ def buscar_producto_inteligente(
                         "nombre": producto_db["nombre"],
                         "marca": producto_db["marca"],
                         "ingredientes": producto_db["ingredientes"],
+                        "imagen_url": producto_db["imagen_url"],
                     },
                     "analisis": {
                         "es_apto": producto_db["estado_gluten"] == "APTO",

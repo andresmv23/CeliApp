@@ -62,10 +62,12 @@ def guardar_producto(ean, datos_producto, analisis_result, fuente_datos):
             or f"https://world.openfoodfacts.org/product/{ean}"
         )
 
+        imagen_url = datos_producto.get("imagen_url", "")
+
         # Query UPSERT
         sql = """
-            INSERT INTO productos (ean, nombre, marca, ingredientes, estado_gluten, tipo_fuente, justificacion, url_fuente)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO productos (ean, nombre, marca, ingredientes, estado_gluten, tipo_fuente, justificacion, url_fuente, imagen_url)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
             ON CONFLICT (ean) DO UPDATE SET
                 nombre = EXCLUDED.nombre,
                 marca = EXCLUDED.marca,
@@ -73,6 +75,7 @@ def guardar_producto(ean, datos_producto, analisis_result, fuente_datos):
                 estado_gluten = EXCLUDED.estado_gluten,
                 tipo_fuente = EXCLUDED.tipo_fuente,
                 justificacion = EXCLUDED.justificacion,
+                imagen_url = EXCLUDED.imagen_url,
                 fecha_registro = CURRENT_TIMESTAMP;
         """
 
@@ -87,6 +90,7 @@ def guardar_producto(ean, datos_producto, analisis_result, fuente_datos):
                 fuente_datos,
                 analisis_result.get("motivo", "")[:1000],
                 url,
+                imagen_url,
             ),
         )
 
