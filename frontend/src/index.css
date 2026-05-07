@@ -1,9 +1,9 @@
+/* Fuente Satoshi desde Fontshare — DEBE ir antes de @tailwind */
+@import url('https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,700,900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Fuente Satoshi desde Fontshare */
-@import url('https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,700,900&display=swap');
 
 /* ─── Reset & Base ─────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
@@ -16,42 +16,34 @@ html {
 }
 
 body {
-  @apply bg-cream-100 text-gray-900;
+  @apply text-gray-900;
+  background: #070d0a;
   font-family: 'Satoshi', system-ui, sans-serif;
   min-height: 100dvh;
+  margin: 0;
+  padding: 0;
+}
+
+#root {
+  /* Override App.css que limita a 1280px con padding — lo necesitamos full-width */
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  text-align: left !important;
 }
 
 /* ─── Tokens de estado de gluten ───────────────────────── */
-.status-apto {
-  @apply bg-brand-50 text-brand-700 border border-brand-200;
-}
-.status-noapto {
-  @apply bg-red-50 text-red-700 border border-red-200;
-}
-.status-dudoso {
-  @apply bg-amber-50 text-amber-700 border border-amber-200;
-}
+.status-apto    { @apply bg-emerald-50 text-emerald-700 border border-emerald-200; }
+.status-noapto  { @apply bg-red-50 text-red-700 border border-red-200; }
+.status-dudoso  { @apply bg-amber-50 text-amber-700 border border-amber-200; }
 
 /* ─── Botón primario ───────────────────────────────────── */
 .btn-primary {
-  @apply bg-brand-500 hover:bg-brand-600 active:bg-brand-700
+  @apply bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700
          text-white font-semibold rounded-xl
          px-6 py-3 transition-all duration-150
-         focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-200
+         focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-200
          disabled:opacity-40 disabled:cursor-not-allowed;
-}
-
-/* ─── Input de búsqueda ────────────────────────────────── */
-.search-input {
-  @apply w-full py-4 pl-12 pr-4 rounded-xl
-         border-2 border-transparent bg-cream-50
-         text-gray-900 placeholder-gray-400
-         text-base font-medium
-         focus:bg-white focus:border-brand-400 focus:outline-none
-         transition-all duration-150;
-}
-.search-input:focus {
-  box-shadow: 0 0 0 4px rgba(1,162,105,0.10);
 }
 
 /* ─── Card base ────────────────────────────────────────── */
@@ -59,9 +51,7 @@ body {
   @apply bg-white rounded-2xl border border-gray-100;
   box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
 }
-.card-hover {
-  @apply transition-all duration-200;
-}
+.card-hover { @apply transition-all duration-200; }
 .card-hover:hover {
   box-shadow: 0 4px 8px rgba(0,0,0,0.08), 0 12px 32px rgba(0,0,0,0.08);
   @apply -translate-y-0.5;
@@ -79,7 +69,7 @@ body {
   border-radius: 99px;
 }
 
-/* ─── Reducir movimiento ───────────────────────────────── */
+/* ─── Reducir movimiento (accesibilidad) ───────────────── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

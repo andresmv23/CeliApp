@@ -24,7 +24,7 @@ PASOS:
 3. Si el fabricante declara explícitamente "sin gluten" o "gluten free", marca APTO con confianza alta.
 4. Si hay duda razonable sobre contaminación cruzada o ingredientes ambiguos, marca DUDOSO.
 5. Si contiene gluten confirmado, marca NO_APTO.
-6. Busca también la imagen oficial del producto en la web del fabricante o tienda.
+6. Busca también la imagen oficial del producto en la web del fabricante o tienda e incluyela en la respuesta como "imagen_url" no vale poner NULL.
 
 Responde ÚNICAMENTE con este JSON válido, sin texto adicional:
 
