@@ -4,18 +4,22 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DB_HOST = os.getenv("DB_HOST", "localhost")
-DB_NAME = os.getenv("DB_NAME", "celiapp")
-DB_USER = os.getenv("DB_USER", "postgres")
-DB_PASS = os.getenv("DB_PASS", "xenia")
-DB_PORT = os.getenv("DB_PORT", "5432")
-
 
 def get_db_connection():
     try:
-        conn = psycopg2.connect(
-            host=DB_HOST, database=DB_NAME, user=DB_USER, password=DB_PASS, port=DB_PORT
-        )
+        # Railway inyecta DATABASE_URL automáticamente
+        database_url = os.getenv("DATABASE_URL")
+        if database_url:
+            conn = psycopg2.connect(database_url)
+        else:
+            # Fallback para desarrollo local
+            conn = psycopg2.connect(
+                host=os.getenv("DB_HOST", "localhost"),
+                database=os.getenv("DB_NAME", "celiapp"),
+                user=os.getenv("DB_USER", "postgres"),
+                password=os.getenv("DB_PASS", "xenia"),
+                port=os.getenv("DB_PORT", "5432"),
+            )
         return conn
     except Exception as e:
         print(f"🔥 Error fatal conectando a DB: {e}")
@@ -23,7 +27,6 @@ def get_db_connection():
 
 
 def guardar_producto(ean, datos_producto, analisis_result, fuente_datos):
-    # Guarda o actualiza un producto en la tabla 'productos'
     conn = get_db_connection()
     if not conn:
         print("❌ No hay conexión a DB, imposible guardar.")
@@ -32,7 +35,6 @@ def guardar_producto(ean, datos_producto, analisis_result, fuente_datos):
     try:
         cur = conn.cursor()
 
-        # Normalización de Datos
         nombre = (
             datos_producto.get("nombre")
             or datos_producto.get("product_name")
@@ -47,7 +49,6 @@ def guardar_producto(ean, datos_producto, analisis_result, fuente_datos):
             or ""
         )
 
-        # Validación de Estado
         estado_raw = analisis_result.get("estado", "DUDOSO")
         if analisis_result.get("es_apto") is True and estado_raw == "DUDOSO":
             estado_raw = "APTO"
@@ -55,7 +56,6 @@ def guardar_producto(ean, datos_producto, analisis_result, fuente_datos):
         estados_validos = ["APTO", "NO_APTO", "TRAZAS", "DUDOSO"]
         estado_final = estado_raw if estado_raw in estados_validos else "DUDOSO"
 
-        # URL Fuente
         url = (
             datos_producto.get("url")
             or datos_producto.get("url_fuente")
@@ -64,7 +64,6 @@ def guardar_producto(ean, datos_producto, analisis_result, fuente_datos):
 
         imagen_url = datos_producto.get("imagen_url", "")
 
-        # Query UPSERT
         sql = """
             INSERT INTO productos (ean, nombre, marca, ingredientes, estado_gluten, tipo_fuente, justificacion, url_fuente, imagen_url)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
@@ -97,9 +96,7 @@ def guardar_producto(ean, datos_producto, analisis_result, fuente_datos):
         conn.commit()
         cur.close()
         conn.close()
-        print(
-            f"💾 [DB] Producto {ean} guardado correctamente (Estado: {estado_final})."
-        )
+        print(f"💾 [DB] Producto {ean} guardado correctamente (Estado: {estado_final}).")
 
     except Exception as e:
         print(f"❌ Error CRÍTICO guardando en DB: {e}")
