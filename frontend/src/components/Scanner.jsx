@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { BrowserMultiFormatReader } from '@zxing/browser'; // ❌ Eliminado NotFoundException
 
+
 /**
  * Scanner de código de barras usando @zxing/browser.
  * Abre la cámara DIRECTAMENTE (sin selector de archivo).
@@ -13,10 +14,12 @@ export default function Scanner({ onScanSuccess, onClose }) {
   const readerRef  = useRef(null);
   const controlsRef = useRef(null);
 
+
   const [error, setError]       = useState(null);
   const [cameras, setCameras]   = useState([]);
   const [camIdx, setCamIdx]     = useState(0);
   const [scanning, setScanning] = useState(false);
+
 
   /* ── Detectar cámaras disponibles ───────────────────── */
   useEffect(() => {
@@ -26,29 +29,32 @@ export default function Scanner({ onScanSuccess, onClose }) {
           setError('No se detectó ninguna cámara en este dispositivo.');
           return;
         }
-        // Preferir cámara trasera en móvil
-        const sorted = [...devices].sort((a, b) => {
-          const aBack = /back|rear|environment/i.test(a.label);
-          const bBack = /back|rear|environment/i.test(b.label);
-          return bBack - aBack;
-        });
-        setCameras(sorted);
+        setCameras(devices);
       })
       .catch(() => setError('No se pudo acceder a la cámara. Revisa los permisos del navegador.'));
   }, []);
 
+
   /* ── Iniciar escaneo cuando hay cámaras ─────────────── */
   useEffect(() => {
-    if (!cameras.length || !videoRef.current) return;
+    if (!videoRef.current) return;
 
     const reader = new BrowserMultiFormatReader();
     readerRef.current = reader;
     setScanning(true);
     setError(null);
 
+    const constraints = {
+      video: {
+        facingMode: camIdx === 0 ? { ideal: 'environment' } : { ideal: 'user' },
+        width: { ideal: 1280 },
+        height: { ideal: 720 },
+      }
+    };
+
     reader
-      .decodeFromVideoDevice(
-        cameras[camIdx]?.deviceId ?? undefined,
+      .decodeFromConstraints(
+        constraints,
         videoRef.current,
         (result, err, controls) => {
           controlsRef.current = controls;
@@ -78,13 +84,15 @@ export default function Scanner({ onScanSuccess, onClose }) {
       controlsRef.current?.stop();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cameras, camIdx]);
+  }, [camIdx]);
+
 
   /* ── Cambiar cámara ──────────────────────────────────── */
   const switchCamera = () => {
     controlsRef.current?.stop();
     setCamIdx((i) => (i + 1) % cameras.length);
   };
+
 
   return (
     <div
@@ -115,6 +123,7 @@ export default function Scanner({ onScanSuccess, onClose }) {
           </button>
         </div>
 
+
         {/* Visor de cámara */}
         <div className="relative bg-black" style={{ aspectRatio: '4/3' }}>
           <video
@@ -124,6 +133,7 @@ export default function Scanner({ onScanSuccess, onClose }) {
             playsInline
             muted
           />
+
 
           {/* Marco de escaneo */}
           {scanning && !error && (
@@ -152,6 +162,7 @@ export default function Scanner({ onScanSuccess, onClose }) {
             </div>
           )}
 
+
           {/* Error state */}
           {error && (
             <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-black/70">
@@ -164,6 +175,7 @@ export default function Scanner({ onScanSuccess, onClose }) {
               <p className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>{error}</p>
             </div>
           )}
+
 
           {/* Loading state */}
           {!scanning && !error && (
@@ -178,6 +190,7 @@ export default function Scanner({ onScanSuccess, onClose }) {
             </div>
           )}
         </div>
+
 
         {/* Footer */}
         <div className="px-5 py-4 flex items-center gap-3">
@@ -199,6 +212,7 @@ export default function Scanner({ onScanSuccess, onClose }) {
             </button>
           )}
 
+
           <button
             onClick={onClose}
             className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all"
@@ -207,6 +221,7 @@ export default function Scanner({ onScanSuccess, onClose }) {
             Cancelar
           </button>
         </div>
+
 
         {/* Animación línea de escaneo */}
         <style>{`
