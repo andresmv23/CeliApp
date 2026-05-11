@@ -3,6 +3,8 @@ from typing import List, Optional
 from datetime import datetime
 
 
+# ── Schemas existentes (sin cambios) ─────────────────────────────────────────
+
 class AnalisisRequest(BaseModel):
     ingredientes: str
 
@@ -60,3 +62,31 @@ class PerfilResponse(BaseModel):
     usuario: UserInfo
     historial: List[ProductoHistorial]
     favoritos: List[ProductoBasico]
+
+
+# Schemas para /analizar-imagen
+
+class ImagenAnalisisRequest(BaseModel):
+    ean: Optional[str] = ""
+    imagen_base64: str
+
+
+class ProductoImagen(BaseModel):
+    nombre: Optional[str] = None
+    marca: Optional[str] = None
+    ingredientes: Optional[str] = None
+    imagen_url: Optional[str] = None
+
+
+class AnalisisImagen(BaseModel):
+    es_apto: Optional[bool] = None
+    estado: str
+    motivo: str
+    confianza: str
+    analizado_por: str = "vision"
+
+
+class ImagenAnalisisResponse(BaseModel):
+    fuente: str
+    producto: ProductoImagen
+    analisis: AnalisisImagen
