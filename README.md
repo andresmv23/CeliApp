@@ -1,44 +1,105 @@
-# 🌾 CeliApp - Asistente Inteligente para Celíacos
+# 🌾 CeliApp – Asistente inteligente para personas celíacas
 
-> 🚧 **Estado del Proyecto: En Desarrollo Activo (WIP)** 🚧
-> *El código base y la arquitectura están implementados. Actualmente trabajando en la refactorización de interfaces y preparando el despliegue del backend en la nube.*
+CeliApp es una aplicación **full-stack en producción** que ayuda a personas con celiaquía a comprobar en segundos si un producto es seguro para su consumo, escaneando el código de barras o introduciendo el EAN manualmente.
 
-CeliApp es una solución Full-Stack diseñada para ayudar a las personas con celiaquía a identificar si un producto es seguro para su consumo de forma instantánea. Utiliza escaneo de códigos de barras, extracción de datos de etiquetado y evaluación de trazas de gluten mediante Inteligencia Artificial.
+- 🌐 Web en producción: https://celi-app-lemon.vercel.app/
+- 🧩 Stack: **React + Tailwind CSS + FastAPI + PostgreSQL**
+- ☁️ Infraestructura: **Frontend en Vercel, API y base de datos en Railway**
 
-## 🚀 Tecnologías Core 
+---
 
-El ecosistema está construido con un enfoque *API-First* para servir a múltiples clientes simultáneamente:
+## 🎯 Problema que resuelve
 
-- **Backend (API REST):** Python, FastAPI, Autenticación JWT.
-- **Frontend Web:** React, Tailwind CSS, Axios, Context API.
-- **App Móvil:** Flutter, Riverpod (Gestión de estado), GoRouter.
-- **Inteligencia Artificial:** Integración con Perplexity API para análisis de ingredientes y detección de trazas de gluten ocultas.
-- **Lectura de EAN:** `mobile_scanner` (Flutter) y `html5-qrcode` (React Web).
+Leer etiquetas cada vez que una persona celíaca va al supermercado es lento, agotador y propenso a errores.  
+Muchos productos no tienen el sello “Sin gluten”, pero sí ingredientes o trazas que hay que interpretar con cuidado.
 
-## 🧠 Arquitectura y Flujo de Datos
+CeliApp permite:
 
-1. **Escaneo / Input:** El usuario escanea un código EAN-13 desde la app móvil o la web.
-2. **Procesamiento Backend:** FastAPI recibe el código, busca los metadatos del producto y extrae la lista de ingredientes.
-3. **Análisis IA:** Si el producto no cuenta con certificación oficial "Sin Gluten", el backend delega el análisis de los ingredientes al modelo LLM (Perplexity) para detectar posibles riesgos o nomenclaturas engañosas.
-4. **Respuesta Tipificada:** El cliente recibe un estado estandarizado (`APTO`, `NO_APTO`, `DUDOSO`) y lo renderiza visualmente.
+- Escanear un producto (EAN-13) y obtener una evaluación clara:
+  - `APTO`
+  - `NO_APTO`
+  - `DUDOSO`
+- Ver un resumen explicativo de por qué el producto es o no seguro.
+- Consultar el **historial de búsquedas** y guardar **favoritos** para accesos rápidos.
 
-## 🗺️ Roadmap de Desarrollo
+---
 
-**Fase 1: Core Ecosistema (✅ Completado)**
-- [x] Desarrollo de API RESTful con FastAPI y Pydantic.
-- [x] Autenticación segura mediante JSON Web Tokens (JWT).
-- [x] Cliente Web en React con protección de rutas.
-- [x] Cliente Móvil en Flutter con diseño adaptativo.
-- [x] Gestión de perfil de usuario (Historial de escaneos y Favoritos).
+## 🧠 Arquitectura y flujo
 
-**Fase 2: Infraestructura y Cloud (🚀 Siguiente paso)**
-- [ ] Conexión a Base de Datos en la nube (MongoDB/PostgreSQL).
-- [ ] Despliegue del Backend FastAPI en Render.
-- [ ] Hosting del Frontend React en Vercel.
-- [ ] Configuración segura de variables de entorno en producción.
+1. **Frontend (React + Tailwind)**  
+   - SPA con Context API para manejar autenticación y estado global.  
+   - Escáner web de código de barras y formulario manual de EAN.  
+   - Vistas principales:
+     - Buscador de productos
+     - Resultado de aptitud
+     - Perfil con historial y favoritos
 
-## 🛠️ Estructura del Repositorio
+2. **Backend (FastAPI)**  
+   - API REST con endpoints para:
+     - Autenticación y registro de usuarios (JWT)
+     - Consulta de producto por EAN
+     - Gestión de historial de escaneos
+     - Gestión de favoritos
+   - Integración con servicios externos para obtener la ficha del producto.
+   - Uso de un modelo LLM (Perplexity API) para analizar ingredientes y detectar posibles trazas de gluten difíciles de interpretar.
 
-- `/backend`: Servidor principal. Contiene rutas (`/auth`, `/producto`, `/users`), modelos de validación y conexión con IA.
-- `/frontend`: SPA en React. Incluye el escáner web y paneles de administración de perfil.
-- `/mobile`: Código fuente de Flutter. Diseñado con arquitectura limpia y proveedores Riverpod.
+3. **Base de datos (PostgreSQL)**  
+   - Desplegada en Railway.
+   - Tablas principales:
+     - `users`
+     - `historial_busquedas`
+     - `favoritos`
+   - Cada escaneo del usuario queda registrado con:
+     - EAN
+     - nombre del producto
+     - resultado (`APTO` / `NO_APTO` / `DUDOSO`)
+     - marca temporal
+
+4. **Infraestructura**  
+   - Frontend desplegado en **Vercel**.
+   - API y base de datos desplegadas en **Railway**.
+   - Variables de entorno separadas para desarrollo y producción.
+
+---
+
+## 🧩 Tecnologías destacadas
+
+- **Frontend**
+  - React
+  - Tailwind CSS
+  - Axios
+  - Context API / Hooks
+
+- **Backend**
+  - FastAPI
+  - Pydantic
+  - Autenticación JWT
+  - Integración con APIs externas
+  - Cliente HTTP para llamada a modelo LLM (Perplexity)
+
+- **DevOps / Infra**
+  - Vercel (frontend)
+  - Railway (API + PostgreSQL)
+  - Gestión de variables de entorno
+  - Logs y pruebas en entorno real
+
+---
+
+## 👤 Rol y responsabilidades
+
+Proyecto desarrollado de principio a fin:
+
+- Diseño de la arquitectura **full‑stack** (frontend, backend y base de datos).
+- Implementación de la API REST y modelo de datos relacional en PostgreSQL.
+- Desarrollo de la interfaz web orientada a **claridad y confianza** para usuarios celíacos.
+- Integración con modelo LLM para análisis semántico de ingredientes.
+- Despliegue y configuración de la infraestructura en producción.
+
+---
+
+## 🔜 Próximos pasos
+
+- Pulir la experiencia móvil (PWA / app nativa).
+- Ampliar fuentes de datos de productos.
+- Sistema de feedback de usuarios sobre la precisión de los resultados.
+- Panel interno para analizar estadísticas de uso.
