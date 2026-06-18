@@ -14,7 +14,7 @@ from slowapi.errors import RateLimitExceeded
 
 from app.analizador import analisis_rapido
 from app.servicios import obtener_producto_por_ean
-from app.database import get_db_connection, guardar_producto
+from app.database import get_db_connection, release_connection, guardar_producto
 from app.ia_client import consultar_ia_experto_total, consultar_ia_vision_imagen
 from app.schemas import (
     AnalisisRequest,
@@ -44,10 +44,16 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl="auth/login", auto_error=False)
 
-ALLOWED_ORIGINS = os.getenv(
-    "ALLOWED_ORIGINS",
-    "http://localhost:5173"
-).split(",")
+# ALLOWED_ORIGINS es obligatorio en producción — no tiene fallback inseguro
+ALLOWED_ORIGINS_RAW = os.getenv("ALLOWED_ORIGINS", "")
+if ALLOWED_ORIGINS_RAW:
+    ALLOWED_ORIGINS = ALLOWED_ORIGINS_RAW.split(",")
+else:
+    # Solo en desarrollo local se permite localhost
+    import sys
+    if "pytest" not in sys.modules:
+        print("⚠️  ALLOWED_ORIGINS no configurado. Usando localhost solo para desarrollo.")
+    ALLOWED_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -74,10 +80,13 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         raise HTTPException(status_code=401, detail="Token inválido o expirado")
 
     conn = get_db_connection()
-    cur = conn.cursor(cursor_factory=RealDictCursor)
-    cur.execute("SELECT id, email, full_name FROM users WHERE email = %s", (email,))
-    user = cur.fetchone()
-    conn.close()
+    try:
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute("SELECT id, email, full_name FROM users WHERE email = %s", (email,))
+        user = cur.fetchone()
+    finally:
+        release_connection(conn)
+
     if user is None:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
     return user
@@ -92,16 +101,37 @@ def get_optional_user(token: Optional[str] = Depends(oauth2_scheme_optional)):
         if email is None:
             return None
         conn = get_db_connection()
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        cur.execute("SELECT id, email, full_name FROM users WHERE email = %s", (email,))
-        user = cur.fetchone()
-        conn.close()
+        try:
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+            cur.execute("SELECT id, email, full_name FROM users WHERE email = %s", (email,))
+            user = cur.fetchone()
+        finally:
+            release_connection(conn)
         return user
     except Exception:
         return None
 
 
-# ── Endpoints existentes (sin cambios) ───────────────────────────────────────
+def guardar_en_historial(user_id: int, ean: str) -> None:
+    """Guarda una búsqueda en el historial del usuario con manejo de errores y transacción."""
+    conn = get_db_connection()
+    if not conn:
+        return
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            "INSERT INTO historial_busquedas (user_id, ean) VALUES (%s, %s)",
+            (user_id, ean),
+        )
+        conn.commit()
+    except Exception as ex:
+        conn.rollback()
+        print(f"\n❌ Error guardando historial: {ex}")
+    finally:
+        release_connection(conn)
+
+
+# ── Endpoints ─────────────────────────────────────────────────────────────────
 
 @app.get("/")
 def root():
@@ -130,16 +160,19 @@ def registrar_usuario(user: UserCreate):
         conn.rollback()
         raise HTTPException(status_code=500, detail=str(e))
     finally:
-        conn.close()
+        release_connection(conn)
 
 
 @app.post("/auth/login", response_model=Token)
 def login_usuario(form_data: OAuth2PasswordRequestForm = Depends()):
     conn = get_db_connection()
-    cursor = conn.cursor(cursor_factory=RealDictCursor)
-    cursor.execute("SELECT * FROM users WHERE email = %s", (form_data.username,))
-    user_db = cursor.fetchone()
-    conn.close()
+    try:
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor.execute("SELECT * FROM users WHERE email = %s", (form_data.username,))
+        user_db = cursor.fetchone()
+    finally:
+        release_connection(conn)
+
     if not user_db or not verify_password(form_data.password, user_db["hashed_password"]):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -158,31 +191,34 @@ def leer_usuario_actual(current_user=Depends(get_current_user)):
 @app.get("/users/perfil", response_model=PerfilResponse)
 def obtener_perfil_completo(current_user=Depends(get_current_user)):
     conn = get_db_connection()
-    cur = conn.cursor(cursor_factory=RealDictCursor)
-    cur.execute(
-        """
-        SELECT h.fecha, p.nombre, p.marca, p.ean, p.estado_gluten
-        FROM historial_busquedas h
-        JOIN productos p ON h.ean = p.ean
-        WHERE h.user_id = %s
-        ORDER BY h.fecha DESC
-        LIMIT 10
-        """,
-        (current_user["id"],),
-    )
-    historial = cur.fetchall()
-    cur.execute(
-        """
-        SELECT p.nombre, p.marca, p.ean, p.estado_gluten
-        FROM favoritos f
-        JOIN productos p ON f.ean = p.ean
-        WHERE f.user_id = %s
-        ORDER BY f.fecha DESC
-        """,
-        (current_user["id"],),
-    )
-    favoritos = cur.fetchall()
-    conn.close()
+    try:
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute(
+            """
+            SELECT h.fecha, p.nombre, p.marca, p.ean, p.estado_gluten
+            FROM historial_busquedas h
+            JOIN productos p ON h.ean = p.ean
+            WHERE h.user_id = %s
+            ORDER BY h.fecha DESC
+            LIMIT 10
+            """,
+            (current_user["id"],),
+        )
+        historial = cur.fetchall()
+        cur.execute(
+            """
+            SELECT p.nombre, p.marca, p.ean, p.estado_gluten
+            FROM favoritos f
+            JOIN productos p ON f.ean = p.ean
+            WHERE f.user_id = %s
+            ORDER BY f.fecha DESC
+            """,
+            (current_user["id"],),
+        )
+        favoritos = cur.fetchall()
+    finally:
+        release_connection(conn)
+
     return {
         "usuario": {
             "id": current_user["id"],
@@ -197,8 +233,8 @@ def obtener_perfil_completo(current_user=Depends(get_current_user)):
 @app.post("/favoritos")
 def agregar_favorito(fav: FavoritoRequest, current_user=Depends(get_current_user)):
     conn = get_db_connection()
-    cur = conn.cursor()
     try:
+        cur = conn.cursor()
         cur.execute(
             "INSERT INTO favoritos (user_id, ean) VALUES (%s, %s) ON CONFLICT (user_id, ean) DO NOTHING",
             (current_user["id"], fav.ean),
@@ -209,19 +245,21 @@ def agregar_favorito(fav: FavoritoRequest, current_user=Depends(get_current_user
         conn.rollback()
         raise HTTPException(status_code=500, detail=str(e))
     finally:
-        conn.close()
+        release_connection(conn)
 
 
 @app.delete("/favoritos/{ean}")
 def eliminar_favorito(ean: str, current_user=Depends(get_current_user)):
     conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute(
-        "DELETE FROM favoritos WHERE user_id = %s AND ean = %s",
-        (current_user["id"], ean),
-    )
-    conn.commit()
-    conn.close()
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            "DELETE FROM favoritos WHERE user_id = %s AND ean = %s",
+            (current_user["id"], ean),
+        )
+        conn.commit()
+    finally:
+        release_connection(conn)
     return {"mensaje": "Eliminado de favoritos"}
 
 
@@ -237,21 +275,6 @@ def buscar_producto_inteligente(
     ean: str,
     current_user=Depends(get_optional_user),
 ):
-    def guardar_en_historial(ean_encontrado):
-        if not current_user:
-            return
-        try:
-            c = get_db_connection()
-            cur = c.cursor()
-            cur.execute(
-                "INSERT INTO historial_busquedas (user_id, ean) VALUES (%s, %s)",
-                (current_user["id"], ean_encontrado),
-            )
-            c.commit()
-            c.close()
-        except Exception as ex:
-            print(f"\n❌ Error guardando historial: {ex}")
-
     # 1. BD local
     conn = get_db_connection()
     if conn:
@@ -259,29 +282,29 @@ def buscar_producto_inteligente(
             cur = conn.cursor(cursor_factory=RealDictCursor)
             cur.execute("SELECT * FROM productos WHERE ean = %s", (ean,))
             producto_db = cur.fetchone()
-            cur.close()
-            conn.close()
-            if producto_db:
-                print(f"\n✅ [CACHE HIT] Producto {ean} encontrado en DB Local.")
-                guardar_en_historial(ean)
-                return {
-                    "fuente": "BASE_DE_DATOS_PROPIA",
-                    "producto": {
-                        "nombre": producto_db["nombre"],
-                        "marca": producto_db["marca"],
-                        "ingredientes": producto_db["ingredientes"],
-                        "imagen_url": producto_db["imagen_url"],
-                    },
-                    "analisis": {
-                        "es_apto": producto_db["estado_gluten"] == "APTO",
-                        "necesita_ia": producto_db["estado_gluten"] == "DUDOSO",
-                        "motivo": producto_db["justificacion"],
-                        "estado": producto_db["estado_gluten"],
-                        "confianza": "alta",
-                    },
-                }
-        except Exception as e:
-            print(f"\n❌ Error leyendo DB Local: {e}")
+        finally:
+            release_connection(conn)
+
+        if producto_db:
+            print(f"\n✅ [CACHE HIT] Producto {ean} encontrado en DB Local.")
+            if current_user:
+                guardar_en_historial(current_user["id"], ean)
+            return {
+                "fuente": "BASE_DE_DATOS_PROPIA",
+                "producto": {
+                    "nombre": producto_db["nombre"],
+                    "marca": producto_db["marca"],
+                    "ingredientes": producto_db["ingredientes"],
+                    "imagen_url": producto_db["imagen_url"],
+                },
+                "analisis": {
+                    "es_apto": producto_db["estado_gluten"] == "APTO",
+                    "necesita_ia": producto_db["estado_gluten"] == "DUDOSO",
+                    "motivo": producto_db["justificacion"],
+                    "estado": producto_db["estado_gluten"],
+                    "confianza": "alta",
+                },
+            }
 
     # 2. OpenFoodFacts
     print(f"\n🔍 [CACHE MISS] Buscando {ean} en OpenFoodFacts...")
@@ -315,7 +338,8 @@ def buscar_producto_inteligente(
             analisis_result=analisis_final,
             fuente_datos=fuente_final,
         )
-        guardar_en_historial(ean)
+        if current_user:
+            guardar_en_historial(current_user["id"], ean)
         return {
             "fuente": "OPEN_FOOD_FACTS",
             "producto": resultado_off,
@@ -341,7 +365,8 @@ def buscar_producto_inteligente(
             analisis_result=analisis_ia,
             fuente_datos="IA_GENERADA",
         )
-        guardar_en_historial(ean)
+        if current_user:
+            guardar_en_historial(current_user["id"], ean)
         return {
             "fuente": "IA_PERPLEXITY",
             "producto": datos_ia,
@@ -365,8 +390,6 @@ def buscar_producto_inteligente(
     }
 
 
-# Endpoint: análisis por imagen
-
 @app.post("/analizar-imagen", response_model=ImagenAnalisisResponse)
 @limiter.limit("5/minute")
 def analizar_producto_por_imagen(
@@ -374,12 +397,6 @@ def analizar_producto_por_imagen(
     body: ImagenAnalisisRequest,
     current_user=Depends(get_optional_user),
 ):
-    """
-    Recibe una foto del producto en base64 y el EAN de referencia.
-    Usa sonar-pro de Perplexity que soporta imágenes de forma nativa.
-    Rate limit: 5/minuto (sonar-pro es más caro que sonar).
-    """
-
     MAX_BASE64_LEN = 6_500_000
     if len(body.imagen_base64) > MAX_BASE64_LEN:
         raise HTTPException(
@@ -403,7 +420,6 @@ def analizar_producto_por_imagen(
     ean_ref = body.ean.strip() if body.ean else ""
     print(f"\n📷 POST /analizar-imagen | EAN ref: '{ean_ref}' | Tamaño: {len(body.imagen_base64)} chars")
 
-    # Llamar a sonar-pro con la imagen
     datos_vision = consultar_ia_vision_imagen(body.imagen_base64, ean_ref)
 
     nombre       = datos_vision.get("nombre") or "Producto analizado por imagen"
@@ -417,8 +433,6 @@ def analizar_producto_por_imagen(
     encontrado   = datos_vision.get("encontrado", False)
     analizado_por = datos_vision.get("analizado_por", "vision")
 
-    # Si sonar-pro leyó ingredientes, pasar también por el analizador rápido
-    # para mantener consistencia con el flujo de OpenFoodFacts
     if ingredientes and len(ingredientes.strip()) > 5:
         diagnostico_rapido = analisis_rapido(ingredientes)
         if diagnostico_rapido.get("estado") == "NO_APTO":
@@ -435,7 +449,6 @@ def analizar_producto_por_imagen(
         "analizado_por": analizado_por,
     }
 
-    # Guardar en BD si hay datos suficientes
     if encontrado and ean_ref:
         try:
             guardar_producto(
@@ -460,19 +473,8 @@ def analizar_producto_por_imagen(
         except Exception as e:
             print(f"\n⚠️  No se pudo guardar en BD: {e}")
 
-    # Guardar historial
     if current_user and ean_ref:
-        try:
-            c = get_db_connection()
-            cur = c.cursor()
-            cur.execute(
-                "INSERT INTO historial_busquedas (user_id, ean) VALUES (%s, %s)",
-                (current_user["id"], ean_ref),
-            )
-            c.commit()
-            c.close()
-        except Exception as ex:
-            print(f"\n⚠️  Error guardando historial visión: {ex}")
+        guardar_en_historial(current_user["id"], ean_ref)
 
     return {
         "fuente": "IA_VISION",

@@ -1,29 +1,49 @@
 import os
 import psycopg2
+from psycopg2 import pool
 from dotenv import load_dotenv
 
 load_dotenv()
 
+# ── Connection Pool ────────────────────────────────────────────────────────────
+# Se crea una sola vez al arrancar la app. Min 2 conexiones, max 10.
+_pool: pool.SimpleConnectionPool | None = None
 
-def get_db_connection():
-    try:
-        # Railway inyecta DATABASE_URL automáticamente
+
+def _get_pool() -> pool.SimpleConnectionPool:
+    global _pool
+    if _pool is None:
         database_url = os.getenv("DATABASE_URL")
         if database_url:
-            conn = psycopg2.connect(database_url)
+            _pool = pool.SimpleConnectionPool(2, 10, dsn=database_url)
         else:
-            # Fallback para desarrollo local
-            conn = psycopg2.connect(
+            _pool = pool.SimpleConnectionPool(
+                2, 10,
                 host=os.getenv("DB_HOST", "localhost"),
                 database=os.getenv("DB_NAME", "celiapp"),
                 user=os.getenv("DB_USER", "postgres"),
-                password=os.getenv("DB_PASS", "xenia"),
+                password=os.getenv("DB_PASS", ""),
                 port=os.getenv("DB_PORT", "5432"),
             )
-        return conn
+    return _pool
+
+
+def get_db_connection():
+    """Obtiene una conexión del pool. Devuelve None si falla."""
+    try:
+        return _get_pool().getconn()
     except Exception as e:
-        print(f"🔥 Error fatal conectando a DB: {e}")
+        print(f"🔥 Error obteniendo conexión del pool: {e}")
         return None
+
+
+def release_connection(conn) -> None:
+    """Devuelve la conexión al pool. Llamar siempre en el bloque finally."""
+    try:
+        if conn:
+            _get_pool().putconn(conn)
+    except Exception as e:
+        print(f"⚠️  Error devolviendo conexión al pool: {e}")
 
 
 def guardar_producto(ean, datos_producto, analisis_result, fuente_datos):
@@ -95,10 +115,10 @@ def guardar_producto(ean, datos_producto, analisis_result, fuente_datos):
 
         conn.commit()
         cur.close()
-        conn.close()
         print(f"💾 [DB] Producto {ean} guardado correctamente (Estado: {estado_final}).")
 
     except Exception as e:
         print(f"❌ Error CRÍTICO guardando en DB: {e}")
-        if conn:
-            conn.rollback()
+        conn.rollback()
+    finally:
+        release_connection(conn)
