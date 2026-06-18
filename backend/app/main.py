@@ -17,13 +17,26 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # ── CORS ──────────────────────────────────────────────────────────────────────
+# Dominios de producción siempre permitidos
+PRODUCTION_ORIGINS = [
+    "https://celi-app-lemon.vercel.app",
+]
+
 ALLOWED_ORIGINS_RAW = os.getenv("ALLOWED_ORIGINS", "")
-if ALLOWED_ORIGINS_RAW:
-    ALLOWED_ORIGINS = ALLOWED_ORIGINS_RAW.split(",")
-else:
-    if "pytest" not in sys.modules:
-        print("⚠️  ALLOWED_ORIGINS no configurado. Usando localhost solo para desarrollo.")
-    ALLOWED_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173"]
+# strip() elimina espacios y saltos de línea invisibles en cada origen
+extra_origins = [
+    o.strip().rstrip("/")
+    for o in ALLOWED_ORIGINS_RAW.split(",")
+    if o.strip()
+]
+
+ALLOWED_ORIGINS = list(set(PRODUCTION_ORIGINS + extra_origins + [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]))
+
+if "pytest" not in sys.modules:
+    print(f"✅ CORS allow_origins: {ALLOWED_ORIGINS}")
 
 app.add_middleware(
     CORSMiddleware,
