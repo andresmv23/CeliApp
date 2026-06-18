@@ -10,10 +10,10 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Redirige al sitio de origen si vine de una ruta protegida
+  // Si vine redirigido desde una ruta protegida, vuelvo ahí tras login
   const from = location.state?.from?.pathname || '/perfil';
 
-  const [modo, setModo]         = useState('login'); // 'login' | 'registro'
+  const [modo, setModo]         = useState('login');
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
   const [nombre, setNombre]     = useState('');
@@ -58,7 +58,7 @@ export default function Login() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center px-4"
+      className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12"
       style={{ background: 'linear-gradient(135deg, #070d0a 0%, #0b1812 50%, #0e1e15 100%)' }}
     >
       <div
@@ -147,12 +147,14 @@ export default function Login() {
           </div>
 
           {error && (
-            <p className="text-sm rounded-xl px-4 py-3" style={{ background: 'rgba(239,68,68,0.08)', color: '#fca5a5', border: '1px solid rgba(239,68,68,0.15)' }}>
+            <p className="text-sm rounded-xl px-4 py-3"
+              style={{ background: 'rgba(239,68,68,0.08)', color: '#fca5a5', border: '1px solid rgba(239,68,68,0.15)' }}>
               {error}
             </p>
           )}
           {success && (
-            <p className="text-sm rounded-xl px-4 py-3" style={{ background: 'rgba(16,185,129,0.08)', color: '#6ee7b7', border: '1px solid rgba(16,185,129,0.15)' }}>
+            <p className="text-sm rounded-xl px-4 py-3"
+              style={{ background: 'rgba(16,185,129,0.08)', color: '#6ee7b7', border: '1px solid rgba(16,185,129,0.15)' }}>
               {success}
             </p>
           )}
@@ -165,16 +167,6 @@ export default function Login() {
             {loading ? 'Cargando...' : modo === 'login' ? 'Entrar' : 'Crear cuenta'}
           </button>
         </form>
-
-        <button
-          onClick={() => navigate('/')}
-          className="w-full mt-4 text-xs text-center transition-colors"
-          style={{ color: 'rgba(240,253,244,0.25)' }}
-          onMouseEnter={e => (e.currentTarget.style.color = 'rgba(240,253,244,0.5)')}
-          onMouseLeave={e => (e.currentTarget.style.color = 'rgba(240,253,244,0.25)')}
-        >
-          Volver al buscador
-        </button>
       </div>
     </div>
   );

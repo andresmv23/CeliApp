@@ -1,12 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, NavLink, useNavigate, Navigate } from 'react-router-dom';
-import { useState } from 'react';
 import Buscador from './components/Buscador';
 import Login from './components/Login';
 import Perfil from './components/Perfil';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
-/* ─── Navbar ──────────────────────────────────────────────────────────── */
+/* ─── Navbar ──────────────────────────────────────────── */
 function Navbar() {
   const { logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -85,7 +84,6 @@ function Navbar() {
                     ? { background: 'rgba(255,255,255,0.12)', color: '#f0fdf4' }
                     : { color: 'rgba(240,253,244,0.45)' }
                 }
-                aria-current={({ isActive }) => (isActive ? 'page' : undefined)}
               >
                 {icon}
                 <span className="hidden sm:block">{label}</span>
@@ -130,13 +128,15 @@ function Navbar() {
   );
 }
 
-/* ─── Ruta protegida ────────────────────────────────────────────────── */
+/* ─── Ruta protegida ──────────────────────────────────── */
 function ProtectedRoute({ children }) {
   const { isAuthenticated } = useAuth();
-  return isAuthenticated ? children : <Navigate to="/login" replace />;
+  // Sin replace: true para que el historial permita volver atrás
+  return isAuthenticated ? children : <Navigate to="/login" />;
 }
 
-/* ─── Layout principal ────────────────────────────────────────────── */
+/* ─── Layout principal ────────────────────────────────── */
+// Login ahora está DENTRO del layout — tiene Navbar y el botón atrás funciona
 function MainLayout() {
   return (
     <div className="min-h-screen w-full relative overflow-x-hidden font-sans" style={{ background: '#070d0a' }}>
@@ -145,6 +145,7 @@ function MainLayout() {
         <main className="flex-1 w-full p-0 m-0">
           <Routes>
             <Route path="/" element={<Buscador />} />
+            <Route path="/login" element={<Login />} />
             <Route
               path="/perfil"
               element={
@@ -153,8 +154,7 @@ function MainLayout() {
                 </ProtectedRoute>
               }
             />
-            <Route path="/login" element={<Login />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </main>
       </div>
@@ -162,7 +162,7 @@ function MainLayout() {
   );
 }
 
-/* ─── App root ─────────────────────────────────────────────────────────── */
+/* ─── App root ────────────────────────────────────────── */
 export default function App() {
   return (
     <BrowserRouter>
