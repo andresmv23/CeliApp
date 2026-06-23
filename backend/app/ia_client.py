@@ -10,28 +10,35 @@ PERPLEXITY_URL = "https://api.perplexity.ai/chat/completions"
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Función original — búsqueda por EAN con sonar
+# Búsqueda por EAN con sonar
 # ─────────────────────────────────────────────────────────────────────────────
-def consultar_ia_experto_total(ean: str, nombre_producto: str = ""):
+def consultar_ia_experto_total(ean: str, nombre_producto: str = "", marca: str = ""):
     print(f"\n🤖 IA Deep Search investigando EAN: {ean}...")
 
-    prompt = f"""Investiga en internet el siguiente producto alimenticio y determina si es apto para celíacos (libre de gluten).
+    contexto = ""
+    if nombre_producto:
+        contexto += f"Nombre del producto: \"{nombre_producto}\".\n"
+    if marca:
+        contexto += f"Marca: \"{marca}\".\n"
+
+    prompt = f"""Investiga si el siguiente producto alimenticio es apto para celíacos (libre de gluten).
 EAN: {ean}
-Nombre aproximado: "{nombre_producto}"
-PASOS:
-1. Busca el EAN {ean} para identificar el producto exacto.
-2. Verifica ingredientes, alérgenos y sellos sin gluten desde la web del fabricante o tiendas oficiales.
-3. Si el fabricante declara explícitamente "sin gluten" o "gluten free" en el envase o en su web, marca APTO con confianza alta.
-4. Si hay duda razonable sobre contaminación cruzada o ingredientes ambiguos, marca DUDOSO.
-5. Si contiene gluten confirmado, marca NO_APTO.
-6. Busca también la imagen oficial del producto en la web del fabricante o tienda.
+{contexto}
+INSTRUCCIONES ESTRICTAS:
+- Busca información EXCLUSIVAMENTE sobre este producto con este EAN exacto.
+- Si encuentras la página del fabricante, tienda oficial o base de datos con este EAN, extrae si declara "sin gluten", "gluten free", o si lista gluten/trigo/cebada/centeno entre sus ingredientes o alérgenos.
+- Si el fabricante declara explícitamente "sin gluten" o "gluten free" en el envase o en su web, marca APTO con confianza alta.
+- Si los ingredientes contienen trigo, cebada, centeno, espelta, malta, o derivados, marca NO_APTO.
+- Si hay trazas declaradas de gluten/trigo, marca NO_APTO.
+- Si no encuentras información específica y verificada sobre ESTE producto exacto, devuelve encontrado: false.
+- NUNCA uses productos de nombre similar o de otras marcas como referencia. Solo este EAN.
 Responde ÚNICAMENTE con este JSON válido, sin texto adicional:
 {{
     "encontrado": true,
     "nombre": "Nombre real del producto",
     "marca": "Marca del fabricante",
-    "imagen_url": "URL directa a imagen del producto o null si no encuentras",
-    "ingredientes": "Lista completa de ingredientes tal como aparece en el envase o la web, o null si no la encuentras",
+    "imagen_url": "URL directa a imagen del producto o null",
+    "ingredientes": "Lista completa de ingredientes tal como aparece en el envase o la web, o null",
     "es_apto": true,
     "estado": "APTO",
     "justificacion": "Razón breve basada en ingredientes y declaraciones del fabricante (sin incluir URLs aquí)",
@@ -39,7 +46,7 @@ Responde ÚNICAMENTE con este JSON válido, sin texto adicional:
     "confianza": "alta"
 }}
 Los valores posibles de estado son: APTO, NO_APTO, DUDOSO.
-Si no encuentras el producto, devuelve encontrado: false y estado: DUDOSO."""
+Si no encuentras información verificada sobre este producto exacto, devuelve encontrado: false y estado: DUDOSO."""
 
     payload = {
         "model": "sonar",
@@ -77,13 +84,11 @@ Si no encuentras el producto, devuelve encontrado: false y estado: DUDOSO."""
             "confianza": "baja",
         }
 
-# Análisis por imagen usando sonar-pro
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Análisis por imagen usando sonar-pro
+# ─────────────────────────────────────────────────────────────────────────────
 def consultar_ia_vision_imagen(imagen_base64: str, ean: str = "") -> dict:
-    """
-    Manda la imagen directamente a sonar-pro que la procesa de forma nativa.
-    No requiere ninguna dependencia extra.
-    """
     print(f"\n📷 Analizando imagen con sonar-pro (EAN ref: '{ean}')...")
 
     referencia_ean = f"EAN de referencia: {ean}." if ean else ""
@@ -130,14 +135,9 @@ Si no puedes identificar el producto con claridad, devuelve encontrado: false y 
                 "content": [
                     {
                         "type": "image_url",
-                        "image_url": {
-                            "url": f"data:image/jpeg;base64,{imagen_base64}"
-                        },
+                        "image_url": {"url": f"data:image/jpeg;base64,{imagen_base64}"},
                     },
-                    {
-                        "type": "text",
-                        "text": prompt,
-                    },
+                    {"type": "text", "text": prompt},
                 ],
             }
         ],
@@ -171,9 +171,7 @@ Si no puedes identificar el producto con claridad, devuelve encontrado: false y 
         status_code = e.response.status_code if e.response else 0
         print(f"\n❌ HTTP Error sonar-pro: {status_code} — {e.response.text if e.response else ''}")
         if status_code == 400:
-            return _error_vision(
-                "La imagen no pudo procesarse. Asegúrate de enfocar bien la etiqueta."
-            )
+            return _error_vision("La imagen no pudo procesarse. Asegúrate de enfocar bien la etiqueta.")
         return _error_vision(f"Error del servidor de IA ({status_code}).")
 
     except Exception as e:
