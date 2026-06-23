@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CeliApp · Admin</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f3ef;
+    --surface: #ffffff;
+    --border: #e2ddd8;
+    --text: #1a1a1a;
+    --text-muted: #6b6762;
+    --apto: #1e7e44;
+    --apto-bg: #e8f5ed;
+    --no-apto: #c0392b;
+    --no-apto-bg: #fdecea;
+    --dudoso: #b45309;
+    --dudoso-bg: #fef3e2;
+    --trazas: #7c3aed;
+    --trazas-bg: #f3effe;
+    --accent: #1e7e44;
+    --radius: 8px;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    min-height: 100vh;
+  }
+
+  /* ── Login ── */
+  #login-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
+
+  .login-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 40px;
+    width: 340px;
+  }
+
+  .login-card h1 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .login-card p {
+    color: var(--text-muted);
+    margin-bottom: 28px;
+    font-size: 13px;
+  }
+
+  .login-card input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 14px;
+    margin-bottom: 12px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .login-card input:focus { border-color: var(--accent); }
+
+  .btn-primary {
+    width: 100%;
+    padding: 10px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+
+  .btn-primary:hover { opacity: 0.88; }
+
+  #login-error {
+    color: var(--no-apto);
+    font-size: 13px;
+    margin-top: 10px;
+    display: none;
+  }
+
+  /* ── App ── */
+  #app { display: none; }
+
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  header span { font-weight: 600; font-size: 15px; }
+
+  .btn-logout {
+    font-size: 13px;
+    color: var(--text-muted);
+    cursor: pointer;
+    border: none;
+    background: none;
+    padding: 6px 10px;
+    border-radius: var(--radius);
+    transition: background 0.15s;
+  }
+
+  .btn-logout:hover { background: var(--bg); }
+
+  main { max-width: 1100px; margin: 0 auto; padding: 28px 24px; }
+
+  /* ── Stats ── */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+  }
+
+  .stat-card .label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+  .stat-card .value { font-size: 26px; font-weight: 700; }
+  .stat-card.apto .value   { color: var(--apto); }
+  .stat-card.noapto .value { color: var(--no-apto); }
+  .stat-card.dudoso .value { color: var(--dudoso); }
+
+  /* ── Filtros ── */
+  .filtros {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+
+  .filtros input {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 13px;
+    outline: none;
+    flex: 1;
+    min-width: 180px;
+    transition: border-color 0.15s;
+  }
+
+  .filtros input:focus { border-color: var(--accent); }
+
+  .filtros select {
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 13px;
+    outline: none;
+    background: var(--surface);
+    cursor: pointer;
+  }
+
+  /* ── Tabla ── */
+  .tabla-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  thead th {
+    padding: 11px 14px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+  }
+
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #faf9f7; }
+
+  td {
+    padding: 12px 14px;
+    vertical-align: top;
+    font-size: 13px;
+  }
+
+  td.nombre { font-weight: 500; max-width: 200px; }
+  td.ean    { color: var(--text-muted); font-family: monospace; font-size: 12px; }
+  td.motivo { max-width: 260px; color: var(--text-muted); font-size: 12px; line-height: 1.4; }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .badge-APTO    { background: var(--apto-bg);   color: var(--apto); }
+  .badge-NO_APTO { background: var(--no-apto-bg); color: var(--no-apto); }
+  .badge-DUDOSO  { background: var(--dudoso-bg);  color: var(--dudoso); }
+  .badge-TRAZAS  { background: var(--trazas-bg);  color: var(--trazas); }
+
+  .acciones { display: flex; gap: 6px; }
+
+  .btn-edit {
+    padding: 5px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    background: var(--surface);
+    transition: background 0.1s;
+  }
+
+  .btn-edit:hover { background: var(--bg); }
+
+  .btn-del {
+    padding: 5px 10px;
+    border: 1px solid #fbd5d2;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    background: #fff5f5;
+    color: var(--no-apto);
+    transition: background 0.1s;
+  }
+
+  .btn-del:hover { background: #fdecea; }
+
+  /* ── Paginación ── */
+  .paginacion {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 16px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .paginacion button {
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    cursor: pointer;
+    font-size: 13px;
+    transition: background 0.1s;
+  }
+
+  .paginacion button:disabled { opacity: 0.4; cursor: default; }
+  .paginacion button:not(:disabled):hover { background: var(--bg); }
+
+  /* ── Modal ── */
+  .modal-bg {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-bg.visible { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 28px;
+    width: 480px;
+    max-width: 94vw;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .modal h2 { font-size: 16px; font-weight: 600; margin-bottom: 20px; }
+
+  .campo {
+    margin-bottom: 14px;
+  }
+
+  .campo label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .campo input,
+  .campo select,
+  .campo textarea {
+    width: 100%;
+    padding: 9px 11px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+    resize: vertical;
+    transition: border-color 0.15s;
+  }
+
+  .campo input:focus,
+  .campo select:focus,
+  .campo textarea:focus { border-color: var(--accent); }
+
+  .modal-btns {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 20px;
+  }
+
+  .btn-cancel {
+    padding: 8px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+
+  .btn-cancel:hover { background: var(--bg); }
+
+  .btn-save {
+    padding: 8px 16px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+
+  .btn-save:hover { opacity: 0.88; }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    padding: 12px 18px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 500;
+    color: #fff;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    z-index: 200;
+  }
+
+  .toast.ok  { background: var(--apto); }
+  .toast.err { background: var(--no-apto); }
+  .toast.show { opacity: 1; }
+
+  #empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--text-muted);
+  }
+
+  @media (max-width: 700px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    td.motivo { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Login -->
+<div id="login-screen">
+  <div class="login-card">
+    <h1>CeliApp Admin</h1>
+    <p>Introduce la clave de administrador para continuar.</p>
+    <input type="password" id="input-secret" placeholder="Clave secreta" />
+    <button class="btn-primary" onclick="login()">Entrar</button>
+    <div id="login-error">Clave incorrecta o error de conexión.</div>
+  </div>
+</div>
+
+<!-- App -->
+<div id="app">
+  <header>
+    <span>CeliApp · Admin</span>
+    <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
+  </header>
+
+  <main>
+    <div class="stats">
+      <div class="stat-card">
+        <div class="label">Total productos</div>
+        <div class="value" id="stat-total">—</div>
+      </div>
+      <div class="stat-card apto">
+        <div class="label">Aptos</div>
+        <div class="value" id="stat-apto">—</div>
+      </div>
+      <div class="stat-card noapto">
+        <div class="label">No aptos</div>
+        <div class="value" id="stat-noapto">—</div>
+      </div>
+      <div class="stat-card dudoso">
+        <div class="label">Dudosos</div>
+        <div class="value" id="stat-dudoso">—</div>
+      </div>
+    </div>
+
+    <div class="filtros">
+      <input type="text" id="busqueda" placeholder="Buscar por nombre, marca o EAN..." oninput="debounceBuscar()" />
+      <select id="filtro-estado" onchange="cargarProductos(1)">
+        <option value="">Todos los estados</option>
+        <option value="APTO">Apto</option>
+        <option value="NO_APTO">No apto</option>
+        <option value="DUDOSO">Dudoso</option>
+        <option value="TRAZAS">Trazas</option>
+      </select>
+    </div>
+
+    <div class="tabla-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>EAN</th>
+            <th>Marca</th>
+            <th>Estado</th>
+            <th>Fuente</th>
+            <th>Motivo</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+      <div id="empty-state" style="display:none">No hay productos con este filtro.</div>
+    </div>
+
+    <div class="paginacion">
+      <span id="pag-info"></span>
+      <div style="display:flex;gap:8px">
+        <button id="btn-prev" onclick="irPagina(-1)">← Anterior</button>
+        <button id="btn-next" onclick="irPagina(1)">Siguiente →</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Modal edición -->
+<div class="modal-bg" id="modal-bg">
+  <div class="modal">
+    <h2>Editar producto</h2>
+    <div class="campo">
+      <label>Nombre</label>
+      <input type="text" id="edit-nombre" />
+    </div>
+    <div class="campo">
+      <label>Marca</label>
+      <input type="text" id="edit-marca" />
+    </div>
+    <div class="campo">
+      <label>Estado gluten</label>
+      <select id="edit-estado">
+        <option value="APTO">Apto</option>
+        <option value="NO_APTO">No apto</option>
+        <option value="DUDOSO">Dudoso</option>
+        <option value="TRAZAS">Trazas</option>
+      </select>
+    </div>
+    <div class="campo">
+      <label>Ingredientes</label>
+      <textarea id="edit-ingredientes" rows="4"></textarea>
+    </div>
+    <div class="campo">
+      <label>Justificación</label>
+      <textarea id="edit-justificacion" rows="3"></textarea>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn-save" onclick="guardarEdicion()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const API = window.location.origin;
+  let secret = "";
+  let paginaActual = 1;
+  let eanEditando = null;
+  let debounceTimer = null;
+
+  document.getElementById("input-secret").addEventListener("keydown", e => {
+    if (e.key === "Enter") login();
+  });
+
+  async function login() {
+    const val = document.getElementById("input-secret").value.trim();
+    if (!val) return;
+    const res = await fetch(`${API}/admin/productos?limite=1`, {
+      headers: { "x-admin-secret": val },
+    });
+    if (res.ok) {
+      secret = val;
+      document.getElementById("login-screen").style.display = "none";
+      document.getElementById("app").style.display = "block";
+      cargarStats();
+      cargarProductos(1);
+    } else {
+      document.getElementById("login-error").style.display = "block";
+    }
+  }
+
+  function logout() {
+    secret = "";
+    document.getElementById("login-screen").style.display = "flex";
+    document.getElementById("app").style.display = "none";
+    document.getElementById("input-secret").value = "";
+  }
+
+  async function cargarStats() {
+    const estados = ["APTO", "NO_APTO", "DUDOSO"];
+    let total = 0;
+    const counts = {};
+    for (const e of estados) {
+      const r = await fetch(`${API}/admin/productos?estado=${e}&limite=1`, {
+        headers: { "x-admin-secret": secret },
+      });
+      const d = await r.json();
+      counts[e] = d.total;
+      total += d.total;
+    }
+    const rAll = await fetch(`${API}/admin/productos?limite=1`, {
+      headers: { "x-admin-secret": secret },
+    });
+    const dAll = await rAll.json();
+    document.getElementById("stat-total").textContent  = dAll.total;
+    document.getElementById("stat-apto").textContent   = counts["APTO"];
+    document.getElementById("stat-noapto").textContent  = counts["NO_APTO"];
+    document.getElementById("stat-dudoso").textContent = counts["DUDOSO"];
+  }
+
+  async function cargarProductos(pagina) {
+    paginaActual = pagina;
+    const busqueda = document.getElementById("busqueda").value.trim();
+    const estado   = document.getElementById("filtro-estado").value;
+    let url = `${API}/admin/productos?pagina=${pagina}&limite=20`;
+    if (estado)   url += `&estado=${estado}`;
+    if (busqueda) url += `&busqueda=${encodeURIComponent(busqueda)}`;
+
+    const res = await fetch(url, { headers: { "x-admin-secret": secret } });
+    const data = await res.json();
+
+    const tbody = document.getElementById("tbody");
+    const empty = document.getElementById("empty-state");
+
+    if (!data.productos.length) {
+      tbody.innerHTML = "";
+      empty.style.display = "block";
+    } else {
+      empty.style.display = "none";
+      tbody.innerHTML = data.productos.map(p => `
+        <tr>
+          <td class="nombre">${esc(p.nombre || "—")}</td>
+          <td class="ean">${esc(p.ean)}</td>
+          <td>${esc(p.marca || "—")}</td>
+          <td><span class="badge badge-${p.estado_gluten}">${p.estado_gluten}</span></td>
+          <td style="font-size:11px;color:var(--text-muted)">${esc(p.tipo_fuente || "—")}</td>
+          <td class="motivo">${esc((p.justificacion || "").slice(0, 80))}${p.justificacion && p.justificacion.length > 80 ? "..." : ""}</td>
+          <td>
+            <div class="acciones">
+              <button class="btn-edit" onclick="abrirModal('${esc(p.ean)}', '${esc(p.nombre||"")}', '${esc(p.marca||"")}', '${p.estado_gluten}', ${JSON.stringify(p.ingredientes||'')}, ${JSON.stringify(p.justificacion||'')})">Editar</button>
+              <button class="btn-del" onclick="borrar('${esc(p.ean)}')">Borrar</button>
+            </div>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    const totalPags = Math.ceil(data.total / 20);
+    document.getElementById("pag-info").textContent = `Página ${pagina} de ${totalPags} · ${data.total} productos`;
+    document.getElementById("btn-prev").disabled = pagina <= 1;
+    document.getElementById("btn-next").disabled = pagina >= totalPags;
+  }
+
+  function irPagina(delta) {
+    cargarProductos(paginaActual + delta);
+  }
+
+  function debounceBuscar() {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => cargarProductos(1), 350);
+  }
+
+  function abrirModal(ean, nombre, marca, estado, ingredientes, justificacion) {
+    eanEditando = ean;
+    document.getElementById("edit-nombre").value         = nombre;
+    document.getElementById("edit-marca").value          = marca;
+    document.getElementById("edit-estado").value         = estado;
+    document.getElementById("edit-ingredientes").value   = ingredientes || "";
+    document.getElementById("edit-justificacion").value  = justificacion || "";
+    document.getElementById("modal-bg").classList.add("visible");
+  }
+
+  function cerrarModal() {
+    document.getElementById("modal-bg").classList.remove("visible");
+    eanEditando = null;
+  }
+
+  async function guardarEdicion() {
+    const body = {
+      nombre:       document.getElementById("edit-nombre").value,
+      marca:        document.getElementById("edit-marca").value,
+      estado_gluten: document.getElementById("edit-estado").value,
+      ingredientes: document.getElementById("edit-ingredientes").value,
+      justificacion: document.getElementById("edit-justificacion").value,
+    };
+    const res = await fetch(`${API}/admin/producto/${encodeURIComponent(eanEditando)}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", "x-admin-secret": secret },
+      body: JSON.stringify(body),
+    });
+    if (res.ok) {
+      cerrarModal();
+      toast("Producto actualizado", "ok");
+      cargarProductos(paginaActual);
+      cargarStats();
+    } else {
+      toast("Error guardando cambios", "err");
+    }
+  }
+
+  async function borrar(ean) {
+    if (!confirm(`¿Borrar el producto con EAN ${ean} de la base de datos?`)) return;
+    const res = await fetch(`${API}/admin/producto/${encodeURIComponent(ean)}`, {
+      method: "DELETE",
+      headers: { "x-admin-secret": secret },
+    });
+    if (res.ok) {
+      toast("Producto eliminado", "ok");
+      cargarProductos(paginaActual);
+      cargarStats();
+    } else {
+      toast("Error al borrar", "err");
+    }
+  }
+
+  function toast(msg, tipo) {
+    const el = document.getElementById("toast");
+    el.textContent = msg;
+    el.className = `toast ${tipo} show`;
+    setTimeout(() => el.classList.remove("show"), 2800);
+  }
+
+  function esc(str) {
+    return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+  }
+
+  document.getElementById("modal-bg").addEventListener("click", e => {
+    if (e.target === document.getElementById("modal-bg")) cerrarModal();
+  });
+</script>
+</body>
+</html>
