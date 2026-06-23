@@ -10,7 +10,7 @@ PERPLEXITY_URL = "https://api.perplexity.ai/chat/completions"
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Función original — búsqueda por EAN con sonar (sin cambios)
+# Función original — búsqueda por EAN con sonar
 # ─────────────────────────────────────────────────────────────────────────────
 def consultar_ia_experto_total(ean: str, nombre_producto: str = ""):
     print(f"\n🤖 IA Deep Search investigando EAN: {ean}...")
@@ -21,7 +21,7 @@ Nombre aproximado: "{nombre_producto}"
 PASOS:
 1. Busca el EAN {ean} para identificar el producto exacto.
 2. Verifica ingredientes, alérgenos y sellos sin gluten desde la web del fabricante o tiendas oficiales.
-3. Si el fabricante declara explícitamente "sin gluten" o "gluten free", marca APTO con confianza alta.
+3. Si el fabricante declara explícitamente "sin gluten" o "gluten free" en el envase o en su web, marca APTO con confianza alta.
 4. Si hay duda razonable sobre contaminación cruzada o ingredientes ambiguos, marca DUDOSO.
 5. Si contiene gluten confirmado, marca NO_APTO.
 6. Busca también la imagen oficial del producto en la web del fabricante o tienda.
@@ -31,9 +31,11 @@ Responde ÚNICAMENTE con este JSON válido, sin texto adicional:
     "nombre": "Nombre real del producto",
     "marca": "Marca del fabricante",
     "imagen_url": "URL directa a imagen del producto o null si no encuentras",
+    "ingredientes": "Lista completa de ingredientes tal como aparece en el envase o la web, o null si no la encuentras",
     "es_apto": true,
     "estado": "APTO",
-    "justificacion": "URL fuente + razón breve basada en ingredientes reales encontrados",
+    "justificacion": "Razón breve basada en ingredientes y declaraciones del fabricante (sin incluir URLs aquí)",
+    "url_fuente": "URL de la página web donde encontraste la información",
     "confianza": "alta"
 }}
 Los valores posibles de estado son: APTO, NO_APTO, DUDOSO.
@@ -69,7 +71,9 @@ Si no encuentras el producto, devuelve encontrado: false y estado: DUDOSO."""
             "estado": "DUDOSO",
             "es_apto": False,
             "imagen_url": None,
+            "ingredientes": None,
             "justificacion": "Error técnico IA",
+            "url_fuente": None,
             "confianza": "baja",
         }
 
@@ -94,9 +98,10 @@ TAREA:
 3. Busca en internet información adicional sobre este producto si lo identificas.
 4. Determina si contiene gluten: trigo, cebada, centeno, espelta, kamut, triticale, malta, bulgur, seitán o derivados.
 5. También detecta trazas declaradas: "puede contener trazas de gluten/trigo".
+6. Si el envase indica explícitamente "sin gluten" o "gluten free", tenlo muy en cuenta para marcar APTO.
 
 CRITERIOS:
-- APTO: No hay gluten visible ni trazas declaradas
+- APTO: No hay gluten visible ni trazas declaradas, o el fabricante declara explícitamente "sin gluten"
 - NO_APTO: Contiene ingrediente con gluten confirmado
 - DUDOSO: No puedes leer los ingredientes con claridad, o hay ambigüedad
 
@@ -109,7 +114,8 @@ Responde ÚNICAMENTE con este JSON válido, sin texto adicional:
     "ingredientes": "Lista de ingredientes leída de la imagen, o null si no son visibles",
     "es_apto": true,
     "estado": "APTO",
-    "justificacion": "Razón basada en los ingredientes leídos de la imagen",
+    "justificacion": "Razón basada en los ingredientes leídos de la imagen y declaraciones del fabricante (sin incluir URLs aquí)",
+    "url_fuente": "URL de la página web donde encontraste información adicional, o null",
     "confianza": "alta",
     "analizado_por": "vision"
 }}
@@ -185,6 +191,7 @@ def _error_vision(motivo: str) -> dict:
         "es_apto": False,
         "estado": "DUDOSO",
         "justificacion": motivo,
+        "url_fuente": None,
         "confianza": "baja",
         "analizado_por": "vision",
     }
