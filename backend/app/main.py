@@ -8,8 +8,12 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
 from app.routers import auth, productos, favoritos
+from app.init_db import inicializar_base_datos
 
 app = FastAPI(title="CeliApp API")
+
+# ── Inicializar base de datos al arrancar ─────────────────────────────────────
+inicializar_base_datos()
 
 # ── Rate limiting ─────────────────────────────────────────────────────────────
 limiter = Limiter(key_func=get_remote_address)
