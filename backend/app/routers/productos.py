@@ -140,9 +140,17 @@ def buscar_producto_inteligente(
                 "estado": datos_ia.get("estado"),
                 "confianza": datos_ia.get("confianza", "media"),
             }
+            # Fusionar OFF + IA: OFF es la base, IA rellena lo que OFF no tiene
+            producto_fusionado = {
+                **resultado_off,
+                "ingredientes": resultado_off.get("ingredientes") or datos_ia.get("ingredientes") or "",
+                "imagen_url": resultado_off.get("imagen_url") or datos_ia.get("imagen_url") or "",
+                "nombre": resultado_off.get("nombre") or datos_ia.get("nombre") or "Desconocido",
+                "marca": resultado_off.get("marca") or datos_ia.get("marca") or "Marca desconocida",
+            }
             guardar_producto(
                 ean=ean,
-                datos_producto={**resultado_off, **{k: datos_ia.get(k) for k in ("ingredientes", "imagen_url") if datos_ia.get(k)}},
+                datos_producto=producto_fusionado,
                 analisis_result=analisis_ia,
                 fuente_datos="OFF_VALIDADO_IA",
             )
@@ -150,7 +158,7 @@ def buscar_producto_inteligente(
                 guardar_en_historial(current_user["id"], ean)
             return {
                 "fuente": "OFF_VALIDADO_IA",
-                "producto": resultado_off,
+                "producto": producto_fusionado,
                 "analisis": analisis_ia,
             }
 
