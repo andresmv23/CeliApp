@@ -63,8 +63,14 @@ def obtener_producto_por_ean(ean: str):
             )
             tags = producto.get("ingredients_tags", [])
             imagen = producto.get("image_front_url", "")
-
             gluten_segun_off = _detectar_gluten_off(producto)
+
+            # URL real del producto en OFF. Se usa el campo `url` de la API si existe,
+            # o se construye con el EAN — sabemos que el producto existe en OFF.
+            url_fuente = (
+                producto.get("url")
+                or f"https://world.openfoodfacts.org/product/{ean}"
+            )
 
             return {
                 "encontrado": True,
@@ -77,6 +83,7 @@ def obtener_producto_por_ean(ean: str):
                 "imagen_url": imagen,
                 "ingredientes_clave_off": tags,
                 "gluten_segun_off": gluten_segun_off,
+                "url_fuente": url_fuente,
             }
         else:
             return {"encontrado": False}
