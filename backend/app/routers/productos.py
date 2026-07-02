@@ -126,7 +126,27 @@ def buscar_producto_inteligente(
                 "analisis": analisis_final,
             }
 
-        # 2b. OFF encontró el producto pero no tiene datos de gluten → IA busca por EAN+nombre+marca
+        # 2b. OFF no tiene alérgenos explícitos → segunda puerta: analisis_rapido sobre ingredientes
+        ingredientes_off = resultado_off.get("ingredientes", "")
+        diagnostico_rapido = analisis_rapido(ingredientes_off)
+
+        if diagnostico_rapido["estado"] in ("NO_APTO", "TRAZAS"):
+            print(f"\n⚡ [ANALISIS_RAPIDO] Detectado {diagnostico_rapido['estado']} en ingredientes OFF para {ean}")
+            guardar_producto(
+                ean=ean,
+                datos_producto=resultado_off,
+                analisis_result=diagnostico_rapido,
+                fuente_datos="OFF_ANALISIS_RAPIDO",
+            )
+            if current_user:
+                guardar_en_historial(current_user["id"], ean)
+            return {
+                "fuente": "OPEN_FOOD_FACTS",
+                "producto": resultado_off,
+                "analisis": diagnostico_rapido,
+            }
+
+        # 2c. Ingredientes limpios según analisis_rapido → IA busca por EAN+nombre+marca
         print(f"\n🌐 [OFF SIN GLUTEN DATA] Delegando a IA para {ean}...")
         nombre_pista = resultado_off.get("nombre", "")
         marca_pista = resultado_off.get("marca", "")
