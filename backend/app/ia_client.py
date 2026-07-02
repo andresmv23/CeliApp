@@ -9,9 +9,9 @@ API_KEY = os.getenv("PERPLEXITY_API_KEY")
 PERPLEXITY_URL = "https://api.perplexity.ai/chat/completions"
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ───────────────────────────────────────────────────────────────────────────────
 # Búsqueda por EAN con sonar
-# ─────────────────────────────────────────────────────────────────────────────
+# ───────────────────────────────────────────────────────────────────────────────
 def consultar_ia_experto_total(ean: str, nombre_producto: str = "", marca: str = ""):
     print(f"\n🤖 IA Deep Search investigando EAN: {ean}...")
 
@@ -26,10 +26,10 @@ EAN: {ean}
 {contexto}
 INSTRUCCIONES ESTRICTAS:
 - Busca información EXCLUSIVAMENTE sobre este producto con este EAN exacto.
-- Si encuentras la página del fabricante, tienda oficial o base de datos con este EAN, extrae si declara "sin gluten", "gluten free", o si lista gluten/trigo/cebada/centeno entre sus ingredientes o alérgenos.
+- Si encuentras la página del fabricante, tienda oficial o base de datos con este EAN, extrae si declara "sin gluten", "gluten free", o si lista cualquier cereal con gluten o sus derivados entre sus ingredientes o alérgenos.
 - Si el fabricante declara explícitamente "sin gluten" o "gluten free" en el envase o en su web, marca APTO con confianza alta.
-- Si los ingredientes contienen trigo, cebada, centeno, espelta, malta, o derivados, marca NO_APTO.
-- Si hay trazas declaradas de gluten/trigo, marca NO_APTO.
+- Si los ingredientes o alérgenos contienen cualquier cereal con gluten o sus derivados, marca NO_APTO.
+- Si hay trazas declaradas de gluten o cereales con gluten, marca NO_APTO.
 - Si no encuentras información específica y verificada sobre ESTE producto exacto, devuelve encontrado: false.
 - NUNCA uses productos de nombre similar o de otras marcas como referencia. Solo este EAN.
 Responde ÚNICAMENTE con este JSON válido, sin texto adicional:
@@ -41,7 +41,7 @@ Responde ÚNICAMENTE con este JSON válido, sin texto adicional:
     "ingredientes": "Lista completa de ingredientes tal como aparece en el envase o la web, o null",
     "es_apto": true,
     "estado": "APTO",
-    "justificacion": "Razón breve basada en ingredientes y declaraciones del fabricante (sin incluir URLs aquí)",
+    "justificacion": "Explica de forma natural y concisa por qué el producto es o no es apto para celíacos, basandote en sus ingredientes reales y declaraciones del fabricante.",
     "url_fuente": "URL de la página web donde encontraste la información",
     "confianza": "alta"
 }}
@@ -85,9 +85,9 @@ Si no encuentras información verificada sobre este producto exacto, devuelve en
         }
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ───────────────────────────────────────────────────────────────────────────────
 # Análisis por imagen usando sonar-pro
-# ─────────────────────────────────────────────────────────────────────────────
+# ───────────────────────────────────────────────────────────────────────────────
 def consultar_ia_vision_imagen(imagen_base64: str, ean: str = "") -> dict:
     print(f"\n📷 Analizando imagen con sonar-pro (EAN ref: '{ean}')...")
 
@@ -101,14 +101,14 @@ TAREA:
 1. Identifica el producto por su imagen: nombre, marca, logotipo, texto visible en el envase.
 2. Lee la lista de ingredientes si es visible en la imagen.
 3. Busca en internet información adicional sobre este producto si lo identificas.
-4. Determina si contiene gluten: trigo, cebada, centeno, espelta, kamut, triticale, malta, bulgur, seitán o derivados.
-5. También detecta trazas declaradas: "puede contener trazas de gluten/trigo".
+4. Determina si contiene gluten: cualquier cereal con gluten (trigo, cebada, centeno, espelta, kamut, triticale, avena contaminada, etc.) o sus derivados (harina, almidón, malta, séitán, etc.).
+5. Detecta trazas declaradas: frases como "puede contener trazas de gluten", "elaborado en instalaciones que procesan trigo", etc.
 6. Si el envase indica explícitamente "sin gluten" o "gluten free", tenlo muy en cuenta para marcar APTO.
 
 CRITERIOS:
-- APTO: No hay gluten visible ni trazas declaradas, o el fabricante declara explícitamente "sin gluten"
-- NO_APTO: Contiene ingrediente con gluten confirmado
-- DUDOSO: No puedes leer los ingredientes con claridad, o hay ambigüedad
+- APTO: No hay gluten ni trazas declaradas, o el fabricante declara explícitamente "sin gluten"
+- NO_APTO: Contiene cualquier ingrediente con gluten o trazas declaradas
+- DUDOSO: No puedes leer los ingredientes con claridad, o hay ambigüedad real
 
 Responde ÚNICAMENTE con este JSON válido, sin texto adicional:
 {{
@@ -119,7 +119,7 @@ Responde ÚNICAMENTE con este JSON válido, sin texto adicional:
     "ingredientes": "Lista de ingredientes leída de la imagen, o null si no son visibles",
     "es_apto": true,
     "estado": "APTO",
-    "justificacion": "Razón basada en los ingredientes leídos de la imagen y declaraciones del fabricante (sin incluir URLs aquí)",
+    "justificacion": "Explica de forma natural y concisa por qué el producto es o no es apto para celíacos, basándote en sus ingredientes reales y declaraciones del fabricante.",
     "url_fuente": "URL de la página web donde encontraste información adicional, o null",
     "confianza": "alta",
     "analizado_por": "vision"
@@ -171,7 +171,7 @@ Si no puedes identificar el producto con claridad, devuelve encontrado: false y 
         status_code = e.response.status_code if e.response else 0
         print(f"\n❌ HTTP Error sonar-pro: {status_code} — {e.response.text if e.response else ''}")
         if status_code == 400:
-            return _error_vision("La imagen no pudo procesarse. Asegúrate de enfocar bien la etiqueta.")
+            return _error_vision("La imagen no pudo procesarse. Asgúrate de enfocar bien la etiqueta.")
         return _error_vision(f"Error del servidor de IA ({status_code}).")
 
     except Exception as e:

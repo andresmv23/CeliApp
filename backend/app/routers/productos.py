@@ -98,6 +98,8 @@ def buscar_producto_inteligente(
                     "motivo": producto_db["justificacion"],
                     "estado": producto_db["estado_gluten"],
                     "confianza": "alta",
+                    "url_fuente": producto_db["url_fuente"],
+                    "tipo_fuente": producto_db["tipo_fuente"],
                 },
             }
 
@@ -160,13 +162,13 @@ def buscar_producto_inteligente(
                 "estado": datos_ia.get("estado"),
                 "confianza": datos_ia.get("confianza", "media"),
             }
-            # Fusionar OFF + IA: OFF es la base, IA rellena lo que OFF no tiene
             producto_fusionado = {
                 **resultado_off,
                 "ingredientes": resultado_off.get("ingredientes") or datos_ia.get("ingredientes") or "",
                 "imagen_url": resultado_off.get("imagen_url") or datos_ia.get("imagen_url") or "",
                 "nombre": resultado_off.get("nombre") or datos_ia.get("nombre") or "Desconocido",
                 "marca": resultado_off.get("marca") or datos_ia.get("marca") or "Marca desconocida",
+                "url_fuente": datos_ia.get("url_fuente") or resultado_off.get("url_fuente"),
             }
             guardar_producto(
                 ean=ean,
@@ -182,7 +184,7 @@ def buscar_producto_inteligente(
                 "analisis": analisis_ia,
             }
 
-        # IA no encontró nada concreto → DUDOSO, no inventar
+        # IA no encontró nada concreto → DUDOSO
         analisis_dudoso = {
             "es_apto": False,
             "necesita_ia": False,
@@ -230,7 +232,7 @@ def buscar_producto_inteligente(
             "analisis": analisis_ia,
         }
 
-    # Nadie encontró nada → DUDOSO (nunca NO_APTO por defecto)
+    # Nadie encontró nada → DUDOSO
     return {
         "fuente": "NO_ENCONTRADO",
         "producto": {
@@ -318,6 +320,7 @@ def analizar_producto_por_imagen(
                     "marca":        marca,
                     "ingredientes": ingredientes or "",
                     "imagen_url":   imagen_url,
+                    "url_fuente":   datos_vision.get("url_fuente"),
                 },
                 analisis_result={
                     "es_apto":     es_apto,

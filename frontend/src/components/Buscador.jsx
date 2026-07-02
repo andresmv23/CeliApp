@@ -127,6 +127,27 @@ export default function Buscador() {
 
   const cfg = getStatusConfig(resultado?.analisis);
 
+  // Etiqueta legible para el tipo de fuente
+  const fuenteLabel = {
+    BASE_DE_DATOS_PROPIA: 'Base de datos propia',
+    OPEN_FOOD_FACTS:      'Open Food Facts',
+    OFF_DIRECTO:          'Open Food Facts',
+    OFF_ANALISIS_RAPIDO:  'Open Food Facts',
+    OFF_VALIDADO_IA:      'OFF + IA',
+    OFF_SIN_DATOS_GLUTEN: 'Open Food Facts',
+    IA_PERPLEXITY:        'IA Perplexity',
+    IA_GENERADA:          'IA Perplexity',
+    IA_VISION:            'IA Vision',
+    NO_ENCONTRADO:        'Sin fuente',
+  };
+
+  const urlFuente =
+    resultado?.analisis?.url_fuente ||
+    resultado?.producto?.url_fuente ||
+    null;
+
+  const fuenteTexto = fuenteLabel[resultado?.fuente] ?? resultado?.fuente ?? 'Desconocida';
+
   return (
     <>
       {scannerOpen && (
@@ -210,7 +231,7 @@ export default function Buscador() {
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
-                  </svg>
+2                  </svg>
                 </button>
 
                 <button type="submit" disabled={loading || !ean.trim()}
@@ -384,7 +405,21 @@ export default function Buscador() {
                         </svg>
                         Nueva búsqueda
                       </button>
-                      <span className="text-xs text-gray-300">Fuente: {resultado.fuente ?? 'Desconocida'}</span>
+                      <span className="text-xs text-gray-300">
+                        Fuente:{' '}
+                        {urlFuente ? (
+                          <a
+                            href={urlFuente}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="hover:text-emerald-500 transition-colors underline underline-offset-2"
+                          >
+                            {fuenteTexto}
+                          </a>
+                        ) : (
+                          fuenteTexto
+                        )}
+                      </span>
                     </div>
                   </div>
                 </div>
