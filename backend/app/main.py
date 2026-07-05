@@ -8,7 +8,7 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
-from app.routers import auth, productos, favoritos, admin
+from app.routers import auth, productos, favoritos, admin, reviews
 from app.init_db import inicializar_base_datos
 
 app = FastAPI(title="CeliApp API")
@@ -53,6 +53,7 @@ app.include_router(auth.router)
 app.include_router(productos.router)
 app.include_router(favoritos.router)
 app.include_router(admin.router)
+app.include_router(reviews.router)
 
 
 # ── Root ──────────────────────────────────────────────────────────────────────

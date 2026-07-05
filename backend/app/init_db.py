@@ -8,13 +8,13 @@ load_dotenv()
 def inicializar_base_datos():
     """
     Crea las tablas necesarias para CeliApp si no existen.
-    Compatible con DATABASE_URL (Railway) y variables separadas (local).
+    Compatible con DATABASE_URL (Render/Railway) y variables separadas (local).
     """
     database_url = os.getenv("DATABASE_URL")
 
     try:
         if database_url:
-            print(f"🔌 Conectando via DATABASE_URL (Railway)...")
+            print("🔌 Conectando via DATABASE_URL...")
             conn = psycopg2.connect(database_url)
         else:
             DB_HOST = os.getenv("DB_HOST", "localhost")
@@ -78,6 +78,22 @@ def inicializar_base_datos():
                 ean VARCHAR(20) REFERENCES productos(ean) ON DELETE CASCADE,
                 fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 CONSTRAINT unique_favorito UNIQUE(user_id, ean)
+            );
+        """)
+
+        print("🔨 Verificando tabla 'reviews'...")
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS reviews (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+                nombre VARCHAR(100) NOT NULL,
+                ciudad VARCHAR(100),
+                email VARCHAR(200),
+                texto TEXT NOT NULL,
+                estrellas INTEGER NOT NULL CHECK (estrellas BETWEEN 1 AND 5),
+                estado VARCHAR(20) DEFAULT 'pendiente'
+                    CHECK (estado IN ('pendiente', 'aprobada', 'rechazada')),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         """)
 

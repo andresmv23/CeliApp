@@ -25,6 +25,12 @@ class ProductoUpdate(BaseModel):
     marca: Optional[str] = None
 
 
+class ReviewAccion(BaseModel):
+    estado: str  # 'aprobada' | 'rechazada'
+
+
+# ── PRODUCTOS ─────────────────────────────────────────────────────────────────
+
 @router.get("/admin/productos")
 def listar_productos(
     estado: Optional[str] = Query(None),
@@ -52,10 +58,7 @@ def listar_productos(
     conn = get_db_connection()
     try:
         cur = conn.cursor(cursor_factory=RealDictCursor)
-        cur.execute(
-            f"SELECT COUNT(*) as total FROM productos {where}",
-            params,
-        )
+        cur.execute(f"SELECT COUNT(*) as total FROM productos {where}", params)
         total = cur.fetchone()["total"]
 
         cur.execute(
@@ -102,10 +105,7 @@ def editar_producto(ean: str, body: ProductoUpdate, x_admin_secret: str = Header
     conn = get_db_connection()
     try:
         cur = conn.cursor()
-        cur.execute(
-            f"UPDATE productos SET {', '.join(campos)} WHERE ean = %s",
-            params,
-        )
+        cur.execute(f"UPDATE productos SET {', '.join(campos)} WHERE ean = %s", params)
         if cur.rowcount == 0:
             raise HTTPException(status_code=404, detail="Producto no encontrado")
         conn.commit()
@@ -139,6 +139,96 @@ def borrar_producto(ean: str, x_admin_secret: str = Header(...)):
     finally:
         release_connection(conn)
 
+
+# ── REVIEWS ───────────────────────────────────────────────────────────────────
+
+@router.get("/admin/reviews")
+def listar_reviews_admin(
+    estado: Optional[str] = Query(None, description="pendiente | aprobada | rechazada"),
+    pagina: int = Query(1, ge=1),
+    limite: int = Query(20, ge=1, le=100),
+    x_admin_secret: str = Header(...),
+):
+    """Lista todas las reviews con filtro opcional por estado."""
+    _verificar_admin(x_admin_secret)
+
+    offset = (pagina - 1) * limite
+    where = "WHERE estado = %s" if estado else ""
+    params = [estado] if estado else []
+
+    conn = get_db_connection()
+    try:
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute(f"SELECT COUNT(*) as total FROM reviews {where}", params)
+        total = cur.fetchone()["total"]
+
+        cur.execute(
+            f"SELECT id, user_id, nombre, ciudad, email, texto, estrellas, estado, created_at "
+            f"FROM reviews {where} ORDER BY created_at DESC LIMIT %s OFFSET %s",
+            params + [limite, offset],
+        )
+        reviews = cur.fetchall()
+        return {"total": total, "pagina": pagina, "reviews": reviews}
+    finally:
+        release_connection(conn)
+
+
+@router.patch("/admin/reviews/{review_id}")
+def moderar_review(
+    review_id: int,
+    body: ReviewAccion,
+    x_admin_secret: str = Header(...),
+):
+    """Aprueba o rechaza una review."""
+    _verificar_admin(x_admin_secret)
+
+    estados_validos = ["aprobada", "rechazada"]
+    if body.estado not in estados_validos:
+        raise HTTPException(status_code=400, detail=f"Estado no válido. Usa: {estados_validos}")
+
+    conn = get_db_connection()
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            "UPDATE reviews SET estado = %s WHERE id = %s",
+            (body.estado, review_id),
+        )
+        if cur.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Review no encontrada")
+        conn.commit()
+        return {"ok": True, "review_id": review_id, "nuevo_estado": body.estado}
+    except HTTPException:
+        raise
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        release_connection(conn)
+
+
+@router.delete("/admin/reviews/{review_id}")
+def eliminar_review(review_id: int, x_admin_secret: str = Header(...)):
+    """Elimina una review definitivamente."""
+    _verificar_admin(x_admin_secret)
+
+    conn = get_db_connection()
+    try:
+        cur = conn.cursor()
+        cur.execute("DELETE FROM reviews WHERE id = %s", (review_id,))
+        if cur.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Review no encontrada")
+        conn.commit()
+        return {"ok": True, "eliminada": review_id}
+    except HTTPException:
+        raise
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        release_connection(conn)
+
+
+# ── PANEL HTML ────────────────────────────────────────────────────────────────
 
 @router.get("/admin", response_class=HTMLResponse, include_in_schema=False)
 def panel_admin():
