@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import Scanner from './Scanner';
 import FotoAnalisis from './FotoAnalisis';
+import SectionReviews from './SectionReviews';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
@@ -24,15 +25,6 @@ const DEMO_RESULTS = {
   },
 };
 
-const REVIEWS = [
-  { nombre: 'María G.', ciudad: 'Madrid', texto: 'Desde que uso CeliApp hago la compra sin estrés. Antes tardaba el doble leyendo etiquetas con lupa.', estrellas: 5, tiempo: 'hace 2 días' },
-  { nombre: 'Carlos R.', ciudad: 'Barcelona', texto: 'Por fin una app que entiende que \"puede contener trazas\" no es lo mismo que \"sin gluten\". Muy precisa.', estrellas: 5, tiempo: 'hace 1 semana' },
-  { nombre: 'Ana P.', ciudad: 'Sevilla', texto: 'Mi hija tiene celiaquía y esta app nos ha cambiado la vida. Escaneamos todo antes de comprar.', estrellas: 5, tiempo: 'hace 2 semanas' },
-  { nombre: 'David M.', ciudad: 'Valencia', texto: 'Interfaz clarísima. El código de colores APTO/NO APTO se ve de un vistazo aunque tengas prisa.', estrellas: 4, tiempo: 'hace 3 semanas' },
-  { nombre: 'Laura S.', ciudad: 'Bilbao', texto: 'Llevo años buscando algo así. La base de datos es enorme, casi todos los productos que escaneo están.', estrellas: 5, tiempo: 'hace 1 mes' },
-  { nombre: 'Javier T.', ciudad: 'Zaragoza', texto: 'El análisis de ingredientes ambiguos es lo que me convenció. No te da un sí/no sin más, te explica por qué.', estrellas: 5, tiempo: 'hace 1 mes' },
-];
-
 function getStatusConfig(analisis) {
   if (!analisis) return null;
   if (analisis.es_apto === null || analisis.es_apto === undefined)
@@ -40,18 +32,6 @@ function getStatusConfig(analisis) {
   return analisis.es_apto
     ? { label: 'APTO',    bg: '#10b981', gradStart: '#ecfdf5', gradEnd: '#d1fae5', text: '#065f46', icon: '✓' }
     : { label: 'NO APTO', bg: '#ef4444', gradStart: '#fff1f2', gradEnd: '#fecdd3', text: '#9f1239', icon: '✕' };
-}
-
-function Stars({ n }) {
-  return (
-    <div className="flex gap-0.5">
-      {[1,2,3,4,5].map(i => (
-        <svg key={i} className={`w-3.5 h-3.5 ${i <= n ? 'text-amber-400' : 'text-gray-200'}`} fill="currentColor" viewBox="0 0 20 20">
-          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-        </svg>
-      ))}
-    </div>
-  );
 }
 
 export default function Buscador() {
@@ -127,7 +107,6 @@ export default function Buscador() {
 
   const cfg = getStatusConfig(resultado?.analisis);
 
-  // Etiqueta legible para el tipo de fuente
   const fuenteLabel = {
     BASE_DE_DATOS_PROPIA: 'Base de datos propia',
     OPEN_FOOD_FACTS:      'Open Food Facts',
@@ -231,7 +210,7 @@ export default function Buscador() {
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
-2                  </svg>
+                  </svg>
                 </button>
 
                 <button type="submit" disabled={loading || !ean.trim()}
@@ -295,7 +274,7 @@ export default function Buscador() {
               <div className="max-w-2xl rounded-3xl overflow-hidden"
                 style={{ boxShadow: '0 12px 48px rgba(0,0,0,0.10)', border: '1px solid rgba(0,0,0,0.05)' }}>
 
-                {/* BLOQUE DE JUSTIFICACIÓN (verde/rojo/amarillo) */}
+                {/* BLOQUE JUSTIFICACIÓN */}
                 <div className="px-7 py-6 flex items-start justify-between gap-4"
                   style={{ background: `linear-gradient(135deg, ${cfg.gradStart}, ${cfg.gradEnd})` }}>
                   <div className="flex-1">
@@ -307,19 +286,13 @@ export default function Buscador() {
                     <p className="text-sm leading-relaxed max-w-md mb-3" style={{ color: cfg.text, opacity: 0.85 }}>
                       {resultado.analisis?.motivo ?? 'Análisis no disponible'}
                     </p>
-                    {/* FUENTE — movida aquí, dentro del bloque de justificación */}
                     <div style={{ opacity: 0.65 }}>
-                      <span className="text-xs" style={{ color: cfg.text }}>
-                        Fuente: {fuenteTexto}
-                      </span>
+                      <span className="text-xs" style={{ color: cfg.text }}>Fuente: {fuenteTexto}</span>
                       {urlFuente && (
-                        <>
-                          {' · '}
+                        <>{' · '}
                           <a href={urlFuente} target="_blank" rel="noopener noreferrer"
                             className="text-xs underline underline-offset-2 transition-opacity hover:opacity-100"
-                            style={{ color: cfg.text }}>
-                            Ver fuente original
-                          </a>
+                            style={{ color: cfg.text }}>Ver fuente original</a>
                         </>
                       )}
                     </div>
@@ -366,7 +339,6 @@ export default function Buscador() {
                       <p className="text-gray-600 text-sm leading-relaxed">{resultado.producto?.ingredientes ?? 'No disponible.'}</p>
                     </div>
 
-                    {/* BANNER: ¿No es tu producto? */}
                     {wrongCount === 0 ? (
                       <div className="flex items-center justify-between py-3 px-4 rounded-xl mb-5"
                         style={{ background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.06)' }}>
@@ -414,7 +386,6 @@ export default function Buscador() {
                       </div>
                     )}
 
-                    {/* FOOTER del card — solo "Nueva búsqueda" */}
                     <div className="flex items-center pt-1">
                       <button onClick={() => { setResultado(null); setEan(''); setWrongCount(0); }}
                         className="text-xs font-medium text-gray-400 hover:text-emerald-600 flex items-center gap-1.5 transition-colors">
@@ -457,41 +428,8 @@ export default function Buscador() {
           </div>
         </section>
 
-        {/* REVIEWS */}
-        <section className="py-24 bg-white">
-          <div className="max-w-5xl mx-auto px-5 sm:px-8">
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-14">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-widest text-emerald-600 mb-3">Opiniones</p>
-                <h2 className="text-4xl sm:text-5xl font-black text-gray-900 leading-tight">Lo que dicen<br />nuestros usuarios</h2>
-              </div>
-              <div className="flex items-center gap-4 px-5 py-4 rounded-2xl w-fit shrink-0" style={{ background: '#f4f3f0' }}>
-                <div><p className="text-3xl font-black text-gray-900 leading-none">4.9</p><Stars n={5} /></div>
-                <div className="pl-4" style={{ borderLeft: '1px solid #e0ddd8' }}>
-                  <p className="text-xs text-gray-500 font-medium">Valoración media</p>
-                  <p className="text-xs text-gray-400">+1.200 reseñas</p>
-                </div>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {REVIEWS.map((r, i) => (
-                <div key={i} className="rounded-2xl p-6 transition-all duration-200 hover:-translate-y-0.5"
-                  style={{ background: '#f4f3f0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-                  <div className="flex items-start justify-between gap-2 mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm shrink-0"
-                        style={{ background: '#d1fae5', color: '#065f46' }}>{r.nombre.charAt(0)}</div>
-                      <div><p className="font-bold text-gray-900 text-sm">{r.nombre}</p><p className="text-xs text-gray-400">{r.ciudad}</p></div>
-                    </div>
-                    <span className="text-xs text-gray-300 shrink-0 mt-0.5">{r.tiempo}</span>
-                  </div>
-                  <Stars n={r.estrellas} />
-                  <p className="mt-3 text-gray-600 text-sm leading-relaxed">"{r.texto}"</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        {/* REVIEWS — componente dinámico */}
+        <SectionReviews />
 
         {/* CONTACTO */}
         <section style={{ background: '#f4f3f0' }} className="py-24">
