@@ -8,7 +8,12 @@ from slowapi.util import get_remote_address
 from app.database import get_db_connection, release_connection, guardar_producto
 from app.analizador import analisis_rapido
 from app.servicios import obtener_producto_por_ean
-from app.ia_client import consultar_ia_experto_total, consultar_ia_vision_imagen
+from app.ia_client import (
+    consultar_ia_experto_total,
+    consultar_ia_vision_imagen,
+    encontrar_ingredientes_producto,
+    encontrar_imagen_producto,
+)
 from app.schemas import AnalisisRequest, AnalisisResponse, ImagenAnalisisRequest, ImagenAnalisisResponse
 from app.routers.auth import get_optional_user
 
@@ -16,7 +21,7 @@ router = APIRouter()
 limiter = Limiter(key_func=get_remote_address)
 
 
-# ── Helper ────────────────────────────────────────────────────────────────────
+# ── Helpers ───────────────────────────────────────────────────────────────────────
 
 def guardar_en_historial(user_id: int, ean: str) -> None:
     conn = get_db_connection()
@@ -31,13 +36,36 @@ def guardar_en_historial(user_id: int, ean: str) -> None:
         conn.commit()
     except Exception as ex:
         conn.rollback()
-        print(f"\n❌ Error guardando historial: {ex}")
+        print(f"\n\u274c Error guardando historial: {ex}")
     finally:
         release_connection(conn)
 
 
+def _enriquecer_datos(producto: dict) -> dict:
+    """
+    Si el producto tiene nombre o marca pero le faltan ingredientes o imagen,
+    lanza las funciones de IA especificas para completarlos.
+    """
+    nombre = producto.get("nombre") or ""
+    marca = producto.get("marca") or ""
+
+    if not nombre and not marca:
+        return producto
+
+    if not producto.get("ingredientes"):
+        ingredientes = encontrar_ingredientes_producto(nombre, marca)
+        if ingredientes:
+            producto["ingredientes"] = ingredientes
+
+    if not producto.get("imagen_url"):
+        imagen_url = encontrar_imagen_producto(nombre, marca)
+        if imagen_url:
+            producto["imagen_url"] = imagen_url
+
+    return producto
+
+
 def _analisis_desde_gluten_off(gluten_segun_off: str) -> dict:
-    """Convierte el valor de gluten_segun_off en un bloque de análisis final."""
     if gluten_segun_off == "SIN_GLUTEN":
         return {
             "es_apto": True,
@@ -46,7 +74,7 @@ def _analisis_desde_gluten_off(gluten_segun_off: str) -> dict:
             "motivo": "Open Food Facts declara explícitamente que este producto no contiene gluten.",
             "confianza": "alta",
         }
-    else:  # CON_GLUTEN
+    else:
         return {
             "es_apto": False,
             "necesita_ia": False,
@@ -56,7 +84,7 @@ def _analisis_desde_gluten_off(gluten_segun_off: str) -> dict:
         }
 
 
-# ── Endpoints ─────────────────────────────────────────────────────────────────
+# ── Endpoints ────────────────────────────────────────────────────────────────────
 
 @router.post("/analizar", response_model=AnalisisResponse)
 def analizar_ingredientes(request: AnalisisRequest):
@@ -70,7 +98,7 @@ def buscar_producto_inteligente(
     ean: str,
     current_user=Depends(get_optional_user),
 ):
-    # 1. BD local
+    # 1. BD local (cache)
     conn = get_db_connection()
     if conn:
         try:
@@ -81,7 +109,7 @@ def buscar_producto_inteligente(
             release_connection(conn)
 
         if producto_db:
-            print(f"\n✅ [CACHE HIT] Producto {ean} encontrado en DB Local.")
+            print(f"\n\u2705 [CACHE HIT] Producto {ean} encontrado en DB Local.")
             if current_user:
                 guardar_en_historial(current_user["id"], ean)
             return {
@@ -104,16 +132,17 @@ def buscar_producto_inteligente(
             }
 
     # 2. Open Food Facts
-    print(f"\n🔍 [CACHE MISS] Buscando {ean} en OpenFoodFacts...")
+    print(f"\n\U0001f50d [CACHE MISS] Buscando {ean} en OpenFoodFacts...")
     resultado_off = obtener_producto_por_ean(ean)
-    gluten_off = resultado_off.get("gluten_segun_off")  # 'SIN_GLUTEN' | 'CON_GLUTEN' | None
+    gluten_off = resultado_off.get("gluten_segun_off")
 
     if resultado_off["encontrado"]:
 
-        # 2a. OFF tiene datos de gluten → usar directamente, sin IA
+        # 2a. OFF tiene datos de gluten → enriquecer si faltan datos y guardar
         if gluten_off is not None:
-            print(f"\n✅ [OFF GLUTEN DATA] Estado gluten según OFF: {gluten_off}")
+            print(f"\n\u2705 [OFF GLUTEN DATA] Estado gluten según OFF: {gluten_off}")
             analisis_final = _analisis_desde_gluten_off(gluten_off)
+            resultado_off = _enriquecer_datos(resultado_off)
             guardar_producto(
                 ean=ean,
                 datos_producto=resultado_off,
@@ -128,12 +157,13 @@ def buscar_producto_inteligente(
                 "analisis": analisis_final,
             }
 
-        # 2b. OFF no tiene alérgenos explícitos → segunda puerta: analisis_rapido sobre ingredientes
+        # 2b. Analisis rapido sobre ingredientes
         ingredientes_off = resultado_off.get("ingredientes", "")
         diagnostico_rapido = analisis_rapido(ingredientes_off)
 
         if diagnostico_rapido["estado"] in ("NO_APTO", "TRAZAS"):
-            print(f"\n⚡ [ANALISIS_RAPIDO] Detectado {diagnostico_rapido['estado']} en ingredientes OFF para {ean}")
+            print(f"\n\u26a1 [ANALISIS_RAPIDO] Detectado {diagnostico_rapido['estado']} para {ean}")
+            resultado_off = _enriquecer_datos(resultado_off)
             guardar_producto(
                 ean=ean,
                 datos_producto=resultado_off,
@@ -148,8 +178,8 @@ def buscar_producto_inteligente(
                 "analisis": diagnostico_rapido,
             }
 
-        # 2c. Ingredientes limpios según analisis_rapido → IA busca por EAN+nombre+marca
-        print(f"\n🌐 [OFF SIN GLUTEN DATA] Delegando a IA para {ean}...")
+        # 2c. Delegar a IA
+        print(f"\n\U0001f310 [OFF SIN GLUTEN DATA] Delegando a IA para {ean}...")
         nombre_pista = resultado_off.get("nombre", "")
         marca_pista = resultado_off.get("marca", "")
         datos_ia = consultar_ia_experto_total(ean, nombre_pista, marca_pista)
@@ -170,6 +200,7 @@ def buscar_producto_inteligente(
                 "marca": resultado_off.get("marca") or datos_ia.get("marca") or "Marca desconocida",
                 "url_fuente": datos_ia.get("url_fuente") or resultado_off.get("url_fuente"),
             }
+            producto_fusionado = _enriquecer_datos(producto_fusionado)
             guardar_producto(
                 ean=ean,
                 datos_producto=producto_fusionado,
@@ -184,7 +215,7 @@ def buscar_producto_inteligente(
                 "analisis": analisis_ia,
             }
 
-        # IA no encontró nada concreto → DUDOSO
+        # IA no encontró nada → DUDOSO
         analisis_dudoso = {
             "es_apto": False,
             "necesita_ia": False,
@@ -192,6 +223,7 @@ def buscar_producto_inteligente(
             "motivo": "No se encontró información específica sobre gluten para este producto. Consulta el etiquetado físico.",
             "confianza": "baja",
         }
+        resultado_off = _enriquecer_datos(resultado_off)
         guardar_producto(
             ean=ean,
             datos_producto=resultado_off,
@@ -206,8 +238,8 @@ def buscar_producto_inteligente(
             "analisis": analisis_dudoso,
         }
 
-    # 3. OFF no encontró el producto → IA Deep Search por EAN
-    print(f"\n🧠 [DEEP SEARCH] OFF no encontró {ean}, invocando IA...")
+    # 3. OFF no encontró el producto → IA Deep Search
+    print(f"\n\U0001f9e0 [DEEP SEARCH] OFF no encontró {ean}, invocando IA...")
     datos_ia = consultar_ia_experto_total(ean, "", "")
 
     if datos_ia.get("encontrado"):
@@ -218,6 +250,7 @@ def buscar_producto_inteligente(
             "estado": datos_ia.get("estado"),
             "confianza": datos_ia.get("confianza", "media"),
         }
+        datos_ia = _enriquecer_datos(datos_ia)
         guardar_producto(
             ean=ean,
             datos_producto=datos_ia,
@@ -279,7 +312,7 @@ def analizar_producto_por_imagen(
         )
 
     ean_ref = body.ean.strip() if body.ean else ""
-    print(f"\n📷 POST /analizar-imagen | EAN ref: '{ean_ref}' | Tamaño: {len(body.imagen_base64)} chars")
+    print(f"\n\U0001f4f7 POST /analizar-imagen | EAN ref: '{ean_ref}' | Tamaño: {len(body.imagen_base64)} chars")
 
     datos_vision = consultar_ia_vision_imagen(body.imagen_base64, ean_ref)
 
@@ -301,6 +334,10 @@ def analizar_producto_por_imagen(
             estado    = "NO_APTO"
             motivo    = diagnostico_rapido.get("motivo", motivo)
             confianza = "alta"
+
+    # Enriquecer imagen si la visión no la encontró
+    if not imagen_url:
+        imagen_url = encontrar_imagen_producto(nombre, marca)
 
     analisis_final = {
         "es_apto":        es_apto,
@@ -331,9 +368,9 @@ def analizar_producto_por_imagen(
                 },
                 fuente_datos="IA_VISION",
             )
-            print(f"\n💾 Guardado en BD desde visión: {nombre}")
+            print(f"\n\U0001f4be Guardado en BD desde visión: {nombre}")
         except Exception as e:
-            print(f"\n⚠️  No se pudo guardar en BD: {e}")
+            print(f"\n\u26a0\ufe0f  No se pudo guardar en BD: {e}")
 
     if current_user and ean_ref:
         guardar_en_historial(current_user["id"], ean_ref)
