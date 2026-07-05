@@ -1,20 +1,43 @@
-from fastapi import APIRouter, HTTPException, Header
+from fastapi import APIRouter, HTTPException, Header, Depends
+from fastapi.security import OAuth2PasswordBearer
 from psycopg2.extras import RealDictCursor
 from pydantic import BaseModel, EmailStr
 from typing import Optional
 
 from app.database import get_db_connection, release_connection
-from app.auth import verificar_token
+from app.auth import jwt, SECRET_KEY, ALGORITHM
 
 router = APIRouter()
 
+oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl="auth/login", auto_error=False)
+
 
 class ReviewCreate(BaseModel):
-    nombre: Optional[str] = None      # obligatorio si no está logueado
+    nombre: Optional[str] = None
     ciudad: Optional[str] = None
-    email: Optional[EmailStr] = None  # obligatorio si no está logueado
+    email: Optional[EmailStr] = None
     texto: str
     estrellas: int
+
+
+def _get_user_from_token(token: Optional[str]) -> Optional[dict]:
+    """Devuelve el usuario de BD si el token es válido, o None si no hay sesión."""
+    if not token:
+        return None
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email: str = payload.get("sub")
+        if not email:
+            return None
+        conn = get_db_connection()
+        try:
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+            cur.execute("SELECT id, email, full_name FROM users WHERE email = %s", (email,))
+            return cur.fetchone()
+        finally:
+            release_connection(conn)
+    except Exception:
+        return None
 
 
 @router.get("/reviews")
@@ -37,36 +60,20 @@ def listar_reviews_aprobadas():
 @router.post("/reviews", status_code=201)
 def crear_review(
     body: ReviewCreate,
-    authorization: Optional[str] = Header(None),
+    token: Optional[str] = Depends(oauth2_scheme_optional),
 ):
     """Envía una nueva review. Queda en estado pendiente hasta que el admin la apruebe."""
 
-    # Determinar si el usuario está logueado
-    user_id = None
+    user = _get_user_from_token(token)
+
     nombre_final = body.nombre
     ciudad_final = body.ciudad
     email_final = body.email
+    user_id = None
 
-    if authorization and authorization.startswith("Bearer "):
-        token = authorization.split(" ", 1)[1]
-        try:
-            payload = verificar_token(token)
-            user_id = payload.get("sub")
-        except Exception:
-            raise HTTPException(status_code=401, detail="Token inválido")
-
-    # Validaciones según si está logueado o no
-    if user_id:
-        # Usuario logueado: obtenemos nombre y email de su perfil
-        conn = get_db_connection()
-        try:
-            cur = conn.cursor(cursor_factory=RealDictCursor)
-            cur.execute("SELECT full_name, email FROM users WHERE id = %s", (user_id,))
-            user = cur.fetchone()
-        finally:
-            release_connection(conn)
-        if not user:
-            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    if user:
+        # Usuario logueado: usamos sus datos del perfil
+        user_id = user["id"]
         nombre_final = user["full_name"] or nombre_final or "Usuario"
         email_final = user["email"]
     else:
