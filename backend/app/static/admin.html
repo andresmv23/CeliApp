@@ -49,52 +49,28 @@
     width: 340px;
   }
 
-  .login-card h1 {
-    font-size: 20px;
-    font-weight: 600;
-    margin-bottom: 6px;
-  }
-
-  .login-card p {
-    color: var(--text-muted);
-    margin-bottom: 28px;
-    font-size: 13px;
-  }
+  .login-card h1 { font-size: 20px; font-weight: 600; margin-bottom: 6px; }
+  .login-card p  { color: var(--text-muted); margin-bottom: 28px; font-size: 13px; }
 
   .login-card input {
-    width: 100%;
-    padding: 10px 12px;
+    width: 100%; padding: 10px 12px;
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    font-size: 14px;
-    margin-bottom: 12px;
-    outline: none;
-    transition: border-color 0.15s;
+    font-size: 14px; margin-bottom: 12px;
+    outline: none; transition: border-color 0.15s;
   }
-
   .login-card input:focus { border-color: var(--accent); }
 
   .btn-primary {
-    width: 100%;
-    padding: 10px;
-    background: var(--accent);
-    color: #fff;
-    border: none;
-    border-radius: var(--radius);
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: opacity 0.15s;
+    width: 100%; padding: 10px;
+    background: var(--accent); color: #fff;
+    border: none; border-radius: var(--radius);
+    font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: opacity 0.15s;
   }
-
   .btn-primary:hover { opacity: 0.88; }
 
-  #login-error {
-    color: var(--no-apto);
-    font-size: 13px;
-    margin-top: 10px;
-    display: none;
-  }
+  #login-error { color: var(--no-apto); font-size: 13px; margin-top: 10px; display: none; }
 
   /* ── App ── */
   #app { display: none; }
@@ -107,25 +83,60 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 10;
+    position: sticky; top: 0; z-index: 10;
   }
 
   header span { font-weight: 600; font-size: 15px; }
 
   .btn-logout {
-    font-size: 13px;
-    color: var(--text-muted);
-    cursor: pointer;
-    border: none;
-    background: none;
-    padding: 6px 10px;
-    border-radius: var(--radius);
+    font-size: 13px; color: var(--text-muted);
+    cursor: pointer; border: none; background: none;
+    padding: 6px 10px; border-radius: var(--radius);
     transition: background 0.15s;
   }
-
   .btn-logout:hover { background: var(--bg); }
+
+  /* ── Tabs ── */
+  .tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 2px solid var(--border);
+    margin-bottom: 28px;
+  }
+
+  .tab-btn {
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.15s, border-color 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .badge-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #fee2e2;
+    color: var(--no-apto);
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 20px;
+    padding: 1px 7px;
+    min-width: 20px;
+  }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
 
   main { max-width: 1100px; margin: 0 auto; padding: 28px 24px; }
 
@@ -152,33 +163,26 @@
 
   /* ── Filtros ── */
   .filtros {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 18px;
-    flex-wrap: wrap;
+    display: flex; gap: 10px;
+    margin-bottom: 18px; flex-wrap: wrap;
   }
 
   .filtros input {
     padding: 8px 12px;
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    font-size: 13px;
-    outline: none;
-    flex: 1;
-    min-width: 180px;
+    font-size: 13px; outline: none;
+    flex: 1; min-width: 180px;
     transition: border-color 0.15s;
   }
-
   .filtros input:focus { border-color: var(--accent); }
 
   .filtros select {
     padding: 8px 10px;
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    font-size: 13px;
-    outline: none;
-    background: var(--surface);
-    cursor: pointer;
+    font-size: 13px; outline: none;
+    background: var(--surface); cursor: pointer;
   }
 
   /* ── Tabla ── */
@@ -194,20 +198,14 @@
   thead th {
     padding: 11px 14px;
     text-align: left;
-    font-size: 12px;
-    font-weight: 600;
+    font-size: 12px; font-weight: 600;
     color: var(--text-muted);
     border-bottom: 1px solid var(--border);
     background: var(--bg);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
+    text-transform: uppercase; letter-spacing: 0.04em;
   }
 
-  tbody tr {
-    border-bottom: 1px solid var(--border);
-    transition: background 0.1s;
-  }
-
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
   tbody tr:last-child { border-bottom: none; }
   tbody tr:hover { background: #faf9f7; }
 
@@ -220,56 +218,69 @@
   td.nombre { font-weight: 500; max-width: 200px; }
   td.ean    { color: var(--text-muted); font-family: monospace; font-size: 12px; }
   td.motivo { max-width: 260px; color: var(--text-muted); font-size: 12px; line-height: 1.4; }
+  td.review-texto { max-width: 300px; font-size: 12px; line-height: 1.5; color: var(--text-muted); }
 
   .badge {
     display: inline-block;
     padding: 3px 9px;
     border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
+    font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.03em;
   }
 
   .badge-APTO    { background: var(--apto-bg);   color: var(--apto); }
   .badge-NO_APTO { background: var(--no-apto-bg); color: var(--no-apto); }
   .badge-DUDOSO  { background: var(--dudoso-bg);  color: var(--dudoso); }
   .badge-TRAZAS  { background: var(--trazas-bg);  color: var(--trazas); }
+  .badge-pendiente  { background: #fef3e2; color: var(--dudoso); }
+  .badge-aprobada   { background: var(--apto-bg); color: var(--apto); }
+  .badge-rechazada  { background: var(--no-apto-bg); color: var(--no-apto); }
+
+  .estrellas { color: #f59e0b; font-size: 13px; letter-spacing: 1px; }
 
   .acciones { display: flex; gap: 6px; }
 
   .btn-edit {
     padding: 5px 10px;
     border: 1px solid var(--border);
-    border-radius: 6px;
-    font-size: 12px;
-    cursor: pointer;
-    background: var(--surface);
+    border-radius: 6px; font-size: 12px;
+    cursor: pointer; background: var(--surface);
     transition: background 0.1s;
   }
-
   .btn-edit:hover { background: var(--bg); }
 
   .btn-del {
     padding: 5px 10px;
     border: 1px solid #fbd5d2;
-    border-radius: 6px;
-    font-size: 12px;
-    cursor: pointer;
-    background: #fff5f5;
-    color: var(--no-apto);
-    transition: background 0.1s;
+    border-radius: 6px; font-size: 12px;
+    cursor: pointer; background: #fff5f5;
+    color: var(--no-apto); transition: background 0.1s;
   }
+  .btn-del:hover { background: var(--no-apto-bg); }
 
-  .btn-del:hover { background: #fdecea; }
+  .btn-aprobar {
+    padding: 5px 10px;
+    border: 1px solid #a7f3c4;
+    border-radius: 6px; font-size: 12px;
+    cursor: pointer; background: var(--apto-bg);
+    color: var(--apto); transition: background 0.1s;
+  }
+  .btn-aprobar:hover { background: #d1fae5; }
+
+  .btn-rechazar {
+    padding: 5px 10px;
+    border: 1px solid #fbd5d2;
+    border-radius: 6px; font-size: 12px;
+    cursor: pointer; background: #fff5f5;
+    color: var(--no-apto); transition: background 0.1s;
+  }
+  .btn-rechazar:hover { background: var(--no-apto-bg); }
 
   /* ── Paginación ── */
   .paginacion {
-    display: flex;
-    align-items: center;
+    display: flex; align-items: center;
     justify-content: space-between;
-    margin-top: 16px;
-    font-size: 13px;
+    margin-top: 16px; font-size: 13px;
     color: var(--text-muted);
   }
 
@@ -277,125 +288,81 @@
     padding: 6px 14px;
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    background: var(--surface);
-    cursor: pointer;
-    font-size: 13px;
-    transition: background 0.1s;
+    background: var(--surface); cursor: pointer;
+    font-size: 13px; transition: background 0.1s;
   }
-
   .paginacion button:disabled { opacity: 0.4; cursor: default; }
   .paginacion button:not(:disabled):hover { background: var(--bg); }
 
   /* ── Modal ── */
   .modal-bg {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.35);
-    z-index: 100;
-    align-items: center;
-    justify-content: center;
+    display: none; position: fixed;
+    inset: 0; background: rgba(0,0,0,0.35);
+    z-index: 100; align-items: center; justify-content: center;
   }
-
   .modal-bg.visible { display: flex; }
 
   .modal {
-    background: var(--surface);
-    border-radius: 12px;
-    padding: 28px;
-    width: 480px;
-    max-width: 94vw;
-    max-height: 90vh;
-    overflow-y: auto;
+    background: var(--surface); border-radius: 12px;
+    padding: 28px; width: 480px;
+    max-width: 94vw; max-height: 90vh; overflow-y: auto;
   }
 
   .modal h2 { font-size: 16px; font-weight: 600; margin-bottom: 20px; }
 
-  .campo {
-    margin-bottom: 14px;
-  }
+  .campo { margin-bottom: 14px; }
 
   .campo label {
-    display: block;
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--text-muted);
-    margin-bottom: 5px;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
+    display: block; font-size: 12px; font-weight: 500;
+    color: var(--text-muted); margin-bottom: 5px;
+    text-transform: uppercase; letter-spacing: 0.04em;
   }
 
-  .campo input,
-  .campo select,
-  .campo textarea {
-    width: 100%;
-    padding: 9px 11px;
+  .campo input, .campo select, .campo textarea {
+    width: 100%; padding: 9px 11px;
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    font-size: 13px;
-    font-family: inherit;
-    outline: none;
-    resize: vertical;
+    font-size: 13px; font-family: inherit;
+    outline: none; resize: vertical;
     transition: border-color 0.15s;
   }
-
-  .campo input:focus,
-  .campo select:focus,
-  .campo textarea:focus { border-color: var(--accent); }
+  .campo input:focus, .campo select:focus, .campo textarea:focus { border-color: var(--accent); }
 
   .modal-btns {
-    display: flex;
-    gap: 8px;
-    justify-content: flex-end;
-    margin-top: 20px;
+    display: flex; gap: 8px;
+    justify-content: flex-end; margin-top: 20px;
   }
 
   .btn-cancel {
     padding: 8px 16px;
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    background: var(--surface);
-    font-size: 13px;
-    cursor: pointer;
-    transition: background 0.1s;
+    background: var(--surface); font-size: 13px;
+    cursor: pointer; transition: background 0.1s;
   }
-
   .btn-cancel:hover { background: var(--bg); }
 
   .btn-save {
     padding: 8px 16px;
-    background: var(--accent);
-    color: #fff;
-    border: none;
-    border-radius: var(--radius);
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: opacity 0.15s;
+    background: var(--accent); color: #fff;
+    border: none; border-radius: var(--radius);
+    font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: opacity 0.15s;
   }
-
   .btn-save:hover { opacity: 0.88; }
 
   .toast {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    padding: 12px 18px;
-    border-radius: var(--radius);
-    font-size: 13px;
-    font-weight: 500;
-    color: #fff;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s;
-    z-index: 200;
+    position: fixed; bottom: 24px; right: 24px;
+    padding: 12px 18px; border-radius: var(--radius);
+    font-size: 13px; font-weight: 500;
+    color: #fff; opacity: 0;
+    pointer-events: none; transition: opacity 0.2s; z-index: 200;
   }
-
   .toast.ok  { background: var(--apto); }
   .toast.err { background: var(--no-apto); }
   .toast.show { opacity: 1; }
 
-  #empty-state {
+  .empty-state {
     text-align: center;
     padding: 48px 24px;
     color: var(--text-muted);
@@ -403,7 +370,7 @@
 
   @media (max-width: 700px) {
     .stats { grid-template-columns: repeat(2, 1fr); }
-    td.motivo { display: none; }
+    td.motivo, td.review-texto { display: none; }
   }
 </style>
 </head>
@@ -428,6 +395,7 @@
   </header>
 
   <main>
+    <!-- Stats -->
     <div class="stats">
       <div class="stat-card">
         <div class="label">Total productos</div>
@@ -442,51 +410,101 @@
         <div class="value" id="stat-noapto">—</div>
       </div>
       <div class="stat-card dudoso">
-        <div class="label">Dudosos</div>
-        <div class="value" id="stat-dudoso">—</div>
+        <div class="label">Reseñas pendientes</div>
+        <div class="value" id="stat-reviews" style="color:var(--dudoso)">—</div>
       </div>
     </div>
 
-    <div class="filtros">
-      <input type="text" id="busqueda" placeholder="Buscar por nombre, marca o EAN..." oninput="debounceBuscar()" />
-      <select id="filtro-estado" onchange="cargarProductos(1)">
-        <option value="">Todos los estados</option>
-        <option value="APTO">Apto</option>
-        <option value="NO_APTO">No apto</option>
-        <option value="DUDOSO">Dudoso</option>
-        <option value="TRAZAS">Trazas</option>
-      </select>
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" id="tab-productos-btn" onclick="cambiarTab('productos')">Productos</button>
+      <button class="tab-btn" id="tab-reviews-btn" onclick="cambiarTab('reviews')">
+        Reseñas
+        <span class="badge-count" id="reviews-badge" style="display:none">0</span>
+      </button>
     </div>
 
-    <div class="tabla-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Producto</th>
-            <th>EAN</th>
-            <th>Marca</th>
-            <th>Estado</th>
-            <th>Fuente</th>
-            <th>Motivo</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody id="tbody"></tbody>
-      </table>
-      <div id="empty-state" style="display:none">No hay productos con este filtro.</div>
+    <!-- Tab Productos -->
+    <div class="tab-panel active" id="tab-productos">
+      <div class="filtros">
+        <input type="text" id="busqueda" placeholder="Buscar por nombre, marca o EAN..." oninput="debounceBuscar()" />
+        <select id="filtro-estado" onchange="cargarProductos(1)">
+          <option value="">Todos los estados</option>
+          <option value="APTO">Apto</option>
+          <option value="NO_APTO">No apto</option>
+          <option value="DUDOSO">Dudoso</option>
+          <option value="TRAZAS">Trazas</option>
+        </select>
+      </div>
+
+      <div class="tabla-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>EAN</th>
+              <th>Marca</th>
+              <th>Estado</th>
+              <th>Fuente</th>
+              <th>Motivo</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+        <div class="empty-state" id="empty-state" style="display:none">No hay productos con este filtro.</div>
+      </div>
+
+      <div class="paginacion">
+        <span id="pag-info"></span>
+        <div style="display:flex;gap:8px">
+          <button id="btn-prev" onclick="irPagina(-1)">← Anterior</button>
+          <button id="btn-next" onclick="irPagina(1)">Siguiente →</button>
+        </div>
+      </div>
     </div>
 
-    <div class="paginacion">
-      <span id="pag-info"></span>
-      <div style="display:flex;gap:8px">
-        <button id="btn-prev" onclick="irPagina(-1)">← Anterior</button>
-        <button id="btn-next" onclick="irPagina(1)">Siguiente →</button>
+    <!-- Tab Reviews -->
+    <div class="tab-panel" id="tab-reviews">
+      <div class="filtros">
+        <select id="filtro-review-estado" onchange="cargarReviews(1)">
+          <option value="pendiente">Pendientes</option>
+          <option value="aprobada">Aprobadas</option>
+          <option value="rechazada">Rechazadas</option>
+          <option value="">Todas</option>
+        </select>
+      </div>
+
+      <div class="tabla-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Usuario</th>
+              <th>Ciudad</th>
+              <th>Estrellas</th>
+              <th>Reseña</th>
+              <th>Estado</th>
+              <th>Fecha</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tbody-reviews"></tbody>
+        </table>
+        <div class="empty-state" id="empty-reviews" style="display:none">No hay reseñas con este filtro.</div>
+      </div>
+
+      <div class="paginacion">
+        <span id="pag-reviews-info"></span>
+        <div style="display:flex;gap:8px">
+          <button id="btn-rev-prev" onclick="irPaginaReviews(-1)">← Anterior</button>
+          <button id="btn-rev-next" onclick="irPaginaReviews(1)">Siguiente →</button>
+        </div>
       </div>
     </div>
   </main>
 </div>
 
-<!-- Modal edición -->
+<!-- Modal edición producto -->
 <div class="modal-bg" id="modal-bg">
   <div class="modal">
     <h2>Editar producto</h2>
@@ -528,8 +546,10 @@
   const API = window.location.origin;
   let secret = "";
   let paginaActual = 1;
+  let paginaReviews = 1;
   let eanEditando = null;
   let debounceTimer = null;
+  let tabActual = "productos";
 
   document.getElementById("input-secret").addEventListener("keydown", e => {
     if (e.key === "Enter") login();
@@ -559,9 +579,17 @@
     document.getElementById("input-secret").value = "";
   }
 
+  function cambiarTab(tab) {
+    tabActual = tab;
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+    document.getElementById(`tab-${tab}-btn`).classList.add("active");
+    document.getElementById(`tab-${tab}`).classList.add("active");
+    if (tab === "reviews") cargarReviews(1);
+  }
+
   async function cargarStats() {
     const estados = ["APTO", "NO_APTO", "DUDOSO"];
-    let total = 0;
     const counts = {};
     for (const e of estados) {
       const r = await fetch(`${API}/admin/productos?estado=${e}&limite=1`, {
@@ -569,7 +597,6 @@
       });
       const d = await r.json();
       counts[e] = d.total;
-      total += d.total;
     }
     const rAll = await fetch(`${API}/admin/productos?limite=1`, {
       headers: { "x-admin-secret": secret },
@@ -578,7 +605,21 @@
     document.getElementById("stat-total").textContent  = dAll.total;
     document.getElementById("stat-apto").textContent   = counts["APTO"];
     document.getElementById("stat-noapto").textContent  = counts["NO_APTO"];
-    document.getElementById("stat-dudoso").textContent = counts["DUDOSO"];
+
+    // Reviews pendientes
+    const rRev = await fetch(`${API}/admin/reviews?estado=pendiente&limite=1`, {
+      headers: { "x-admin-secret": secret },
+    });
+    const dRev = await rRev.json();
+    const pendientes = dRev.total || 0;
+    document.getElementById("stat-reviews").textContent = pendientes;
+    const badge = document.getElementById("reviews-badge");
+    if (pendientes > 0) {
+      badge.style.display = "inline-flex";
+      badge.textContent = pendientes;
+    } else {
+      badge.style.display = "none";
+    }
   }
 
   async function cargarProductos(pagina) {
@@ -618,15 +659,96 @@
       `).join("");
     }
 
-    const totalPags = Math.ceil(data.total / 20);
+    const totalPags = Math.ceil(data.total / 20) || 1;
     document.getElementById("pag-info").textContent = `Página ${pagina} de ${totalPags} · ${data.total} productos`;
     document.getElementById("btn-prev").disabled = pagina <= 1;
     document.getElementById("btn-next").disabled = pagina >= totalPags;
   }
 
-  function irPagina(delta) {
-    cargarProductos(paginaActual + delta);
+  async function cargarReviews(pagina) {
+    paginaReviews = pagina;
+    const estado = document.getElementById("filtro-review-estado").value;
+    let url = `${API}/admin/reviews?pagina=${pagina}&limite=20`;
+    if (estado) url += `&estado=${estado}`;
+
+    const res = await fetch(url, { headers: { "x-admin-secret": secret } });
+    const data = await res.json();
+
+    const tbody = document.getElementById("tbody-reviews");
+    const empty = document.getElementById("empty-reviews");
+
+    if (!data.reviews || !data.reviews.length) {
+      tbody.innerHTML = "";
+      empty.style.display = "block";
+    } else {
+      empty.style.display = "none";
+      tbody.innerHTML = data.reviews.map(r => {
+        const estrellas = "★".repeat(r.estrellas) + "☆".repeat(5 - r.estrellas);
+        const fecha = new Date(r.created_at).toLocaleDateString("es-ES");
+        const esPendiente = r.estado === "pendiente";
+        return `
+          <tr>
+            <td class="nombre">${esc(r.nombre)}<br/><span style="font-size:11px;color:var(--text-muted);font-weight:400">${esc(r.email || "")}</span></td>
+            <td>${esc(r.ciudad || "—")}</td>
+            <td><span class="estrellas">${estrellas}</span></td>
+            <td class="review-texto">${esc(r.texto)}</td>
+            <td><span class="badge badge-${r.estado}">${r.estado}</span></td>
+            <td style="font-size:12px;color:var(--text-muted)">${fecha}</td>
+            <td>
+              <div class="acciones">
+                ${esPendiente ? `
+                  <button class="btn-aprobar" onclick="moderarReview(${r.id}, 'aprobada')">Aprobar</button>
+                  <button class="btn-rechazar" onclick="moderarReview(${r.id}, 'rechazada')">Rechazar</button>
+                ` : `
+                  <button class="btn-del" onclick="eliminarReview(${r.id})">Borrar</button>
+                `}
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    const totalPags = Math.ceil((data.total || 0) / 20) || 1;
+    document.getElementById("pag-reviews-info").textContent = `Página ${pagina} de ${totalPags} · ${data.total} reseñas`;
+    document.getElementById("btn-rev-prev").disabled = pagina <= 1;
+    document.getElementById("btn-rev-next").disabled = pagina >= totalPags;
   }
+
+  async function moderarReview(id, estado) {
+    const accion = estado === "aprobada" ? "aprobar" : "rechazar";
+    if (!confirm(`¿Seguro que quieres ${accion} esta reseña?`)) return;
+    const res = await fetch(`${API}/admin/reviews/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", "x-admin-secret": secret },
+      body: JSON.stringify({ estado }),
+    });
+    if (res.ok) {
+      toast(estado === "aprobada" ? "Reseña aprobada ✅" : "Reseña rechazada", "ok");
+      cargarReviews(paginaReviews);
+      cargarStats();
+    } else {
+      toast("Error al moderar", "err");
+    }
+  }
+
+  async function eliminarReview(id) {
+    if (!confirm("¿Eliminar esta reseña definitivamente?")) return;
+    const res = await fetch(`${API}/admin/reviews/${id}`, {
+      method: "DELETE",
+      headers: { "x-admin-secret": secret },
+    });
+    if (res.ok) {
+      toast("Reseña eliminada", "ok");
+      cargarReviews(paginaReviews);
+      cargarStats();
+    } else {
+      toast("Error al eliminar", "err");
+    }
+  }
+
+  function irPagina(delta) { cargarProductos(paginaActual + delta); }
+  function irPaginaReviews(delta) { cargarReviews(paginaReviews + delta); }
 
   function debounceBuscar() {
     clearTimeout(debounceTimer);
@@ -650,10 +772,10 @@
 
   async function guardarEdicion() {
     const body = {
-      nombre:       document.getElementById("edit-nombre").value,
-      marca:        document.getElementById("edit-marca").value,
+      nombre:        document.getElementById("edit-nombre").value,
+      marca:         document.getElementById("edit-marca").value,
       estado_gluten: document.getElementById("edit-estado").value,
-      ingredientes: document.getElementById("edit-ingredientes").value,
+      ingredientes:  document.getElementById("edit-ingredientes").value,
       justificacion: document.getElementById("edit-justificacion").value,
     };
     const res = await fetch(`${API}/admin/producto/${encodeURIComponent(eanEditando)}`, {
@@ -694,7 +816,9 @@
   }
 
   function esc(str) {
-    return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+    return String(str)
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
   }
 
   document.getElementById("modal-bg").addEventListener("click", e => {
