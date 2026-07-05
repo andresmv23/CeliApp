@@ -17,8 +17,10 @@ app = FastAPI(title="CeliApp API")
 
 inicializar_base_datos()
 
-# ── Session middleware (necesario para OAuth flow) ─────────────────────────────
-SESSION_SECRET = os.getenv("SESSION_SECRET", "cambia-esto-por-algo-aleatorio")
+# ── Session middleware ───────────────────────────────────────────────────────────────
+SESSION_SECRET = os.getenv("SESSION_SECRET")
+if not SESSION_SECRET:
+    raise RuntimeError("SESSION_SECRET no está configurado en las variables de entorno")
 app.add_middleware(SessionMiddleware, secret_key=SESSION_SECRET)
 
 # ── Rate limiting ─────────────────────────────────────────────────────────────
