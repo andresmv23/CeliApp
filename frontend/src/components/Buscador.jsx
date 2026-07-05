@@ -26,7 +26,7 @@ const DEMO_RESULTS = {
 
 const REVIEWS = [
   { nombre: 'María G.', ciudad: 'Madrid', texto: 'Desde que uso CeliApp hago la compra sin estrés. Antes tardaba el doble leyendo etiquetas con lupa.', estrellas: 5, tiempo: 'hace 2 días' },
-  { nombre: 'Carlos R.', ciudad: 'Barcelona', texto: 'Por fin una app que entiende que "puede contener trazas" no es lo mismo que "sin gluten". Muy precisa.', estrellas: 5, tiempo: 'hace 1 semana' },
+  { nombre: 'Carlos R.', ciudad: 'Barcelona', texto: 'Por fin una app que entiende que \"puede contener trazas\" no es lo mismo que \"sin gluten\". Muy precisa.', estrellas: 5, tiempo: 'hace 1 semana' },
   { nombre: 'Ana P.', ciudad: 'Sevilla', texto: 'Mi hija tiene celiaquía y esta app nos ha cambiado la vida. Escaneamos todo antes de comprar.', estrellas: 5, tiempo: 'hace 2 semanas' },
   { nombre: 'David M.', ciudad: 'Valencia', texto: 'Interfaz clarísima. El código de colores APTO/NO APTO se ve de un vistazo aunque tengas prisa.', estrellas: 4, tiempo: 'hace 3 semanas' },
   { nombre: 'Laura S.', ciudad: 'Bilbao', texto: 'Llevo años buscando algo así. La base de datos es enorme, casi todos los productos que escaneo están.', estrellas: 5, tiempo: 'hace 1 mes' },
@@ -295,17 +295,34 @@ export default function Buscador() {
               <div className="max-w-2xl rounded-3xl overflow-hidden"
                 style={{ boxShadow: '0 12px 48px rgba(0,0,0,0.10)', border: '1px solid rgba(0,0,0,0.05)' }}>
 
+                {/* BLOQUE DE JUSTIFICACIÓN (verde/rojo/amarillo) */}
                 <div className="px-7 py-6 flex items-start justify-between gap-4"
                   style={{ background: `linear-gradient(135deg, ${cfg.gradStart}, ${cfg.gradEnd})` }}>
-                  <div>
+                  <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2.5">
                       <span className="w-9 h-9 rounded-full flex items-center justify-center font-black text-white text-sm"
                         style={{ background: cfg.bg }}>{cfg.icon}</span>
                       <span className="text-base font-black uppercase tracking-widest" style={{ color: cfg.text }}>{cfg.label}</span>
                     </div>
-                    <p className="text-sm leading-relaxed max-w-md" style={{ color: cfg.text, opacity: 0.85 }}>
+                    <p className="text-sm leading-relaxed max-w-md mb-3" style={{ color: cfg.text, opacity: 0.85 }}>
                       {resultado.analisis?.motivo ?? 'Análisis no disponible'}
                     </p>
+                    {/* FUENTE — movida aquí, dentro del bloque de justificación */}
+                    <div style={{ opacity: 0.65 }}>
+                      <span className="text-xs" style={{ color: cfg.text }}>
+                        Fuente: {fuenteTexto}
+                      </span>
+                      {urlFuente && (
+                        <>
+                          {' · '}
+                          <a href={urlFuente} target="_blank" rel="noopener noreferrer"
+                            className="text-xs underline underline-offset-2 transition-opacity hover:opacity-100"
+                            style={{ color: cfg.text }}>
+                            Ver fuente original
+                          </a>
+                        </>
+                      )}
+                    </div>
                   </div>
                   <button onClick={toggleFavorito}
                     className="shrink-0 w-9 h-9 rounded-full bg-white flex items-center justify-center transition-all hover:scale-110"
@@ -397,7 +414,8 @@ export default function Buscador() {
                       </div>
                     )}
 
-                    <div className="flex items-center justify-between pt-1">
+                    {/* FOOTER del card — solo "Nueva búsqueda" */}
+                    <div className="flex items-center pt-1">
                       <button onClick={() => { setResultado(null); setEan(''); setWrongCount(0); }}
                         className="text-xs font-medium text-gray-400 hover:text-emerald-600 flex items-center gap-1.5 transition-colors">
                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -405,17 +423,6 @@ export default function Buscador() {
                         </svg>
                         Nueva búsqueda
                       </button>
-                      <div className="text-right">
-                        <span className="block text-xs text-gray-300">
-                          Fuente: {fuenteTexto}
-                        </span>
-                        {urlFuente && (
-                          <a href={urlFuente} target="_blank" rel="noopener noreferrer"
-                            className="block text-xs text-emerald-500 hover:text-emerald-600 transition-colors underline underline-offset-2 mt-1">
-                            Ver fuente original
-                          </a>
-                        )}
-                      </div>
                     </div>
                   </div>
                 </div>
