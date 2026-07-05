@@ -10,7 +10,7 @@ PERPLEXITY_URL = "https://api.perplexity.ai/chat/completions"
 
 
 # ───────────────────────────────────────────────────────────────────────────────
-default _call_ia(prompt: str, timeout: int = 25) -> str | None:
+def _call_ia(prompt: str, timeout: int = 25) -> str | None:
     """Llamada genérica a Perplexity sonar. Devuelve el contenido raw o None."""
     try:
         response = requests.post(
@@ -86,7 +86,7 @@ def encontrar_imagen_producto(nombre: str, marca: str) -> str | None:
     Busca una URL de imagen de calidad para un producto dado su nombre y marca.
     Devuelve la URL directa a la imagen o None si no la encuentra.
     """
-    print(f"\n\U0001f5bc\ufe0f  [IA] Buscando imagen: {marca} - {nombre}")
+    print(f"\n\U0001f5bc\ufe0f [IA] Buscando imagen: {marca} - {nombre}")
 
     prompt = f"""Busca en internet una imagen oficial de buena calidad del siguiente producto alimenticio:
 Nombre: "{nombre}"
@@ -268,7 +268,7 @@ Si no puedes identificar el producto con claridad, devuelve encontrado: false y 
         status_code = e.response.status_code if e.response else 0
         print(f"\n\u274c HTTP Error sonar-pro: {status_code}")
         if status_code == 400:
-            return _error_vision("La imagen no pudo procesarse. Asgúrate de enfocar bien la etiqueta.")
+            return _error_vision("La imagen no pudo procesarse. Asegúrate de enfocar bien la etiqueta.")
         return _error_vision(f"Error del servidor de IA ({status_code}).")
 
     except Exception as e:
