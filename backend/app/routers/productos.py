@@ -85,7 +85,7 @@ def buscar_producto_inteligente(
             if current_user:
                 guardar_en_historial(current_user["id"], ean)
             return {
-                "fuente": "BASE_DE_DATOS_PROPIA",
+                "fuente": producto_db["tipo_fuente"] or "DESCONOCIDA",
                 "producto": {
                     "nombre": producto_db["nombre"],
                     "marca": producto_db["marca"],

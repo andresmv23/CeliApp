@@ -405,21 +405,17 @@ export default function Buscador() {
                         </svg>
                         Nueva búsqueda
                       </button>
-                      <span className="text-xs text-gray-300">
-                        Fuente:{' '}
-                        {urlFuente ? (
-                          <a
-                            href={urlFuente}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="hover:text-emerald-500 transition-colors underline underline-offset-2"
-                          >
-                            {fuenteTexto}
+                      <div className="text-right">
+                        <span className="block text-xs text-gray-300">
+                          Fuente: {fuenteTexto}
+                        </span>
+                        {urlFuente && (
+                          <a href={urlFuente} target="_blank" rel="noopener noreferrer"
+                            className="block text-xs text-emerald-500 hover:text-emerald-600 transition-colors underline underline-offset-2 mt-1">
+                            Ver fuente original
                           </a>
-                        ) : (
-                          fuenteTexto
                         )}
-                      </span>
+                      </div>
                     </div>
                   </div>
                 </div>
