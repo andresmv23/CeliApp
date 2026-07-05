@@ -1,9 +1,35 @@
 import { useEffect, useState } from 'react';
-import { BrowserRouter, Routes, Route, NavLink, useNavigate, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, NavLink, useNavigate, Navigate, useSearchParams } from 'react-router-dom';
 import Buscador from './components/Buscador';
 import Login from './components/Login';
 import Perfil from './components/Perfil';
 import { AuthProvider, useAuth } from './context/AuthContext';
+
+/* ─── OAuth Callback ──────────────────────────────────── */
+function OAuthCallback() {
+  const { login } = useAuth();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const token = searchParams.get('token');
+    if (token) {
+      login(token);
+      navigate('/perfil', { replace: true });
+    } else {
+      navigate('/login', { replace: true });
+    }
+  }, []);
+
+  return (
+    <div className="min-h-screen flex items-center justify-center" style={{ background: '#070d0a' }}>
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-10 h-10 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+        <p className="text-sm" style={{ color: 'rgba(240,253,244,0.4)' }}>Iniciando sesión...</p>
+      </div>
+    </div>
+  );
+}
 
 /* ─── Navbar ──────────────────────────────────────────── */
 function Navbar() {
@@ -131,12 +157,10 @@ function Navbar() {
 /* ─── Ruta protegida ──────────────────────────────────── */
 function ProtectedRoute({ children }) {
   const { isAuthenticated } = useAuth();
-  // Sin replace: true para que el historial permita volver atrás
   return isAuthenticated ? children : <Navigate to="/login" />;
 }
 
 /* ─── Layout principal ────────────────────────────────── */
-// Login ahora está DENTRO del layout — tiene Navbar y el botón atrás funciona
 function MainLayout() {
   return (
     <div className="min-h-screen w-full relative overflow-x-hidden font-sans" style={{ background: '#070d0a' }}>
@@ -146,6 +170,7 @@ function MainLayout() {
           <Routes>
             <Route path="/" element={<Buscador />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/oauth-callback" element={<OAuthCallback />} />
             <Route
               path="/perfil"
               element={
