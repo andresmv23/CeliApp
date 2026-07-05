@@ -38,10 +38,24 @@ def inicializar_base_datos():
             CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
                 email VARCHAR(255) UNIQUE NOT NULL,
-                hashed_password VARCHAR(255) NOT NULL,
+                hashed_password VARCHAR(255),
                 full_name VARCHAR(100),
+                provider VARCHAR(20) DEFAULT 'local',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
+        """)
+
+        # ── Migraciones idempotentes ──────────────────────────────────────────
+        # Permite que usuarios OAuth no tengan contraseña
+        print("🔨 Migrando: hashed_password nullable...")
+        cur.execute("""
+            ALTER TABLE users ALTER COLUMN hashed_password DROP NOT NULL;
+        """)
+
+        # Añade columna provider si no existe (google / local)
+        print("🔨 Migrando: columna provider...")
+        cur.execute("""
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS provider VARCHAR(20) DEFAULT 'local';
         """)
 
         print("🔨 Verificando tabla 'productos'...")
