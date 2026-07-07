@@ -13,7 +13,7 @@ export default defineConfig({
         manualChunks: {
           vendor:  ['react', 'react-dom'],
           http:    ['axios'],
-          scanner: ['@zxing/browser'],
+          scanner: ['@ericblade/quagga2'],
         },
       },
     },
