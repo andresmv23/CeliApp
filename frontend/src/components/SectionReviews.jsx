@@ -3,6 +3,12 @@ import { useAuth } from '../context/AuthContext';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
+const BG      = '#F7FAF8';
+const TEXT    = '#0D1F14';
+const MUTED   = '#4B6355';
+const PRIMARY = '#16a34a';
+const BORDER  = 'rgba(13,31,20,0.08)';
+
 function Estrellas({ valor, onChange }) {
   const [hover, setHover] = useState(0);
   return (
@@ -36,7 +42,7 @@ function ReviewCard({ review }) {
   return (
     <div
       className="rounded-2xl p-6 flex flex-col gap-3"
-      style={{ background: '#f9f9f7', border: '1px solid #e8e3dd' }}
+      style={{ background: '#fff', border: `1px solid ${BORDER}` }}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -47,14 +53,14 @@ function ReviewCard({ review }) {
             {inicial}
           </div>
           <div>
-            <p className="font-semibold text-sm" style={{ color: '#1a1a1a' }}>{review.nombre}</p>
-            {review.ciudad && <p className="text-xs" style={{ color: '#9a9490' }}>{review.ciudad}</p>}
+            <p className="font-semibold text-sm" style={{ color: TEXT }}>{review.nombre}</p>
+            {review.ciudad && <p className="text-xs" style={{ color: MUTED }}>{review.ciudad}</p>}
           </div>
         </div>
-        <span className="text-xs" style={{ color: '#b5b0ab' }}>{fecha}</span>
+        <span className="text-xs" style={{ color: 'rgba(13,31,20,0.40)' }}>{fecha}</span>
       </div>
       <Estrellas valor={review.estrellas} />
-      <p className="text-sm leading-relaxed" style={{ color: '#4a4744' }}>
+      <p className="text-sm leading-relaxed" style={{ color: 'rgba(13,31,20,0.75)' }}>
         &ldquo;{review.texto}&rdquo;
       </p>
     </div>
@@ -74,15 +80,15 @@ function ModalExito({ onClose }) {
         onClick={e => e.stopPropagation()}
       >
         <div className="text-5xl mb-4">✅</div>
-        <h3 className="text-xl font-bold mb-2" style={{ color: '#1a1a1a' }}>¡Gracias por tu reseña!</h3>
-        <p className="text-sm mb-6" style={{ color: '#6b6762' }}>
+        <h3 className="text-xl font-bold mb-2" style={{ color: TEXT }}>¡Gracias por tu reseña!</h3>
+        <p className="text-sm mb-6" style={{ color: MUTED }}>
           Tu reseña ha sido enviada y está <strong>pendiente de revisión</strong>.
           La publicaremos en cuanto la revisemos. ¡Apreciamos mucho tu opinión!
         </p>
         <button
           onClick={onClose}
           className="px-6 py-2.5 rounded-xl text-white font-semibold text-sm transition-opacity hover:opacity-90"
-          style={{ background: '#1e7e44' }}
+          style={{ background: PRIMARY }}
         >
           Entendido
         </button>
@@ -168,24 +174,24 @@ export default function SectionReviews() {
   };
 
   return (
-    <section className="w-full py-20 px-4" style={{ background: '#fff' }}>
+    <section className="w-full py-20 px-4" style={{ background: BG }}>
       <div className="max-w-6xl mx-auto">
 
         {/* Cabecera */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12">
           <div>
-            <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{ color: '#1e7e44' }}>OPINIONES</p>
-            <h2 className="text-4xl sm:text-5xl font-black leading-tight" style={{ color: '#0f1c15' }}>
+            <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{ color: PRIMARY }}>OPINIONES</p>
+            <h2 className="text-4xl sm:text-5xl font-black leading-tight" style={{ color: TEXT }}>
               Lo que dicen<br />nuestros usuarios
             </h2>
           </div>
           {mediaEstrellas && (
             <div
               className="rounded-2xl p-5 shrink-0 flex items-center gap-4"
-              style={{ background: '#f5f3ef', border: '1px solid #e2ddd8', minWidth: 180 }}
+              style={{ background: '#fff', border: `1px solid ${BORDER}`, minWidth: 180 }}
             >
               <div>
-                <p className="text-4xl font-black" style={{ color: '#0f1c15' }}>{mediaEstrellas}</p>
+                <p className="text-4xl font-black" style={{ color: TEXT }}>{mediaEstrellas}</p>
                 <div className="flex gap-0.5 mt-1">
                   {[1,2,3,4,5].map(n => (
                     <span key={n} style={{ color: n <= Math.round(Number(mediaEstrellas)) ? '#f59e0b' : '#d1d5db', fontSize: 16 }}>★</span>
@@ -193,8 +199,8 @@ export default function SectionReviews() {
                 </div>
               </div>
               <div>
-                <p className="text-sm font-medium" style={{ color: '#6b6762' }}>Valoración media</p>
-                <p className="text-xs" style={{ color: '#9a9490' }}>+{reviews.length} reseñas</p>
+                <p className="text-sm font-medium" style={{ color: MUTED }}>Valoración media</p>
+                <p className="text-xs" style={{ color: 'rgba(13,31,20,0.45)' }}>+{reviews.length} reseñas</p>
               </div>
             </div>
           )}
@@ -202,7 +208,7 @@ export default function SectionReviews() {
 
         {/* Estado cargando */}
         {cargando && (
-          <div className="text-center py-16" style={{ color: '#9a9490' }}>
+          <div className="text-center py-16" style={{ color: MUTED }}>
             <div className="text-4xl mb-3 animate-pulse">🌾</div>
             <p>Cargando reseñas...</p>
           </div>
@@ -212,19 +218,29 @@ export default function SectionReviews() {
         {!cargando && reviews.length === 0 && (
           <div
             className="rounded-2xl p-10 text-center mb-10"
-            style={{ background: '#f9f9f7', border: '2px dashed #d6d0c9' }}
+            style={{ background: '#fff', border: `2px dashed ${BORDER}` }}
           >
-            <div className="text-5xl mb-4">🌾</div>
-            <p className="text-lg font-semibold mb-2" style={{ color: '#1a1a1a' }}>
+            <div className="text-5xl mb-4">
+              <svg width="48" height="48" viewBox="0 0 32 32" fill="none" style={{ margin: '0 auto' }}>
+                <rect width="32" height="32" rx="9" fill="#16a34a" />
+                <path d="M16 24 L16 10" stroke="white" strokeWidth="1.6" strokeLinecap="round" />
+                <ellipse cx="16" cy="13" rx="3" ry="1.8" fill="white" opacity="0.9" transform="rotate(-30 16 13)" />
+                <ellipse cx="16" cy="13" rx="3" ry="1.8" fill="white" opacity="0.9" transform="rotate(30 16 13)" />
+                <ellipse cx="16" cy="17" rx="3" ry="1.8" fill="white" opacity="0.75" transform="rotate(-20 16 17)" />
+                <ellipse cx="16" cy="17" rx="3" ry="1.8" fill="white" opacity="0.75" transform="rotate(20 16 17)" />
+                <line x1="9" y1="9" x2="23" y2="23" stroke="white" strokeWidth="1.8" strokeLinecap="round" opacity="0.5" />
+              </svg>
+            </div>
+            <p className="text-lg font-semibold mb-2" style={{ color: TEXT }}>
               Todavía no hay reseñas
             </p>
-            <p className="text-sm mb-6" style={{ color: '#6b6762' }}>
+            <p className="text-sm mb-6" style={{ color: MUTED }}>
               Sé el primero en compartir tu experiencia con CeliApp.
             </p>
             <button
               onClick={() => setMostrarFormulario(true)}
               className="px-6 py-2.5 rounded-xl text-white font-semibold text-sm transition-opacity hover:opacity-90"
-              style={{ background: '#1e7e44' }}
+              style={{ background: PRIMARY }}
             >
               ¡Deja tu reseña!
             </button>
@@ -244,7 +260,7 @@ export default function SectionReviews() {
             <button
               onClick={() => setMostrarFormulario(true)}
               className="px-6 py-2.5 rounded-xl font-semibold text-sm transition-all hover:opacity-90"
-              style={{ background: '#f0fdf4', color: '#1e7e44', border: '1px solid rgba(30,126,68,0.3)' }}
+              style={{ background: '#fff', color: PRIMARY, border: `1px solid rgba(22,163,74,0.30)` }}
             >
               ✍️ Dejar mi reseña
             </button>
@@ -255,10 +271,10 @@ export default function SectionReviews() {
         {mostrarFormulario && (
           <div
             className="rounded-2xl p-6 sm:p-8 mt-8"
-            style={{ background: '#f9f9f7', border: '1px solid #e2ddd8' }}
+            style={{ background: '#fff', border: `1px solid ${BORDER}` }}
           >
-            <h3 className="text-xl font-bold mb-1" style={{ color: '#0f1c15' }}>Escribe tu reseña</h3>
-            <p className="text-sm mb-6" style={{ color: '#6b6762' }}>
+            <h3 className="text-xl font-bold mb-1" style={{ color: TEXT }}>Escribe tu reseña</h3>
+            <p className="text-sm mb-6" style={{ color: MUTED }}>
               {isAuthenticated
                 ? `Hola, ${user?.full_name?.split(' ')[0] || 'usuario'} 👋 Solo necesitamos tu opinión.`
                 : 'Cuéntanos tu experiencia. Tu reseña se publicará tras revisión.'}
@@ -270,25 +286,25 @@ export default function SectionReviews() {
               {!isAuthenticated && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-semibold mb-1 uppercase tracking-wide" style={{ color: '#6b6762' }}>Nombre *</label>
+                    <label className="block text-xs font-semibold mb-1 uppercase tracking-wide" style={{ color: MUTED }}>Nombre *</label>
                     <input
                       type="text"
                       value={form.nombre}
                       onChange={e => handleChange('nombre', e.target.value)}
                       placeholder="Tu nombre"
                       className="w-full px-3 py-2.5 rounded-xl text-sm outline-none transition-all"
-                      style={{ background: '#fff', border: '1px solid #d6d0c9', color: '#1a1a1a' }}
+                      style={{ background: BG, border: `1px solid ${BORDER}`, color: TEXT }}
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold mb-1 uppercase tracking-wide" style={{ color: '#6b6762' }}>Email *</label>
+                    <label className="block text-xs font-semibold mb-1 uppercase tracking-wide" style={{ color: MUTED }}>Email *</label>
                     <input
                       type="email"
                       value={form.email}
                       onChange={e => handleChange('email', e.target.value)}
                       placeholder="tu@email.com"
                       className="w-full px-3 py-2.5 rounded-xl text-sm outline-none transition-all"
-                      style={{ background: '#fff', border: '1px solid #d6d0c9', color: '#1a1a1a' }}
+                      style={{ background: BG, border: `1px solid ${BORDER}`, color: TEXT }}
                     />
                   </div>
                 </div>
@@ -296,39 +312,39 @@ export default function SectionReviews() {
 
               {/* Ciudad — todos */}
               <div>
-                <label className="block text-xs font-semibold mb-1 uppercase tracking-wide" style={{ color: '#6b6762' }}>Ciudad (opcional)</label>
+                <label className="block text-xs font-semibold mb-1 uppercase tracking-wide" style={{ color: MUTED }}>Ciudad (opcional)</label>
                 <input
                   type="text"
                   value={form.ciudad}
                   onChange={e => handleChange('ciudad', e.target.value)}
                   placeholder="Madrid, Barcelona..."
                   className="w-full sm:w-1/2 px-3 py-2.5 rounded-xl text-sm outline-none"
-                  style={{ background: '#fff', border: '1px solid #d6d0c9', color: '#1a1a1a' }}
+                  style={{ background: BG, border: `1px solid ${BORDER}`, color: TEXT }}
                 />
               </div>
 
               {/* Puntuación */}
               <div>
-                <label className="block text-xs font-semibold mb-2 uppercase tracking-wide" style={{ color: '#6b6762' }}>Puntuación *</label>
+                <label className="block text-xs font-semibold mb-2 uppercase tracking-wide" style={{ color: MUTED }}>Puntuación *</label>
                 <Estrellas valor={form.estrellas} onChange={v => handleChange('estrellas', v)} />
               </div>
 
               {/* Texto */}
               <div>
-                <label className="block text-xs font-semibold mb-1 uppercase tracking-wide" style={{ color: '#6b6762' }}>Tu reseña *</label>
+                <label className="block text-xs font-semibold mb-1 uppercase tracking-wide" style={{ color: MUTED }}>Tu reseña *</label>
                 <textarea
                   value={form.texto}
                   onChange={e => handleChange('texto', e.target.value)}
                   placeholder="Cuéntanos cómo te ha ayudado CeliApp..."
                   rows={4}
                   className="w-full px-3 py-2.5 rounded-xl text-sm outline-none resize-none"
-                  style={{ background: '#fff', border: '1px solid #d6d0c9', color: '#1a1a1a' }}
+                  style={{ background: BG, border: `1px solid ${BORDER}`, color: TEXT }}
                 />
               </div>
 
               {/* Error */}
               {error && (
-                <p className="text-sm font-medium" style={{ color: '#c0392b' }}>⚠️ {error}</p>
+                <p className="text-sm font-medium" style={{ color: '#dc2626' }}>⚠️ {error}</p>
               )}
 
               {/* Botones */}
@@ -337,7 +353,7 @@ export default function SectionReviews() {
                   type="submit"
                   disabled={enviando}
                   className="px-6 py-2.5 rounded-xl text-white font-semibold text-sm transition-opacity hover:opacity-90 disabled:opacity-50"
-                  style={{ background: '#1e7e44' }}
+                  style={{ background: PRIMARY }}
                 >
                   {enviando ? 'Enviando...' : 'Enviar reseña'}
                 </button>
@@ -345,7 +361,7 @@ export default function SectionReviews() {
                   type="button"
                   onClick={() => { setMostrarFormulario(false); setError(''); }}
                   className="px-6 py-2.5 rounded-xl text-sm font-medium transition-colors"
-                  style={{ background: '#f0ece8', color: '#6b6762' }}
+                  style={{ background: 'rgba(13,31,20,0.06)', color: MUTED }}
                 >
                   Cancelar
                 </button>
