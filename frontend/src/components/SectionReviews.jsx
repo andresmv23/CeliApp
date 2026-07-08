@@ -100,36 +100,6 @@ function ModalExito({ onClose }) {
   );
 }
 
-/* ─── Banda tipográfica separadora (acotada al contenedor) ──────── */
-function TickerBand() {
-  const items = Array(12).fill('SIN GLUTEN · CELIAPP ·');
-  return (
-    <div className="my-10" style={{ maxWidth: 1120, margin: '2.5rem auto', padding: '0 1.5rem' }}>
-      <div
-        style={{
-          overflow: 'hidden',
-          padding: '0.6rem 0',
-        }}
-      >
-        <div
-          className="flex gap-6 whitespace-nowrap"
-          style={{
-            animation: 'ticker 22s linear infinite',
-            fontSize: 11,
-            fontWeight: 700,
-            letterSpacing: '0.12em',
-            color: 'rgba(13,31,20,0.18)',
-            textTransform: 'uppercase',
-          }}
-        >
-          {items.map((t, i) => <span key={i}>{t}</span>)}
-        </div>
-        <style>{`@keyframes ticker { from { transform: translateX(0) } to { transform: translateX(-50%) } }`}</style>
-      </div>
-    </div>
-  );
-}
-
 /* ─── Sección principal ───────────────────────────────────────────── */
 export default function SectionReviews() {
   const { user, token, isAuthenticated } = useAuth();
@@ -210,7 +180,6 @@ export default function SectionReviews() {
   return (
     <section className="w-full py-20" style={{ background: BG }}>
 
-      {/* Contenedor alineado con el resto de secciones */}
       <div style={{ maxWidth: 1120, margin: '0 auto', padding: '0 1.5rem' }}>
 
         {/* Cabecera */}
@@ -303,16 +272,9 @@ export default function SectionReviews() {
           </div>
         )}
 
-      </div>
-
-      {/* Banda tipográfica separadora — fuera del contenedor pero acotada por su propio maxWidth */}
-      {!cargando && <TickerBand />}
-
-      <div style={{ maxWidth: 1120, margin: '0 auto', padding: '0 1.5rem' }}>
-
         {/* Botón dejar reseña (cuando ya hay reseñas) */}
         {!cargando && reviews.length > 0 && !mostrarFormulario && (
-          <div className="text-center">
+          <div className="text-center mt-8">
             <button
               onClick={() => setMostrarFormulario(true)}
               className="px-6 py-2.5 rounded-xl font-semibold text-sm transition-all hover:opacity-90"
@@ -326,7 +288,7 @@ export default function SectionReviews() {
         {/* Formulario */}
         {mostrarFormulario && (
           <div
-            className="rounded-2xl p-6 sm:p-8"
+            className="rounded-2xl p-6 sm:p-8 mt-8"
             style={{ background: '#fff', border: `1px solid ${BORDER}` }}
           >
             <h3 className="text-xl font-bold mb-1" style={{ color: TEXT }}>Escribe tu reseña</h3>
@@ -338,7 +300,6 @@ export default function SectionReviews() {
 
             <form onSubmit={handleEnviar} className="flex flex-col gap-4">
 
-              {/* Campos solo para no logueados */}
               {!isAuthenticated && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
@@ -366,7 +327,6 @@ export default function SectionReviews() {
                 </div>
               )}
 
-              {/* Ciudad — todos */}
               <div>
                 <label className="block text-xs font-semibold mb-1 uppercase tracking-wide" style={{ color: MUTED }}>Ciudad (opcional)</label>
                 <input
@@ -379,13 +339,11 @@ export default function SectionReviews() {
                 />
               </div>
 
-              {/* Puntuación */}
               <div>
                 <label className="block text-xs font-semibold mb-2 uppercase tracking-wide" style={{ color: MUTED }}>Puntuación *</label>
                 <Estrellas valor={form.estrellas} onChange={v => handleChange('estrellas', v)} />
               </div>
 
-              {/* Texto */}
               <div>
                 <label className="block text-xs font-semibold mb-1 uppercase tracking-wide" style={{ color: MUTED }}>Tu reseña *</label>
                 <textarea
@@ -398,12 +356,10 @@ export default function SectionReviews() {
                 />
               </div>
 
-              {/* Error */}
               {error && (
                 <p className="text-sm font-medium" style={{ color: '#dc2626' }}>⚠️ {error}</p>
               )}
 
-              {/* Botones */}
               <div className="flex gap-3 pt-1">
                 <button
                   type="submit"

@@ -46,7 +46,7 @@ function useReveal() {
   }, []);
 }
 
-/* Divisor sutil entre secciones — línea con degradado que se disuelve en los extremos */
+/* Divisor sutil entre secciones */
 function SectionDivider() {
   return (
     <div aria-hidden="true" style={{
@@ -55,6 +55,31 @@ function SectionDivider() {
       margin: '0',
       flexShrink: 0,
     }} />
+  );
+}
+
+/* Banda tipográfica — siempre visible, independiente de cualquier estado */
+function TickerBand() {
+  const items = Array(12).fill('SIN GLUTEN · CELIAPP ·');
+  return (
+    <div style={{ maxWidth: 1120, margin: '2.5rem auto', padding: '0 1.5rem' }}>
+      <div style={{ overflow: 'hidden', padding: '0.6rem 0' }}>
+        <div
+          className="flex gap-6 whitespace-nowrap"
+          style={{
+            animation: 'ticker 22s linear infinite',
+            fontSize: 11,
+            fontWeight: 700,
+            letterSpacing: '0.12em',
+            color: 'rgba(13,31,20,0.18)',
+            textTransform: 'uppercase',
+          }}
+        >
+          {items.map((t, i) => <span key={i}>{t}</span>)}
+        </div>
+        <style>{`@keyframes ticker { from { transform: translateX(0) } to { transform: translateX(-50%) } }`}</style>
+      </div>
+    </div>
   );
 }
 
@@ -441,7 +466,7 @@ export default function Buscador() {
           </section>
         )}
 
-        {/* ── Divisor: (Resultado /) Hero → Cómo funciona ── */}
+        {/* ── Divisor: Hero → Cómo funciona ── */}
         <SectionDivider />
 
         {/* ══════════════════ CÓMO FUNCIONA ══════════════════ */}
@@ -473,6 +498,9 @@ export default function Buscador() {
 
         {/* ══════════════════ REVIEWS ══════════════════ */}
         <SectionReviews bg={BG_ALT} />
+
+        {/* ── Ticker independiente entre Reviews y Contacto — siempre visible ── */}
+        <TickerBand />
 
         {/* ══════════════════ CONTACTO ══════════════════ */}
         <section style={{ background: BG, paddingTop: '5rem', paddingBottom: '5.5rem' }} id="sobre-celiapp">
@@ -539,13 +567,8 @@ export default function Buscador() {
 
         {/* ══════════════════ FOOTER ══════════════════ */}
         <footer style={{ background: BG }}>
-
-          {/* Línea divisoria full-width */}
           <div style={{ width: '100%', height: '1px', background: BORDER }} />
-
-          {/* Contenido principal del footer */}
           <div style={{ ...container, paddingTop: '3.5rem', paddingBottom: '3rem' }}>
-
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'minmax(200px, 1.5fr) repeat(3, 1fr)',
@@ -553,8 +576,6 @@ export default function Buscador() {
               marginBottom: '3rem',
               alignItems: 'start',
             }}>
-
-              {/* Logo + tagline */}
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.875rem' }}>
                   <svg width="28" height="28" viewBox="0 0 32 32" fill="none" aria-hidden="true">
@@ -566,36 +587,12 @@ export default function Buscador() {
                     <ellipse cx="16" cy="17" rx="3" ry="1.8" fill="white" opacity="0.75" transform="rotate(20 16 17)" />
                     <line x1="9" y1="9" x2="23" y2="23" stroke="white" strokeWidth="1.8" strokeLinecap="round" opacity="0.5" />
                   </svg>
-                  <span style={{
-                    fontFamily: "var(--font-display, 'Fraunces', Georgia, serif)",
-                    fontWeight: 700,
-                    color: TEXT,
-                    fontSize: '1rem',
-                  }}>CeliApp</span>
+                  <span style={{ fontFamily: "var(--font-display, 'Fraunces', Georgia, serif)", fontWeight: 700, color: TEXT, fontSize: '1rem' }}>CeliApp</span>
                 </div>
-                <p style={{
-                  fontSize: '0.875rem',
-                  color: MUTED,
-                  lineHeight: 1.65,
-                  maxWidth: '220px',
-                  marginBottom: '1.25rem',
-                }}>
+                <p style={{ fontSize: '0.875rem', color: MUTED, lineHeight: 1.65, maxWidth: '220px', marginBottom: '1.25rem' }}>
                   Análisis de gluten al instante. Para que comer bien no sea una aventura.
                 </p>
-                <span style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.35rem',
-                  padding: '0.3rem 0.75rem',
-                  borderRadius: '9999px',
-                  fontSize: '0.72rem',
-                  fontWeight: 700,
-                  letterSpacing: '0.07em',
-                  textTransform: 'uppercase',
-                  background: 'rgba(22,163,74,0.08)',
-                  color: PRIMARY,
-                  border: '1px solid rgba(22,163,74,0.20)',
-                }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', padding: '0.3rem 0.75rem', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', background: 'rgba(22,163,74,0.08)', color: PRIMARY, border: '1px solid rgba(22,163,74,0.20)' }}>
                   <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
                     <circle cx="6" cy="6" r="5.5" stroke={PRIMARY} strokeWidth="1" />
                     <path d="M3.5 6l1.8 1.8L8.5 4.2" stroke={PRIMARY} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
@@ -603,42 +600,33 @@ export default function Buscador() {
                   Sin gluten verificado
                 </span>
               </div>
-
-              {/* Col 1: Producto */}
               <div>
                 <p style={{ fontSize: '0.72rem', fontWeight: 700, color: 'rgba(13,31,20,0.38)', textTransform: 'uppercase', letterSpacing: '0.09em', marginBottom: '1rem' }}>Producto</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
                   {['Cómo funciona', 'Verificar producto', 'Análisis por foto', 'Favoritos'].map(l => (
-                    <a key={l} href="#"
-                      style={{ fontSize: '0.875rem', color: MUTED, textDecoration: 'none', transition: 'color 180ms ease' }}
+                    <a key={l} href="#" style={{ fontSize: '0.875rem', color: MUTED, textDecoration: 'none', transition: 'color 180ms ease' }}
                       onMouseEnter={e => e.currentTarget.style.color = TEXT}
                       onMouseLeave={e => e.currentTarget.style.color = MUTED}
                     >{l}</a>
                   ))}
                 </div>
               </div>
-
-              {/* Col 2: Empresa */}
               <div>
                 <p style={{ fontSize: '0.72rem', fontWeight: 700, color: 'rgba(13,31,20,0.38)', textTransform: 'uppercase', letterSpacing: '0.09em', marginBottom: '1rem' }}>Empresa</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
                   {['Sobre CeliApp', 'Contacto', 'Blog', 'Colaboraciones'].map(l => (
-                    <a key={l} href="#sobre-celiapp"
-                      style={{ fontSize: '0.875rem', color: MUTED, textDecoration: 'none', transition: 'color 180ms ease' }}
+                    <a key={l} href="#sobre-celiapp" style={{ fontSize: '0.875rem', color: MUTED, textDecoration: 'none', transition: 'color 180ms ease' }}
                       onMouseEnter={e => e.currentTarget.style.color = TEXT}
                       onMouseLeave={e => e.currentTarget.style.color = MUTED}
                     >{l}</a>
                   ))}
                 </div>
               </div>
-
-              {/* Col 3: Legal */}
               <div>
                 <p style={{ fontSize: '0.72rem', fontWeight: 700, color: 'rgba(13,31,20,0.38)', textTransform: 'uppercase', letterSpacing: '0.09em', marginBottom: '1rem' }}>Legal</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
                   {['Privacidad', 'Términos de uso', 'Cookies', 'Aviso legal'].map(l => (
-                    <a key={l} href="#"
-                      style={{ fontSize: '0.875rem', color: MUTED, textDecoration: 'none', transition: 'color 180ms ease' }}
+                    <a key={l} href="#" style={{ fontSize: '0.875rem', color: MUTED, textDecoration: 'none', transition: 'color 180ms ease' }}
                       onMouseEnter={e => e.currentTarget.style.color = TEXT}
                       onMouseLeave={e => e.currentTarget.style.color = MUTED}
                     >{l}</a>
@@ -646,18 +634,8 @@ export default function Buscador() {
                 </div>
               </div>
             </div>
-
-            {/* Línea separadora interna */}
             <div style={{ height: '1px', background: BORDER, marginBottom: '1.5rem' }} />
-
-            {/* Fila inferior: copyright + nota */}
-            <div style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '0.75rem',
-            }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem' }}>
               <span style={{ fontSize: '0.8125rem', color: 'rgba(13,31,20,0.38)' }}>© 2026 CeliApp — Hecho con cuidado en Barcelona, España</span>
               <span style={{ fontSize: '0.8125rem', color: 'rgba(13,31,20,0.32)' }}>No sustituye el consejo médico. Verifica siempre el etiquetado.</span>
             </div>
