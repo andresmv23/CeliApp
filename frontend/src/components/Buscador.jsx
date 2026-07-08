@@ -474,9 +474,6 @@ export default function Buscador() {
         {/* ══════════════════ REVIEWS ══════════════════ */}
         <SectionReviews bg={BG_ALT} />
 
-        {/* ── Divisor: Reviews → Contacto ── */}
-        <SectionDivider />
-
         {/* ══════════════════ CONTACTO ══════════════════ */}
         <section style={{ background: BG, paddingTop: '5rem', paddingBottom: '5.5rem' }} id="sobre-celiapp">
           <div style={container}>
