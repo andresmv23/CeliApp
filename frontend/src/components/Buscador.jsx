@@ -143,12 +143,11 @@ export default function Buscador() {
     padding: '0 1.5rem',
   };
 
-  /* ── Paleta nueva: verde vivo y esperanzador ── */
   const BG      = '#F7FAF8';
   const TEXT    = '#0D1F14';
   const MUTED   = '#4B6355';
-  const PRIMARY = '#16a34a';   /* green-600 — vivo, fresco */
-  const PRI_HOV = '#15803d';   /* green-700 */
+  const PRIMARY = '#16a34a';
+  const PRI_HOV = '#15803d';
   const BORDER  = 'rgba(13,31,20,0.08)';
 
   return (
@@ -183,7 +182,6 @@ export default function Buscador() {
         }}>
           <div style={container}>
 
-            {/* Badge — sin punto animado */}
             <div className="reveal" style={{ marginBottom: '2.25rem' }}>
               <span style={{
                 display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
@@ -197,7 +195,6 @@ export default function Buscador() {
               </span>
             </div>
 
-            {/* Título */}
             <h1 className="reveal" style={{
               fontFamily: "var(--font-display, 'Fraunces', Georgia, serif)",
               fontWeight: 700,
@@ -214,7 +211,6 @@ export default function Buscador() {
               <span style={{ color: 'rgba(13,31,20,0.40)' }}>para ti?</span>
             </h1>
 
-            {/* Subtítulo */}
             <p className="reveal" style={{
               fontSize: 'clamp(1rem, 1.5vw, 1.1rem)',
               color: MUTED,
@@ -226,7 +222,6 @@ export default function Buscador() {
               Introduce el código de barras y nuestra IA analiza cada ingrediente al instante. Sin dudas, sin riesgos.
             </p>
 
-            {/* Buscador */}
             <form className="reveal" onSubmit={buscarProducto} style={{ maxWidth: '580px', marginBottom: '1rem', transitionDelay: '0.20s' }}>
               <div style={{
                 display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem',
@@ -246,7 +241,6 @@ export default function Buscador() {
                   onChange={e => setEan(e.target.value)}
                   style={{ flex: 1, padding: '0.75rem 0.5rem', background: 'transparent', border: 'none', outline: 'none', fontSize: '0.9375rem', fontFamily: 'inherit', color: TEXT }}
                 />
-                {/* Botón cámara */}
                 <button type="button" onClick={() => setScannerOpen(true)} title="Escanear código de barras"
                   style={{ padding: '0.625rem', borderRadius: '9999px', border: 'none', background: 'transparent', color: 'rgba(13,31,20,0.28)', cursor: 'pointer', display: 'flex', alignItems: 'center', transition: 'color 180ms ease' }}
                   onMouseEnter={e => e.currentTarget.style.color = PRIMARY}
@@ -257,7 +251,6 @@ export default function Buscador() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
                   </svg>
                 </button>
-                {/* Botón verificar */}
                 <button type="submit" disabled={loading || !ean.trim()}
                   style={{ padding: '0.75rem 1.375rem', borderRadius: '9999px', background: loading || !ean.trim() ? 'rgba(22,163,74,0.30)' : PRIMARY, color: '#fff', fontFamily: 'inherit', fontSize: '0.875rem', fontWeight: 600, border: 'none', cursor: loading || !ean.trim() ? 'not-allowed' : 'pointer', transition: 'background 180ms ease', display: 'flex', alignItems: 'center', gap: '0.4rem', whiteSpace: 'nowrap', flexShrink: 0 }}
                   onMouseEnter={e => { if (!loading && ean.trim()) e.currentTarget.style.background = PRI_HOV; }}
@@ -273,7 +266,6 @@ export default function Buscador() {
               </div>
             </form>
 
-            {/* Error */}
             {error && (
               <div style={{ maxWidth: '580px', padding: '0.875rem 1rem', borderRadius: '0.875rem', background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.14)', color: '#dc2626', fontSize: '0.875rem', display: 'flex', gap: '0.625rem', alignItems: 'flex-start', marginBottom: '1rem' }}>
                 <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} style={{ marginTop: '1px', flexShrink: 0 }}>
@@ -283,7 +275,6 @@ export default function Buscador() {
               </div>
             )}
 
-            {/* Recientes — sin puntos de color */}
             <div className="reveal" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.5rem', marginBottom: '3.5rem', transitionDelay: '0.26s' }}>
               <span style={{ fontSize: '0.8125rem', color: 'rgba(13,31,20,0.45)', fontWeight: 500 }}>Recientes:</span>
               {['Avena Quaker', 'Maizena', 'Pan Bimbo'].map(label => (
@@ -297,7 +288,6 @@ export default function Buscador() {
               ))}
             </div>
 
-            {/* Stats — integradas como línea editorial, no 3 columnas */}
             <div className="reveal" style={{ transitionDelay: '0.32s' }}>
               <p style={{
                 fontSize: '0.8125rem',
@@ -324,7 +314,6 @@ export default function Buscador() {
             <div style={container}>
               <p style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(13,31,20,0.45)', marginBottom: '1.5rem' }}>Resultado del análisis</p>
               <div style={{ maxWidth: '640px', borderRadius: '1.5rem', overflow: 'hidden', boxShadow: '0 8px 40px rgba(13,31,20,0.07)', border: `1px solid ${BORDER}` }}>
-                {/* Cabecera resultado */}
                 <div style={{ padding: '1.75rem', background: `linear-gradient(135deg, ${cfg.gradStart}, ${cfg.gradEnd})`, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem' }}>
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
@@ -349,7 +338,6 @@ export default function Buscador() {
                   </button>
                 </div>
 
-                {/* Cuerpo resultado */}
                 <div style={{ background: '#fff' }}>
                   {resultado.producto?.imagen_url && (
                     <div style={{ width: '100%', height: '260px', position: 'relative', overflow: 'hidden', borderBottom: `1px solid ${BORDER}` }}>
@@ -445,36 +433,14 @@ export default function Buscador() {
               <h2 style={{ fontFamily: "var(--font-display, 'Fraunces', Georgia, serif)", fontSize: 'clamp(1.875rem, 4vw, 3rem)', fontWeight: 700, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.02em' }}>Tres pasos.<br />Resultado inmediato.</h2>
             </div>
 
-            {/* Layout asimétrico: paso 01 ocupa más ancho */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1px', background: BORDER, borderRadius: '1.25rem', overflow: 'hidden' }}>
               {[
-                {
-                  num: '01',
-                  titulo: 'Introduce el código',
-                  desc: 'Escribe manualmente el código EAN o usa la cámara para escanearlo directamente desde el envase.',
-                  ancho: 'auto',
-                },
-                {
-                  num: '02',
-                  titulo: 'La IA lo analiza',
-                  desc: 'Nuestra IA revisa cada ingrediente, aditivo y posible traza de gluten en segundos.',
-                  ancho: 'auto',
-                },
-                {
-                  num: '03',
-                  titulo: 'Respuesta clara',
-                  desc: 'Recibes APTO, NO APTO o DUDOSO con la explicación exacta del motivo.',
-                  ancho: 'auto',
-                },
+                { num: '01', titulo: 'Introduce el código', desc: 'Escribe manualmente el código EAN o usa la cámara para escanearlo directamente desde el envase.' },
+                { num: '02', titulo: 'La IA lo analiza', desc: 'Nuestra IA revisa cada ingrediente, aditivo y posible traza de gluten en segundos.' },
+                { num: '03', titulo: 'Respuesta clara', desc: 'Recibes APTO, NO APTO o DUDOSO con la explicación exacta del motivo.' },
               ].map(({ num, titulo, desc }) => (
                 <div key={num} className="reveal" style={{ padding: '2rem 1.75rem', background: '#fff' }}>
-                  <span style={{
-                    display: 'block',
-                    fontSize: '0.72rem', fontWeight: 800, letterSpacing: '0.12em',
-                    color: PRIMARY, textTransform: 'uppercase', marginBottom: '1.25rem',
-                  }}>
-                    {num}
-                  </span>
+                  <span style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, letterSpacing: '0.12em', color: PRIMARY, textTransform: 'uppercase', marginBottom: '1.25rem' }}>{num}</span>
                   <h3 style={{ fontWeight: 700, color: TEXT, fontSize: '1.0625rem', lineHeight: 1.3, marginBottom: '0.625rem' }}>{titulo}</h3>
                   <p style={{ color: MUTED, fontSize: '0.875rem', lineHeight: 1.65 }}>{desc}</p>
                 </div>
@@ -549,10 +515,22 @@ export default function Buscador() {
           </div>
         </section>
 
-        {/* ══════════════════ FOOTER ══════════════════ */}
-        <footer style={{ background: '#0D1F14', paddingTop: '3.5rem', paddingBottom: '3.5rem' }}>
-          <div style={container}>
-            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1.5rem', paddingBottom: '2rem', marginBottom: '2rem', borderBottom: '1px solid rgba(255,255,255,0.10)' }}>
+        {/* ══════════════════ FOOTER estilo Yuka ══════════════════ */}
+        <footer style={{ background: BG, position: 'relative', overflow: 'hidden', paddingTop: '4rem' }}>
+
+          {/* Contenido del footer */}
+          <div style={{ ...container, position: 'relative', zIndex: 1, paddingBottom: '2rem' }}>
+            <div style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '1.5rem',
+              paddingBottom: '1.75rem',
+              marginBottom: '1.75rem',
+              borderBottom: `1px solid ${BORDER}`,
+            }}>
+              {/* Logo + nombre */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                 <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
                   <rect width="32" height="32" rx="9" fill="#16a34a" />
@@ -563,19 +541,83 @@ export default function Buscador() {
                   <ellipse cx="16" cy="17" rx="3" ry="1.8" fill="white" opacity="0.75" transform="rotate(20 16 17)" />
                   <line x1="9" y1="9" x2="23" y2="23" stroke="white" strokeWidth="1.8" strokeLinecap="round" opacity="0.5" />
                 </svg>
-                <span style={{ fontFamily: "var(--font-display, 'Fraunces', Georgia, serif)", fontWeight: 700, color: '#F7FAF8', fontSize: '1.125rem' }}>CeliApp</span>
+                <span style={{ fontFamily: "var(--font-display, 'Fraunces', Georgia, serif)", fontWeight: 700, color: TEXT, fontSize: '1.125rem' }}>CeliApp</span>
               </div>
+
+              {/* Links */}
               <div style={{ display: 'flex', gap: '2rem' }}>
                 {['Privacidad', 'Términos'].map(l => (
-                  <a key={l} href="#" style={{ fontSize: '0.875rem', color: 'rgba(247,250,248,0.65)', textDecoration: 'none', transition: 'color 180ms ease' }}
-                    onMouseEnter={e => e.currentTarget.style.color = '#F7FAF8'}
-                    onMouseLeave={e => e.currentTarget.style.color = 'rgba(247,250,248,0.65)'}
+                  <a key={l} href="#"
+                    style={{ fontSize: '0.875rem', color: MUTED, textDecoration: 'none', transition: 'color 180ms ease' }}
+                    onMouseEnter={e => e.currentTarget.style.color = TEXT}
+                    onMouseLeave={e => e.currentTarget.style.color = MUTED}
                   >{l}</a>
                 ))}
               </div>
             </div>
-            <p style={{ fontSize: '0.8125rem', color: 'rgba(247,250,248,0.50)' }}>© 2026 CeliApp</p>
+
+            <p style={{ fontSize: '0.8125rem', color: 'rgba(13,31,20,0.42)', marginBottom: '0' }}>© 2026 CeliApp</p>
           </div>
+
+          {/*
+            Ilustración botánica dibujada a mano con curvas Bézier.
+            Sin rellenos degradados. Solo trazos y siluetas planas
+            en dos tonos de verde muy desaturado, igual que Yuka.
+          */}
+          <svg
+            viewBox="0 0 1440 180"
+            xmlns="http://www.w3.org/2000/svg"
+            style={{ display: 'block', width: '100%', height: 'auto', marginTop: '1rem' }}
+            aria-hidden="true"
+          >
+            {/* Colina trasera — verde muy pálido */}
+            <path
+              d="M0 140 C120 100, 280 80, 440 105 C560 122, 640 90, 780 88 C900 86, 1020 110, 1160 102 C1280 95, 1380 118, 1440 108 L1440 180 L0 180 Z"
+              fill="#c8dece"
+            />
+            {/* Colina delantera — verde medio */}
+            <path
+              d="M0 155 C80 138, 200 125, 340 132 C460 138, 560 118, 680 122 C800 126, 920 148, 1060 140 C1180 133, 1320 150, 1440 144 L1440 180 L0 180 Z"
+              fill="#8fbc9a"
+            />
+
+            {/* Árbol izquierdo — tronco */}
+            <rect x="138" y="108" width="5" height="28" rx="2" fill="#5a8a68" />
+            {/* Copa redondeada izquierda */}
+            <ellipse cx="140" cy="103" rx="18" ry="16" fill="#5a8a68" />
+            <ellipse cx="140" cy="98" rx="13" ry="11" fill="#6fa87e" />
+
+            {/* Árbol central pequeño */}
+            <rect x="598" y="112" width="4" height="20" rx="2" fill="#5a8a68" />
+            <ellipse cx="600" cy="107" rx="13" ry="12" fill="#5a8a68" />
+            <ellipse cx="600" cy="103" rx="9" ry="8" fill="#6fa87e" />
+
+            {/* Árbol derecho */}
+            <rect x="1258" y="104" width="5" height="30" rx="2" fill="#5a8a68" />
+            <ellipse cx="1260" cy="98" rx="20" ry="18" fill="#5a8a68" />
+            <ellipse cx="1260" cy="93" rx="14" ry="12" fill="#6fa87e" />
+
+            {/* Arbusto izquierda */}
+            <ellipse cx="60" cy="148" rx="28" ry="14" fill="#6fa87e" />
+            <ellipse cx="82" cy="142" rx="18" ry="11" fill="#6fa87e" />
+
+            {/* Arbusto derecha */}
+            <ellipse cx="1380" cy="150" rx="30" ry="13" fill="#5a8a68" />
+            <ellipse cx="1358" cy="144" rx="20" ry="10" fill="#6fa87e" />
+
+            {/* Camino central — línea clara como en Yuka */}
+            <path
+              d="M660 180 C670 160, 695 148, 720 145 C745 142, 768 155, 778 180"
+              fill="#dceee2"
+            />
+
+            {/* Casa — cuerpo */}
+            <rect x="706" y="148" width="28" height="18" rx="2" fill="#fff" opacity="0.85" />
+            {/* Casa — tejado */}
+            <path d="M703 150 L720 138 L737 150 Z" fill="#c8dece" />
+            {/* Casa — puerta */}
+            <rect x="716" y="156" width="8" height="10" rx="1" fill="#8fbc9a" />
+          </svg>
         </footer>
 
         {/* ══════════════════ TOAST ══════════════════ */}
