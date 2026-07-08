@@ -9,6 +9,7 @@ const MUTED   = '#4B6355';
 const PRIMARY = '#16a34a';
 const BORDER  = 'rgba(13,31,20,0.08)';
 
+/* ─── Componente de estrellas ─────────────────────────────────────── */
 function Estrellas({ valor, onChange }) {
   const [hover, setHover] = useState(0);
   return (
@@ -31,6 +32,7 @@ function Estrellas({ valor, onChange }) {
   );
 }
 
+/* ─── Tarjeta de reseña ───────────────────────────────────────────── */
 function ReviewCard({ review }) {
   const inicial = review.nombre?.[0]?.toUpperCase() || '?';
   const colores = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444'];
@@ -67,6 +69,7 @@ function ReviewCard({ review }) {
   );
 }
 
+/* ─── Modal éxito ─────────────────────────────────────────────────── */
 function ModalExito({ onClose }) {
   return (
     <div
@@ -97,6 +100,33 @@ function ModalExito({ onClose }) {
   );
 }
 
+/* ─── Banda tipográfica separadora ────────────────────────────────── */
+function TickerBand() {
+  const items = Array(10).fill('SIN GLUTEN · CELIAPP ·');
+  return (
+    <div
+      className="w-full overflow-hidden py-3 my-10"
+      style={{ borderTop: `1px solid ${BORDER}`, borderBottom: `1px solid ${BORDER}` }}
+    >
+      <div
+        className="flex gap-6 whitespace-nowrap"
+        style={{
+          animation: 'ticker 22s linear infinite',
+          fontSize: 11,
+          fontWeight: 700,
+          letterSpacing: '0.12em',
+          color: 'rgba(13,31,20,0.18)',
+          textTransform: 'uppercase',
+        }}
+      >
+        {items.map((t, i) => <span key={i}>{t}</span>)}
+      </div>
+      <style>{`@keyframes ticker { from { transform: translateX(0) } to { transform: translateX(-50%) } }`}</style>
+    </div>
+  );
+}
+
+/* ─── Sección principal ───────────────────────────────────────────── */
 export default function SectionReviews() {
   const { user, token, isAuthenticated } = useAuth();
   const [reviews, setReviews] = useState([]);
@@ -174,14 +204,28 @@ export default function SectionReviews() {
   };
 
   return (
-    <section className="w-full py-20 px-4" style={{ background: BG }}>
-      <div className="max-w-6xl mx-auto">
+    <section className="w-full py-20" style={{ background: BG }}>
+      {/* Contenedor alineado con el resto de secciones */}
+      <div style={{ maxWidth: 1120, margin: '0 auto', padding: '0 1.5rem' }}>
 
         {/* Cabecera */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12">
           <div>
-            <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{ color: PRIMARY }}>OPINIONES</p>
-            <h2 className="text-4xl sm:text-5xl font-black leading-tight" style={{ color: TEXT }}>
+            <p
+              className="text-xs font-bold tracking-widest uppercase mb-2"
+              style={{ color: PRIMARY }}
+            >
+              OPINIONES
+            </p>
+            <h2
+              className="leading-tight"
+              style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: 'clamp(2.2rem, 5vw, 3.2rem)',
+                fontWeight: 900,
+                color: TEXT,
+              }}
+            >
               Lo que dicen<br />nuestros usuarios
             </h2>
           </div>
@@ -249,10 +293,13 @@ export default function SectionReviews() {
 
         {/* Grid de reseñas */}
         {!cargando && reviews.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {reviews.map(r => <ReviewCard key={r.id} review={r} />)}
           </div>
         )}
+
+        {/* Banda tipográfica separadora */}
+        {!cargando && <TickerBand />}
 
         {/* Botón dejar reseña (cuando ya hay reseñas) */}
         {!cargando && reviews.length > 0 && !mostrarFormulario && (
