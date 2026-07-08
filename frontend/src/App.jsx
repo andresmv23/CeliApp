@@ -10,13 +10,13 @@ const globalStyles = `
   :root {
     --font-display: 'Fraunces', Georgia, serif;
     --font-body: 'DM Sans', system-ui, sans-serif;
-    --color-bg: #F8FAFB;
+    --color-bg: #F7FAF8;
     --color-surface: #FFFFFF;
-    --color-text: #0F1F17;
-    --color-text-muted: #52687A;
-    --color-primary: #1f6b4a;
-    --color-primary-hover: #175438;
-    --color-border: rgba(15, 31, 23, 0.09);
+    --color-text: #0D1F14;
+    --color-text-muted: #4B6355;
+    --color-primary: #16a34a;
+    --color-primary-hover: #15803d;
+    --color-border: rgba(13, 31, 20, 0.08);
     --radius-md: 0.5rem;
     --radius-full: 9999px;
     --transition: 200ms cubic-bezier(0.16, 1, 0.3, 1);
@@ -98,13 +98,13 @@ const globalStyles = `
     cursor: pointer;
     text-decoration: none;
     transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
-    box-shadow: 0 1px 3px rgba(15,31,23,0.12);
+    box-shadow: 0 1px 3px rgba(13,31,20,0.12);
     letter-spacing: 0.01em;
   }
   .btn-primary:hover {
     background: var(--color-primary-hover);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(15,31,23,0.16);
+    box-shadow: 0 4px 12px rgba(22,163,74,0.22);
   }
   .btn-primary:active {
     transform: translateY(0);
@@ -127,9 +127,9 @@ const globalStyles = `
     transition: color var(--transition), border-color var(--transition), background var(--transition);
   }
   .btn-ghost:hover {
-    color: #c0392b;
-    border-color: rgba(192,57,43,0.3);
-    background: rgba(192,57,43,0.05);
+    color: #dc2626;
+    border-color: rgba(220,38,38,0.28);
+    background: rgba(220,38,38,0.04);
   }
 `;
 
@@ -193,14 +193,14 @@ function Navbar() {
           top: 0,
           zIndex: 50,
           width: '100%',
-          background: scrolled ? 'rgba(248,250,251,0.97)' : 'rgba(248,250,251,0.82)',
+          background: scrolled ? 'rgba(247,250,248,0.97)' : 'rgba(247,250,248,0.82)',
           backdropFilter: 'blur(14px)',
           WebkitBackdropFilter: 'blur(14px)',
           borderBottom: scrolled
-            ? '1px solid rgba(15,31,23,0.09)'
+            ? '1px solid rgba(13,31,20,0.08)'
             : '1px solid transparent',
           transition: 'background 300ms ease, border-color 300ms ease, box-shadow 300ms ease',
-          boxShadow: scrolled ? '0 1px 12px rgba(15,31,23,0.06)' : 'none',
+          boxShadow: scrolled ? '0 1px 12px rgba(13,31,20,0.05)' : 'none',
         }}
       >
         <div style={{ maxWidth: '1120px', margin: '0 auto', padding: '0 1.5rem' }}>
@@ -213,7 +213,7 @@ function Navbar() {
               style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', textDecoration: 'none', flexShrink: 0 }}
             >
               <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-                <rect width="32" height="32" rx="9" fill="#1f6b4a" />
+                <rect width="32" height="32" rx="9" fill="#16a34a" />
                 <path d="M16 24 L16 10" stroke="white" strokeWidth="1.6" strokeLinecap="round" />
                 <ellipse cx="16" cy="13" rx="3" ry="1.8" fill="white" opacity="0.9" transform="rotate(-30 16 13)" />
                 <ellipse cx="16" cy="13" rx="3" ry="1.8" fill="white" opacity="0.9" transform="rotate(30 16 13)" />
@@ -304,7 +304,7 @@ function Navbar() {
         {menuOpen && (
           <div style={{
             borderTop: '1px solid var(--color-border)',
-            background: 'rgba(248,250,251,0.99)',
+            background: 'rgba(247,250,248,0.99)',
             padding: '1rem 1.5rem 1.25rem',
           }}>
             {navLinks.map(({ to, label, end }) => (
