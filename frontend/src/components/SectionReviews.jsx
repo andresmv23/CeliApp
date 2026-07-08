@@ -100,28 +100,34 @@ function ModalExito({ onClose }) {
   );
 }
 
-/* ─── Banda tipográfica separadora ────────────────────────────────── */
+/* ─── Banda tipográfica separadora (acotada al contenedor) ──────── */
 function TickerBand() {
-  const items = Array(10).fill('SIN GLUTEN · CELIAPP ·');
+  const items = Array(12).fill('SIN GLUTEN · CELIAPP ·');
   return (
-    <div
-      className="w-full overflow-hidden py-3 my-10"
-      style={{ borderTop: `1px solid ${BORDER}`, borderBottom: `1px solid ${BORDER}` }}
-    >
+    <div className="my-10" style={{ maxWidth: 1120, margin: '2.5rem auto', padding: '0 1.5rem' }}>
       <div
-        className="flex gap-6 whitespace-nowrap"
         style={{
-          animation: 'ticker 22s linear infinite',
-          fontSize: 11,
-          fontWeight: 700,
-          letterSpacing: '0.12em',
-          color: 'rgba(13,31,20,0.18)',
-          textTransform: 'uppercase',
+          borderTop: `1px solid ${BORDER}`,
+          borderBottom: `1px solid ${BORDER}`,
+          overflow: 'hidden',
+          padding: '0.6rem 0',
         }}
       >
-        {items.map((t, i) => <span key={i}>{t}</span>)}
+        <div
+          className="flex gap-6 whitespace-nowrap"
+          style={{
+            animation: 'ticker 22s linear infinite',
+            fontSize: 11,
+            fontWeight: 700,
+            letterSpacing: '0.12em',
+            color: 'rgba(13,31,20,0.18)',
+            textTransform: 'uppercase',
+          }}
+        >
+          {items.map((t, i) => <span key={i}>{t}</span>)}
+        </div>
+        <style>{`@keyframes ticker { from { transform: translateX(0) } to { transform: translateX(-50%) } }`}</style>
       </div>
-      <style>{`@keyframes ticker { from { transform: translateX(0) } to { transform: translateX(-50%) } }`}</style>
     </div>
   );
 }
@@ -205,6 +211,7 @@ export default function SectionReviews() {
 
   return (
     <section className="w-full py-20" style={{ background: BG }}>
+
       {/* Contenedor alineado con el resto de secciones */}
       <div style={{ maxWidth: 1120, margin: '0 auto', padding: '0 1.5rem' }}>
 
@@ -298,8 +305,12 @@ export default function SectionReviews() {
           </div>
         )}
 
-        {/* Banda tipográfica separadora */}
-        {!cargando && <TickerBand />}
+      </div>
+
+      {/* Banda tipográfica separadora — fuera del contenedor pero acotada por su propio maxWidth */}
+      {!cargando && <TickerBand />}
+
+      <div style={{ maxWidth: 1120, margin: '0 auto', padding: '0 1.5rem' }}>
 
         {/* Botón dejar reseña (cuando ya hay reseñas) */}
         {!cargando && reviews.length > 0 && !mostrarFormulario && (
@@ -317,7 +328,7 @@ export default function SectionReviews() {
         {/* Formulario */}
         {mostrarFormulario && (
           <div
-            className="rounded-2xl p-6 sm:p-8 mt-8"
+            className="rounded-2xl p-6 sm:p-8"
             style={{ background: '#fff', border: `1px solid ${BORDER}` }}
           >
             <h3 className="text-xl font-bold mb-1" style={{ color: TEXT }}>Escribe tu reseña</h3>
@@ -416,6 +427,7 @@ export default function SectionReviews() {
             </form>
           </div>
         )}
+
       </div>
 
       {exito && <ModalExito onClose={() => setExito(false)} />}
