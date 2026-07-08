@@ -238,13 +238,15 @@ export default function Buscador() {
             }}>
               ¿Es este producto<br />
               <em style={{ fontStyle: 'italic', color: '#3d6b50' }}>seguro</em>{' '}
-              <span style={{ color: 'rgba(28,43,30,0.28)' }}>para ti?</span>
+              {/* FIX: opacity 0.28 → 0.55 para legibilidad */}
+              <span style={{ color: 'rgba(28,43,30,0.55)' }}>para ti?</span>
             </h1>
 
             {/* Subtítulo */}
+            {/* FIX: --color-text-muted #6B7E6F → #4a5e50 (mayor contraste sobre fondo crema) */}
             <p className="reveal" style={{
               fontSize: 'clamp(1rem, 1.5vw, 1.125rem)',
-              color: 'var(--color-text-muted, #6B7E6F)',
+              color: 'var(--color-text-muted, #4a5e50)',
               lineHeight: 1.7,
               maxWidth: '480px',
               marginBottom: '2.5rem',
@@ -368,8 +370,9 @@ export default function Buscador() {
             )}
 
             {/* Recientes */}
+            {/* FIX: opacity 0.40 → 0.55 en label "Recientes" */}
             <div className="reveal" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.5rem', marginBottom: '4rem', transitionDelay: '0.26s' }}>
-              <span style={{ fontSize: '0.8125rem', color: 'rgba(28,43,30,0.4)', fontWeight: 500 }}>Recientes:</span>
+              <span style={{ fontSize: '0.8125rem', color: 'rgba(28,43,30,0.55)', fontWeight: 500 }}>Recientes:</span>
               {[{ label: 'Avena Quaker', ok: false }, { label: 'Maizena', ok: true }, { label: 'Pan Bimbo', ok: false }].map(s => (
                 <button
                   key={s.label}
@@ -385,7 +388,8 @@ export default function Buscador() {
                     fontFamily: 'inherit',
                     background: '#fff',
                     border: '1px solid rgba(28,43,30,0.10)',
-                    color: 'rgba(28,43,30,0.65)',
+                    /* FIX: opacity 0.65 → 0.80 */
+                    color: 'rgba(28,43,30,0.80)',
                     cursor: 'pointer',
                     transition: 'border-color 180ms ease, box-shadow 180ms ease',
                   }}
@@ -409,7 +413,8 @@ export default function Buscador() {
                   <p style={{ fontSize: 'clamp(1.75rem, 3vw, 2.25rem)', fontWeight: 700, fontFamily: "var(--font-display, 'Fraunces', Georgia, serif)", color: 'var(--color-text, #1C2B1E)', lineHeight: 1.1 }}>
                     {s.valor}
                   </p>
-                  <p style={{ fontSize: '0.8125rem', color: 'var(--color-text-muted, #6B7E6F)', marginTop: '0.25rem', fontWeight: 500 }}>
+                  {/* FIX: --color-text-muted #6B7E6F → #4a5e50 */}
+                  <p style={{ fontSize: '0.8125rem', color: 'var(--color-text-muted, #4a5e50)', marginTop: '0.25rem', fontWeight: 500 }}>
                     {s.label}
                   </p>
                 </div>
@@ -422,7 +427,8 @@ export default function Buscador() {
         {resultado && !loading && cfg && (
           <section ref={resultRef} style={{ background: '#F7F5F0', paddingTop: '4rem', paddingBottom: '4rem' }}>
             <div style={container}>
-              <p style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(28,43,30,0.4)', marginBottom: '1.5rem' }}>
+              {/* FIX: opacity 0.40 → 0.55 */}
+              <p style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(28,43,30,0.55)', marginBottom: '1.5rem' }}>
                 Resultado del análisis
               </p>
               <div style={{ maxWidth: '640px', borderRadius: '1.5rem', overflow: 'hidden', boxShadow: '0 8px 40px rgba(28,43,30,0.10)', border: '1px solid rgba(28,43,30,0.06)' }}>
@@ -441,7 +447,7 @@ export default function Buscador() {
                     <p style={{ fontSize: '0.9rem', lineHeight: 1.6, color: cfg.text, opacity: 0.85, maxWidth: '380px', marginBottom: '0.75rem' }}>
                       {resultado.analisis?.motivo ?? 'Análisis no disponible'}
                     </p>
-                    <div style={{ opacity: 0.6 }}>
+                    <div style={{ opacity: 0.7 }}>
                       <span style={{ fontSize: '0.75rem', color: cfg.text }}>Fuente: {fuenteTexto}</span>
                       {urlFuente && (
                         <>{' · '}
@@ -483,22 +489,26 @@ export default function Buscador() {
                     <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--color-text, #1C2B1E)', lineHeight: 1.25, marginBottom: '0.375rem' }}>
                       {resultado.producto?.nombre ?? 'Producto sin nombre'}
                     </h2>
-                    <span style={{ display: 'inline-block', fontSize: '0.75rem', fontWeight: 600, color: 'rgba(28,43,30,0.45)', background: 'rgba(28,43,30,0.05)', padding: '0.25rem 0.75rem', borderRadius: '9999px', marginBottom: '1.5rem' }}>
+                    {/* FIX: opacity 0.45 → 0.60 en badge de marca */}
+                    <span style={{ display: 'inline-block', fontSize: '0.75rem', fontWeight: 600, color: 'rgba(28,43,30,0.60)', background: 'rgba(28,43,30,0.05)', padding: '0.25rem 0.75rem', borderRadius: '9999px', marginBottom: '1.5rem' }}>
                       {resultado.producto?.marca ?? 'Marca desconocida'}
                     </span>
 
                     <div style={{ borderRadius: '0.875rem', padding: '1.125rem', background: '#F7F5F0', marginBottom: '1.25rem' }}>
-                      <p style={{ fontSize: '0.6875rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(28,43,30,0.4)', marginBottom: '0.5rem' }}>Ingredientes</p>
-                      <p style={{ fontSize: '0.875rem', lineHeight: 1.65, color: 'rgba(28,43,30,0.75)' }}>{resultado.producto?.ingredientes ?? 'No disponible.'}</p>
+                      {/* FIX: opacity 0.40 → 0.55 en label ingredientes */}
+                      <p style={{ fontSize: '0.6875rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(28,43,30,0.55)', marginBottom: '0.5rem' }}>Ingredientes</p>
+                      {/* FIX: opacity 0.75 → 0.88 en texto ingredientes */}
+                      <p style={{ fontSize: '0.875rem', lineHeight: 1.65, color: 'rgba(28,43,30,0.88)' }}>{resultado.producto?.ingredientes ?? 'No disponible.'}</p>
                     </div>
 
                     {wrongCount === 0 ? (
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem 1rem', borderRadius: '0.75rem', background: 'rgba(28,43,30,0.03)', border: '1px solid rgba(28,43,30,0.07)', marginBottom: '1.25rem' }}>
-                        <p style={{ fontSize: '0.8125rem', color: 'rgba(28,43,30,0.5)' }}>¿El resultado no corresponde al producto que tienes?</p>
+                        {/* FIX: opacity 0.50 → 0.65 */}
+                        <p style={{ fontSize: '0.8125rem', color: 'rgba(28,43,30,0.65)' }}>¿El resultado no corresponde al producto que tienes?</p>
                         <button onClick={handleWrongProduct}
-                          style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'rgba(28,43,30,0.4)', background: 'none', border: 'none', cursor: 'pointer', marginLeft: '0.75rem', flexShrink: 0, fontFamily: 'inherit', transition: 'color 180ms ease' }}
+                          style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'rgba(28,43,30,0.55)', background: 'none', border: 'none', cursor: 'pointer', marginLeft: '0.75rem', flexShrink: 0, fontFamily: 'inherit', transition: 'color 180ms ease' }}
                           onMouseEnter={e => e.currentTarget.style.color = '#3d6b50'}
-                          onMouseLeave={e => e.currentTarget.style.color = 'rgba(28,43,30,0.4)'}
+                          onMouseLeave={e => e.currentTarget.style.color = 'rgba(28,43,30,0.55)'}
                         >
                           No es mi producto
                         </button>
@@ -515,7 +525,8 @@ export default function Buscador() {
                             </div>
                             <div>
                               <p style={{ fontWeight: 800, color: 'var(--color-text, #1C2B1E)', fontSize: '0.9rem', marginBottom: '0.25rem' }}>¿Quieres un análisis más preciso?</p>
-                              <p style={{ fontSize: '0.8125rem', color: 'rgba(28,43,30,0.6)', lineHeight: 1.55 }}>
+                              {/* FIX: opacity 0.60 → 0.75 */}
+                              <p style={{ fontSize: '0.8125rem', color: 'rgba(28,43,30,0.75)', lineHeight: 1.55 }}>
                                 Haz una foto a la etiqueta de ingredientes o al frente del envase. Nuestra IA lo identificará visualmente.
                               </p>
                             </div>
@@ -534,9 +545,9 @@ export default function Buscador() {
                         </div>
                         <div style={{ padding: '0 1.375rem 1.125rem' }}>
                           <button onClick={() => setWrongCount(0)}
-                            style={{ fontSize: '0.8125rem', color: 'rgba(28,43,30,0.4)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', transition: 'color 180ms ease' }}
-                            onMouseEnter={e => e.currentTarget.style.color = 'rgba(28,43,30,0.65)'}
-                            onMouseLeave={e => e.currentTarget.style.color = 'rgba(28,43,30,0.4)'}
+                            style={{ fontSize: '0.8125rem', color: 'rgba(28,43,30,0.55)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', transition: 'color 180ms ease' }}
+                            onMouseEnter={e => e.currentTarget.style.color = 'rgba(28,43,30,0.80)'}
+                            onMouseLeave={e => e.currentTarget.style.color = 'rgba(28,43,30,0.55)'}
                           >
                             No, el resultado es correcto
                           </button>
@@ -546,9 +557,9 @@ export default function Buscador() {
 
                     <button
                       onClick={() => { setResultado(null); setEan(''); setWrongCount(0); }}
-                      style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.8125rem', fontWeight: 500, color: 'rgba(28,43,30,0.4)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', transition: 'color 180ms ease' }}
+                      style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.8125rem', fontWeight: 500, color: 'rgba(28,43,30,0.55)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', transition: 'color 180ms ease' }}
                       onMouseEnter={e => e.currentTarget.style.color = '#3d6b50'}
-                      onMouseLeave={e => e.currentTarget.style.color = 'rgba(28,43,30,0.4)'}
+                      onMouseLeave={e => e.currentTarget.style.color = 'rgba(28,43,30,0.55)'}
                     >
                       <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
@@ -585,7 +596,8 @@ export default function Buscador() {
                     <span style={{ fontSize: '3rem', fontWeight: 800, lineHeight: 1, color: 'rgba(28,43,30,0.06)', fontFamily: "var(--font-display, 'Fraunces', Georgia, serif)", userSelect: 'none' }}>{num}</span>
                   </div>
                   <h3 style={{ fontWeight: 700, color: 'var(--color-text, #1C2B1E)', fontSize: '1.0625rem', marginBottom: '0.5rem' }}>{titulo}</h3>
-                  <p style={{ color: 'var(--color-text-muted, #6B7E6F)', fontSize: '0.875rem', lineHeight: 1.65 }}>{desc}</p>
+                  {/* FIX: --color-text-muted #6B7E6F → #4a5e50 */}
+                  <p style={{ color: 'var(--color-text-muted, #4a5e50)', fontSize: '0.875rem', lineHeight: 1.65 }}>{desc}</p>
                 </div>
               ))}
             </div>
@@ -604,7 +616,8 @@ export default function Buscador() {
                 <h2 style={{ fontFamily: "var(--font-display, 'Fraunces', Georgia, serif)", fontSize: 'clamp(1.875rem, 4vw, 3rem)', fontWeight: 700, color: 'var(--color-text, #1C2B1E)', lineHeight: 1.1, letterSpacing: '-0.02em', marginBottom: '1.5rem' }}>
                   ¿Tienes alguna<br />pregunta?
                 </h2>
-                <p style={{ color: 'var(--color-text-muted, #6B7E6F)', fontSize: '0.9375rem', lineHeight: 1.7, marginBottom: '2.5rem' }}>
+                {/* FIX: --color-text-muted #6B7E6F → #4a5e50 */}
+                <p style={{ color: 'var(--color-text-muted, #4a5e50)', fontSize: '0.9375rem', lineHeight: 1.7, marginBottom: '2.5rem' }}>
                   Estamos aquí para ayudarte. Si tienes dudas sobre un producto, quieres reportar un error o simplemente quieres saber más, escríbenos.
                 </p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -618,7 +631,8 @@ export default function Buscador() {
                         {c.icon}
                       </div>
                       <div>
-                        <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted, #6B7E6F)', fontWeight: 500 }}>{c.label}</p>
+                        {/* FIX: --color-text-muted #6B7E6F → #4a5e50 */}
+                        <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted, #4a5e50)', fontWeight: 500 }}>{c.label}</p>
                         <p style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--color-text, #1C2B1E)' }}>{c.val}</p>
                       </div>
                     </div>
@@ -631,13 +645,14 @@ export default function Buscador() {
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                     {[{ label: 'Nombre', type: 'text', ph: 'Tu nombre' }, { label: 'Email', type: 'email', ph: 'tu@email.com' }].map(f => (
                       <div key={f.label}>
-                        <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'rgba(28,43,30,0.5)', display: 'block', marginBottom: '0.375rem' }}>{f.label}</label>
+                        {/* FIX: form label opacity 0.50 → 0.65 */}
+                        <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'rgba(28,43,30,0.65)', display: 'block', marginBottom: '0.375rem' }}>{f.label}</label>
                         <input type={f.type} placeholder={f.ph} required style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '0.75rem', border: 'none', background: '#F7F5F0', fontSize: '0.875rem', fontFamily: 'inherit', color: 'var(--color-text, #1C2B1E)', outline: 'none' }} />
                       </div>
                     ))}
                   </div>
                   <div>
-                    <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'rgba(28,43,30,0.5)', display: 'block', marginBottom: '0.375rem' }}>Asunto</label>
+                    <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'rgba(28,43,30,0.65)', display: 'block', marginBottom: '0.375rem' }}>Asunto</label>
                     <select style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '0.75rem', border: 'none', background: '#F7F5F0', fontSize: '0.875rem', fontFamily: 'inherit', color: 'var(--color-text, #1C2B1E)', outline: 'none', appearance: 'none' }}>
                       <option>Duda sobre un producto</option>
                       <option>Reportar un error</option>
@@ -647,7 +662,7 @@ export default function Buscador() {
                     </select>
                   </div>
                   <div>
-                    <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'rgba(28,43,30,0.5)', display: 'block', marginBottom: '0.375rem' }}>Mensaje</label>
+                    <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'rgba(28,43,30,0.65)', display: 'block', marginBottom: '0.375rem' }}>Mensaje</label>
                     <textarea rows={4} placeholder="Cuéntanos en qué podemos ayudarte…" required style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '0.75rem', border: 'none', background: '#F7F5F0', fontSize: '0.875rem', fontFamily: 'inherit', color: 'var(--color-text, #1C2B1E)', outline: 'none', resize: 'none' }} />
                   </div>
                   <button type="submit" style={{ padding: '0.875rem', borderRadius: '0.75rem', background: '#3d6b50', color: '#fff', fontFamily: 'inherit', fontSize: '0.875rem', fontWeight: 600, border: 'none', cursor: 'pointer', transition: 'background 180ms ease' }}
