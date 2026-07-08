@@ -13,11 +13,12 @@ html {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   scroll-behavior: smooth;
+  hanging-punctuation: first last;
 }
 
 body {
   @apply text-gray-900;
-  background: #070d0a;
+  background: #09150f;
   font-family: 'Satoshi', system-ui, sans-serif;
   min-height: 100dvh;
   margin: 0;
@@ -25,7 +26,6 @@ body {
 }
 
 #root {
-  /* Override App.css que limita a 1280px con padding — lo necesitamos full-width */
   max-width: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
@@ -33,39 +33,70 @@ body {
 }
 
 /* ─── Tokens de estado de gluten ───────────────────────── */
-.status-apto    { @apply bg-emerald-50 text-emerald-700 border border-emerald-200; }
+.status-apto    { @apply bg-emerald-50 text-emerald-800 border border-emerald-200; }
 .status-noapto  { @apply bg-red-50 text-red-700 border border-red-200; }
-.status-dudoso  { @apply bg-amber-50 text-amber-700 border border-amber-200; }
+.status-dudoso  { @apply bg-amber-50 text-amber-800 border border-amber-200; }
 
 /* ─── Botón primario ───────────────────────────────────── */
 .btn-primary {
-  @apply bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700
-         text-white font-semibold rounded-xl
-         px-6 py-3 transition-all duration-150
-         focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-200
+  @apply font-semibold rounded-xl px-6 py-3
+         transition-all duration-150
+         focus-visible:outline-none
          disabled:opacity-40 disabled:cursor-not-allowed;
+  background: #1a7f5e;
+  color: #fff;
 }
+.btn-primary:hover:not(:disabled)  { background: #156649; }
+.btn-primary:active:not(:disabled) { background: #0f4d37; }
+.btn-primary:focus-visible          { box-shadow: 0 0 0 4px rgba(26,127,94,0.2); }
 
 /* ─── Card base ────────────────────────────────────────── */
 .card {
-  @apply bg-white rounded-2xl border border-gray-100;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+  @apply bg-white rounded-2xl;
+  border: 1px solid rgba(0,0,0,0.06);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.05);
 }
-.card-hover { @apply transition-all duration-200; }
+.card-hover {
+  @apply transition-all duration-200;
+}
 .card-hover:hover {
-  box-shadow: 0 4px 8px rgba(0,0,0,0.08), 0 12px 32px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08), 0 16px 40px rgba(0,0,0,0.07);
   @apply -translate-y-0.5;
+}
+
+/* ─── Input con glow verde en focus ─────────────────────── */
+.input-base {
+  @apply w-full px-4 py-3 rounded-xl text-sm font-medium
+         text-gray-900 placeholder-gray-400
+         focus:outline-none transition-shadow duration-150;
+  background: #f2ede3;
+  border: 1px solid transparent;
+}
+.input-base:focus {
+  border-color: rgba(26,127,94,0.3);
+  box-shadow: 0 0 0 4px rgba(26,127,94,0.10);
+}
+
+/* ─── Grain overlay para hero ───────────────────────────── */
+.grain-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 128px 128px;
 }
 
 /* ─── Scrollbar discreta ───────────────────────────────── */
 .scroll-area {
   scrollbar-width: thin;
-  scrollbar-color: #e8e2d5 transparent;
+  scrollbar-color: #e6ded0 transparent;
 }
 .scroll-area::-webkit-scrollbar { width: 5px; }
 .scroll-area::-webkit-scrollbar-track { background: transparent; }
 .scroll-area::-webkit-scrollbar-thumb {
-  background: #e8e2d5;
+  background: #e6ded0;
   border-radius: 99px;
 }
 
