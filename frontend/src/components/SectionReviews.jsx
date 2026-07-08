@@ -107,8 +107,6 @@ function TickerBand() {
     <div className="my-10" style={{ maxWidth: 1120, margin: '2.5rem auto', padding: '0 1.5rem' }}>
       <div
         style={{
-          borderTop: `1px solid ${BORDER}`,
-          borderBottom: `1px solid ${BORDER}`,
           overflow: 'hidden',
           padding: '0.6rem 0',
         }}
