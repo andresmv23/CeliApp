@@ -552,7 +552,7 @@ export default function Buscador() {
         {/* ══════════════════ FOOTER ══════════════════ */}
         <footer style={{ background: '#0D1F14', paddingTop: '3.5rem', paddingBottom: '3.5rem' }}>
           <div style={container}>
-            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1.5rem', paddingBottom: '2rem', marginBottom: '2rem', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1.5rem', paddingBottom: '2rem', marginBottom: '2rem', borderBottom: '1px solid rgba(255,255,255,0.10)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                 <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
                   <rect width="32" height="32" rx="9" fill="#16a34a" />
@@ -567,14 +567,14 @@ export default function Buscador() {
               </div>
               <div style={{ display: 'flex', gap: '2rem' }}>
                 {['Privacidad', 'Términos'].map(l => (
-                  <a key={l} href="#" style={{ fontSize: '0.8125rem', color: 'rgba(247,250,248,0.30)', textDecoration: 'none', transition: 'color 180ms ease' }}
-                    onMouseEnter={e => e.currentTarget.style.color = 'rgba(247,250,248,0.75)'}
-                    onMouseLeave={e => e.currentTarget.style.color = 'rgba(247,250,248,0.30)'}
+                  <a key={l} href="#" style={{ fontSize: '0.875rem', color: 'rgba(247,250,248,0.65)', textDecoration: 'none', transition: 'color 180ms ease' }}
+                    onMouseEnter={e => e.currentTarget.style.color = '#F7FAF8'}
+                    onMouseLeave={e => e.currentTarget.style.color = 'rgba(247,250,248,0.65)'}
                   >{l}</a>
                 ))}
               </div>
             </div>
-            <p style={{ fontSize: '0.8125rem', color: 'rgba(247,250,248,0.22)' }}>© 2026 CeliApp</p>
+            <p style={{ fontSize: '0.8125rem', color: 'rgba(247,250,248,0.50)' }}>© 2026 CeliApp</p>
           </div>
         </footer>
 
