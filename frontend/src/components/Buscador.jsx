@@ -46,6 +46,18 @@ function useReveal() {
   }, []);
 }
 
+/* Divisor sutil entre secciones — línea con degradado que se disuelve en los extremos */
+function SectionDivider() {
+  return (
+    <div aria-hidden="true" style={{
+      height: '1px',
+      background: 'linear-gradient(90deg, transparent 0%, rgba(13,31,20,0.10) 20%, rgba(13,31,20,0.10) 80%, transparent 100%)',
+      margin: '0',
+      flexShrink: 0,
+    }} />
+  );
+}
+
 export default function Buscador() {
   const { token } = useAuth();
   const [ean, setEan]                     = useState('');
@@ -309,6 +321,9 @@ export default function Buscador() {
           </div>
         </section>
 
+        {/* ── Divisor: Hero → Resultado ── */}
+        <SectionDivider />
+
         {/* ══════════════════ RESULTADO ══════════════════ */}
         {resultado && !loading && cfg && (
           <section ref={resultRef} style={{ background: BG, paddingTop: '4rem', paddingBottom: '4rem' }}>
@@ -426,6 +441,9 @@ export default function Buscador() {
           </section>
         )}
 
+        {/* ── Divisor: (Resultado /) Hero → Cómo funciona ── */}
+        <SectionDivider />
+
         {/* ══════════════════ CÓMO FUNCIONA ══════════════════ */}
         <section style={{ background: BG_ALT, paddingTop: '5rem', paddingBottom: '5.5rem' }} id="como-funciona">
           <div style={container}>
@@ -450,8 +468,14 @@ export default function Buscador() {
           </div>
         </section>
 
+        {/* ── Divisor: Cómo funciona → Reviews ── */}
+        <SectionDivider />
+
         {/* ══════════════════ REVIEWS ══════════════════ */}
         <SectionReviews bg={BG_ALT} />
+
+        {/* ── Divisor: Reviews → Contacto ── */}
+        <SectionDivider />
 
         {/* ══════════════════ CONTACTO ══════════════════ */}
         <section style={{ background: BG, paddingTop: '5rem', paddingBottom: '5.5rem' }} id="sobre-celiapp">
