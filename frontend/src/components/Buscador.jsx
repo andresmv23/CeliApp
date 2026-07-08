@@ -46,7 +46,6 @@ function useReveal() {
   }, []);
 }
 
-/* Divisor sutil entre secciones */
 function SectionDivider() {
   return (
     <div aria-hidden="true" style={{
@@ -58,11 +57,10 @@ function SectionDivider() {
   );
 }
 
-/* Banda tipográfica — siempre visible, independiente de cualquier estado */
 function TickerBand() {
   const items = Array(12).fill('SIN GLUTEN · CELIAPP ·');
   return (
-    <div style={{ maxWidth: 1120, margin: '2.5rem auto', padding: '0 1.5rem' }}>
+    <div style={{ maxWidth: 1120, margin: '2rem auto', padding: '0 1rem' }}>
       <div style={{ overflow: 'hidden', padding: '0.6rem 0' }}>
         <div
           className="flex gap-6 whitespace-nowrap"
@@ -177,7 +175,7 @@ export default function Buscador() {
   const container = {
     maxWidth: '1120px',
     margin: '0 auto',
-    padding: '0 1.5rem',
+    padding: '0 1rem',
   };
 
   const BG      = '#F7FAF8';
@@ -211,16 +209,14 @@ export default function Buscador() {
       <div style={{ fontFamily: "var(--font-body, 'DM Sans', system-ui, sans-serif)", color: TEXT }}>
 
         {/* ══════════════════ HERO ══════════════════ */}
-        <section style={{
+        <section className="section-hero" style={{
           background: BG,
-          paddingTop: '5rem',
-          paddingBottom: '5.5rem',
           position: 'relative',
           overflow: 'hidden',
         }}>
           <div style={container}>
 
-            <div className="reveal" style={{ marginBottom: '2.25rem' }}>
+            <div className="reveal" style={{ marginBottom: '1.5rem' }}>
               <span style={{
                 display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
                 padding: '0.3rem 0.8rem', borderRadius: '9999px',
@@ -236,11 +232,11 @@ export default function Buscador() {
             <h1 className="reveal" style={{
               fontFamily: "var(--font-display, 'Fraunces', Georgia, serif)",
               fontWeight: 700,
-              fontSize: 'clamp(2.75rem, 6vw, 5.5rem)',
+              fontSize: 'clamp(2.2rem, 6vw, 5.5rem)',
               lineHeight: 1.08,
               letterSpacing: '-0.02em',
               color: TEXT,
-              marginBottom: '1.25rem',
+              marginBottom: '1rem',
               maxWidth: '820px',
               transitionDelay: '0.08s',
             }}>
@@ -250,18 +246,19 @@ export default function Buscador() {
             </h1>
 
             <p className="reveal" style={{
-              fontSize: 'clamp(1rem, 1.5vw, 1.1rem)',
+              fontSize: 'clamp(0.95rem, 1.5vw, 1.1rem)',
               color: MUTED,
               lineHeight: 1.7,
               maxWidth: '460px',
-              marginBottom: '2.25rem',
+              marginBottom: '1.75rem',
               transitionDelay: '0.14s',
             }}>
               Introduce el código de barras y nuestra IA analiza cada ingrediente al instante. Sin dudas, sin riesgos.
             </p>
 
-            <form className="reveal" onSubmit={buscarProducto} style={{ maxWidth: '580px', marginBottom: '1rem', transitionDelay: '0.20s' }}>
-              <div style={{
+            {/* Formulario búsqueda — pill en desktop, stacked en móvil */}
+            <form className="reveal search-form" onSubmit={buscarProducto} style={{ maxWidth: '580px', marginBottom: '1rem', transitionDelay: '0.20s' }}>
+              <div className="search-inner" style={{
                 display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem',
                 borderRadius: '9999px', background: '#fff',
                 border: `1.5px solid ${BORDER}`,
@@ -274,13 +271,13 @@ export default function Buscador() {
                 </span>
                 <input
                   type="text"
-                  placeholder="Código EAN · prueba: demo · noapto · dudoso"
+                  placeholder="Código EAN · demo · noapto · dudoso"
                   value={ean}
                   onChange={e => setEan(e.target.value)}
-                  style={{ flex: 1, padding: '0.75rem 0.5rem', background: 'transparent', border: 'none', outline: 'none', fontSize: '0.9375rem', fontFamily: 'inherit', color: TEXT }}
+                  style={{ flex: 1, minWidth: 0, padding: '0.75rem 0.5rem', background: 'transparent', border: 'none', outline: 'none', fontSize: '0.9375rem', fontFamily: 'inherit', color: TEXT }}
                 />
                 <button type="button" onClick={() => setScannerOpen(true)} title="Escanear código de barras"
-                  style={{ padding: '0.625rem', borderRadius: '9999px', border: 'none', background: 'transparent', color: 'rgba(13,31,20,0.28)', cursor: 'pointer', display: 'flex', alignItems: 'center', transition: 'color 180ms ease' }}
+                  style={{ padding: '0.625rem', borderRadius: '9999px', border: 'none', background: 'transparent', color: 'rgba(13,31,20,0.28)', cursor: 'pointer', display: 'flex', alignItems: 'center', transition: 'color 180ms ease', flexShrink: 0 }}
                   onMouseEnter={e => e.currentTarget.style.color = PRIMARY}
                   onMouseLeave={e => e.currentTarget.style.color = 'rgba(13,31,20,0.28)'}
                 >
@@ -313,7 +310,7 @@ export default function Buscador() {
               </div>
             )}
 
-            <div className="reveal" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.5rem', marginBottom: '3.5rem', transitionDelay: '0.26s' }}>
+            <div className="reveal" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.5rem', marginBottom: '2.5rem', transitionDelay: '0.26s' }}>
               <span style={{ fontSize: '0.8125rem', color: 'rgba(13,31,20,0.45)', fontWeight: 500 }}>Recientes:</span>
               {['Avena Quaker', 'Maizena', 'Pan Bimbo'].map(label => (
                 <button key={label} onClick={() => setEan(label)}
@@ -326,7 +323,7 @@ export default function Buscador() {
               ))}
             </div>
 
-            <div className="reveal" style={{ transitionDelay: '0.32s' }}>
+            <div className="reveal hero-stats" style={{ transitionDelay: '0.32s' }}>
               <p style={{
                 fontSize: '0.8125rem',
                 color: 'rgba(13,31,20,0.42)',
@@ -334,34 +331,33 @@ export default function Buscador() {
                 letterSpacing: '0.01em',
                 display: 'flex',
                 flexWrap: 'wrap',
-                gap: '0 1.5rem',
+                gap: '0.25rem 1.5rem',
               }}>
                 <span>+50.000 productos analizados</span>
-                <span style={{ color: BORDER }}>·</span>
+                <span className="stat-dot" style={{ color: BORDER }}>·</span>
                 <span>99% de precisión</span>
-                <span style={{ color: BORDER }}>·</span>
+                <span className="stat-dot" style={{ color: BORDER }}>·</span>
                 <span>Gratis, sin suscripción</span>
               </p>
             </div>
           </div>
         </section>
 
-        {/* ── Divisor: Hero → Resultado ── */}
         <SectionDivider />
 
         {/* ══════════════════ RESULTADO ══════════════════ */}
         {resultado && !loading && cfg && (
-          <section ref={resultRef} style={{ background: BG, paddingTop: '4rem', paddingBottom: '4rem' }}>
+          <section ref={resultRef} style={{ background: BG, paddingTop: '3rem', paddingBottom: '3rem' }}>
             <div style={container}>
               <p style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(13,31,20,0.45)', marginBottom: '1.5rem' }}>Resultado del análisis</p>
               <div style={{ maxWidth: '640px', borderRadius: '1.5rem', overflow: 'hidden', boxShadow: '0 8px 40px rgba(13,31,20,0.07)', border: `1px solid ${BORDER}` }}>
-                <div style={{ padding: '1.75rem', background: `linear-gradient(135deg, ${cfg.gradStart}, ${cfg.gradEnd})`, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem' }}>
-                  <div style={{ flex: 1 }}>
+                <div style={{ padding: '1.25rem', background: `linear-gradient(135deg, ${cfg.gradStart}, ${cfg.gradEnd})`, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem' }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
-                      <span style={{ width: '2.25rem', height: '2.25rem', borderRadius: '50%', background: cfg.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: '#fff', fontSize: '0.9rem' }}>{cfg.icon}</span>
+                      <span style={{ width: '2.25rem', height: '2.25rem', borderRadius: '50%', background: cfg.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: '#fff', fontSize: '0.9rem', flexShrink: 0 }}>{cfg.icon}</span>
                       <span style={{ fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: cfg.text }}>{cfg.label}</span>
                     </div>
-                    <p style={{ fontSize: '0.9rem', lineHeight: 1.6, color: cfg.text, opacity: 0.85, maxWidth: '380px', marginBottom: '0.75rem' }}>{resultado.analisis?.motivo ?? 'Análisis no disponible'}</p>
+                    <p style={{ fontSize: '0.875rem', lineHeight: 1.6, color: cfg.text, opacity: 0.85, marginBottom: '0.75rem' }}>{resultado.analisis?.motivo ?? 'Análisis no disponible'}</p>
                     <div style={{ opacity: 0.7 }}>
                       <span style={{ fontSize: '0.75rem', color: cfg.text }}>Fuente: {fuenteTexto}</span>
                       {urlFuente && (<>{' · '}<a href={urlFuente} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.75rem', color: cfg.text, textDecoration: 'underline' }}>Ver fuente original</a></>)}
@@ -381,40 +377,40 @@ export default function Buscador() {
 
                 <div style={{ background: '#fff' }}>
                   {resultado.producto?.imagen_url && (
-                    <div style={{ width: '100%', height: '260px', position: 'relative', overflow: 'hidden', borderBottom: `1px solid ${BORDER}` }}>
+                    <div style={{ width: '100%', height: '220px', position: 'relative', overflow: 'hidden', borderBottom: `1px solid ${BORDER}` }}>
                       <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${resultado.producto.imagen_url})`, backgroundSize: 'cover', backgroundPosition: 'center', filter: 'blur(28px) brightness(0.9) saturate(0.5)', transform: 'scale(1.15)', opacity: 0.35 }} />
                       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(247,250,248,0.3) 0%, rgba(247,250,248,0.5) 100%)' }} />
-                      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+                      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
                         <img src={resultado.producto.imagen_url} alt={resultado.producto?.nombre ?? 'Producto'}
-                          style={{ maxHeight: '200px', maxWidth: '80%', objectFit: 'contain', filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.14))', position: 'relative', zIndex: 1 }}
+                          style={{ maxHeight: '180px', maxWidth: '80%', objectFit: 'contain', filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.14))', position: 'relative', zIndex: 1 }}
                           onError={e => { e.currentTarget.parentElement.parentElement.style.display = 'none'; }} />
                       </div>
                     </div>
                   )}
 
-                  <div style={{ padding: '1.75rem' }}>
-                    <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: TEXT, lineHeight: 1.25, marginBottom: '0.375rem' }}>{resultado.producto?.nombre ?? 'Producto sin nombre'}</h2>
-                    <span style={{ display: 'inline-block', fontSize: '0.75rem', fontWeight: 600, color: 'rgba(13,31,20,0.50)', background: 'rgba(13,31,20,0.05)', padding: '0.25rem 0.75rem', borderRadius: '9999px', marginBottom: '1.5rem' }}>
+                  <div style={{ padding: '1.25rem' }}>
+                    <h2 style={{ fontSize: '1.125rem', fontWeight: 800, color: TEXT, lineHeight: 1.25, marginBottom: '0.375rem' }}>{resultado.producto?.nombre ?? 'Producto sin nombre'}</h2>
+                    <span style={{ display: 'inline-block', fontSize: '0.75rem', fontWeight: 600, color: 'rgba(13,31,20,0.50)', background: 'rgba(13,31,20,0.05)', padding: '0.25rem 0.75rem', borderRadius: '9999px', marginBottom: '1.25rem' }}>
                       {resultado.producto?.marca ?? 'Marca desconocida'}
                     </span>
 
-                    <div style={{ borderRadius: '0.875rem', padding: '1.125rem', background: BG, marginBottom: '1.25rem' }}>
+                    <div style={{ borderRadius: '0.875rem', padding: '1rem', background: BG, marginBottom: '1rem' }}>
                       <p style={{ fontSize: '0.6875rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(13,31,20,0.45)', marginBottom: '0.5rem' }}>Ingredientes</p>
-                      <p style={{ fontSize: '0.875rem', lineHeight: 1.65, color: 'rgba(13,31,20,0.80)' }}>{resultado.producto?.ingredientes ?? 'No disponible.'}</p>
+                      <p style={{ fontSize: '0.8125rem', lineHeight: 1.65, color: 'rgba(13,31,20,0.80)' }}>{resultado.producto?.ingredientes ?? 'No disponible.'}</p>
                     </div>
 
                     {wrongCount === 0 ? (
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem 1rem', borderRadius: '0.75rem', background: 'rgba(13,31,20,0.03)', border: `1px solid rgba(13,31,20,0.06)`, marginBottom: '1.25rem' }}>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', padding: '0.75rem 1rem', borderRadius: '0.75rem', background: 'rgba(13,31,20,0.03)', border: `1px solid rgba(13,31,20,0.06)`, marginBottom: '1rem' }}>
                         <p style={{ fontSize: '0.8125rem', color: 'rgba(13,31,20,0.55)' }}>¿El resultado no corresponde al producto que tienes?</p>
                         <button onClick={handleWrongProduct}
-                          style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'rgba(13,31,20,0.45)', background: 'none', border: 'none', cursor: 'pointer', marginLeft: '0.75rem', flexShrink: 0, fontFamily: 'inherit', transition: 'color 180ms ease' }}
+                          style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'rgba(13,31,20,0.45)', background: 'none', border: 'none', cursor: 'pointer', flexShrink: 0, fontFamily: 'inherit', transition: 'color 180ms ease' }}
                           onMouseEnter={e => e.currentTarget.style.color = PRIMARY}
                           onMouseLeave={e => e.currentTarget.style.color = 'rgba(13,31,20,0.45)'}
                         >No es mi producto</button>
                       </div>
                     ) : (
-                      <div style={{ borderRadius: '1rem', overflow: 'hidden', border: `1px solid rgba(22,163,74,0.18)`, background: 'linear-gradient(135deg, #f0fdf4, #dcfce7)', marginBottom: '1.25rem' }}>
-                        <div style={{ padding: '1.25rem 1.375rem' }}>
+                      <div style={{ borderRadius: '1rem', overflow: 'hidden', border: `1px solid rgba(22,163,74,0.18)`, background: 'linear-gradient(135deg, #f0fdf4, #dcfce7)', marginBottom: '1rem' }}>
+                        <div style={{ padding: '1.25rem' }}>
                           <div style={{ display: 'flex', gap: '0.875rem', alignItems: 'flex-start', marginBottom: '1rem' }}>
                             <div style={{ width: '2.25rem', height: '2.25rem', borderRadius: '0.625rem', background: 'rgba(22,163,74,0.10)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                               <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke={PRIMARY} strokeWidth={1.8}>
@@ -423,7 +419,7 @@ export default function Buscador() {
                               </svg>
                             </div>
                             <div>
-                              <p style={{ fontWeight: 800, color: TEXT, fontSize: '0.9rem', marginBottom: '0.25rem' }}>¿Quieres un análisis más preciso?</p>
+                              <p style={{ fontWeight: 800, color: TEXT, fontSize: '0.875rem', marginBottom: '0.25rem' }}>¿Quieres un análisis más preciso?</p>
                               <p style={{ fontSize: '0.8125rem', color: 'rgba(13,31,20,0.65)', lineHeight: 1.55 }}>Haz una foto a la etiqueta de ingredientes o al frente del envase. Nuestra IA lo identificará visualmente.</p>
                             </div>
                           </div>
@@ -439,7 +435,7 @@ export default function Buscador() {
                             Analizar con foto del producto
                           </button>
                         </div>
-                        <div style={{ padding: '0 1.375rem 1.125rem' }}>
+                        <div style={{ padding: '0 1.25rem 1rem' }}>
                           <button onClick={() => setWrongCount(0)}
                             style={{ fontSize: '0.8125rem', color: 'rgba(13,31,20,0.45)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', transition: 'color 180ms ease' }}
                             onMouseEnter={e => e.currentTarget.style.color = 'rgba(13,31,20,0.75)'}
@@ -466,26 +462,26 @@ export default function Buscador() {
           </section>
         )}
 
-        {/* ── Divisor: Hero → Cómo funciona ── */}
         <SectionDivider />
 
         {/* ══════════════════ CÓMO FUNCIONA ══════════════════ */}
-        <section style={{ background: BG_ALT, paddingTop: '5rem', paddingBottom: '5.5rem' }} id="como-funciona">
+        <section className="section-pad" style={{ background: BG_ALT }} id="como-funciona">
           <div style={container}>
-            <div className="reveal" style={{ marginBottom: '3.5rem', maxWidth: '520px' }}>
+            <div className="reveal" style={{ marginBottom: '2.5rem', maxWidth: '520px' }}>
               <p style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: PRIMARY, marginBottom: '0.75rem' }}>Cómo funciona</p>
-              <h2 style={{ fontFamily: "var(--font-display, 'Fraunces', Georgia, serif)", fontSize: 'clamp(1.875rem, 4vw, 3rem)', fontWeight: 700, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.02em' }}>Tres pasos.<br />Resultado inmediato.</h2>
+              <h2 style={{ fontFamily: "var(--font-display, 'Fraunces', Georgia, serif)", fontSize: 'clamp(1.75rem, 4vw, 3rem)', fontWeight: 700, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.02em' }}>Tres pasos.<br />Resultado inmediato.</h2>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1px', background: BORDER, borderRadius: '1.25rem', overflow: 'hidden' }}>
+            {/* Grid de 3 — colapsa a 1 col en móvil */}
+            <div className="steps-grid" style={{ background: BORDER, borderRadius: '1.25rem', overflow: 'hidden' }}>
               {[
                 { num: '01', titulo: 'Introduce el código', desc: 'Escribe manualmente el código EAN o usa la cámara para escanearlo directamente desde el envase.' },
                 { num: '02', titulo: 'La IA lo analiza', desc: 'Nuestra IA revisa cada ingrediente, aditivo y posible traza de gluten en segundos.' },
                 { num: '03', titulo: 'Respuesta clara', desc: 'Recibes APTO, NO APTO o DUDOSO con la explicación exacta del motivo.' },
               ].map(({ num, titulo, desc }) => (
-                <div key={num} className="reveal" style={{ padding: '2rem 1.75rem', background: '#fff' }}>
-                  <span style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, letterSpacing: '0.12em', color: PRIMARY, textTransform: 'uppercase', marginBottom: '1.25rem' }}>{num}</span>
-                  <h3 style={{ fontWeight: 700, color: TEXT, fontSize: '1.0625rem', lineHeight: 1.3, marginBottom: '0.625rem' }}>{titulo}</h3>
+                <div key={num} className="reveal step-card" style={{ padding: '1.75rem 1.5rem', background: '#fff' }}>
+                  <span style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, letterSpacing: '0.12em', color: PRIMARY, textTransform: 'uppercase', marginBottom: '1rem' }}>{num}</span>
+                  <h3 style={{ fontWeight: 700, color: TEXT, fontSize: '1rem', lineHeight: 1.3, marginBottom: '0.5rem' }}>{titulo}</h3>
                   <p style={{ color: MUTED, fontSize: '0.875rem', lineHeight: 1.65 }}>{desc}</p>
                 </div>
               ))}
@@ -493,23 +489,21 @@ export default function Buscador() {
           </div>
         </section>
 
-        {/* ── Divisor: Cómo funciona → Reviews ── */}
         <SectionDivider />
 
         {/* ══════════════════ REVIEWS ══════════════════ */}
-        <SectionReviews bg={BG_ALT} />
+        <SectionReviews />
 
-        {/* ── Ticker independiente entre Reviews y Contacto — siempre visible ── */}
         <TickerBand />
 
         {/* ══════════════════ CONTACTO ══════════════════ */}
-        <section style={{ background: BG, paddingTop: '5rem', paddingBottom: '5.5rem' }} id="sobre-celiapp">
+        <section className="section-pad" style={{ background: BG }} id="sobre-celiapp">
           <div style={container}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '4rem', alignItems: 'start' }}>
+            <div className="contact-grid">
               <div className="reveal">
                 <p style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: PRIMARY, marginBottom: '0.75rem' }}>Contacto</p>
-                <h2 style={{ fontFamily: "var(--font-display, 'Fraunces', Georgia, serif)", fontSize: 'clamp(1.875rem, 4vw, 3rem)', fontWeight: 700, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.02em', marginBottom: '1.5rem' }}>¿Tienes alguna<br />pregunta?</h2>
-                <p style={{ color: MUTED, fontSize: '0.9375rem', lineHeight: 1.7, marginBottom: '2.5rem' }}>Estamos aquí para ayudarte. Si tienes dudas sobre un producto, quieres reportar un error o simplemente quieres saber más, escríbenos.</p>
+                <h2 style={{ fontFamily: "var(--font-display, 'Fraunces', Georgia, serif)", fontSize: 'clamp(1.75rem, 4vw, 3rem)', fontWeight: 700, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.02em', marginBottom: '1.25rem' }}>¿Tienes alguna<br />pregunta?</h2>
+                <p style={{ color: MUTED, fontSize: '0.9375rem', lineHeight: 1.7, marginBottom: '2rem' }}>Estamos aquí para ayudarte. Si tienes dudas sobre un producto, quieres reportar un error o simplemente quieres saber más, escríbenos.</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                   {[
                     { label: 'Email', val: 'hola@celiapp.es' },
@@ -524,13 +518,14 @@ export default function Buscador() {
                 </div>
               </div>
 
-              <div className="reveal" style={{ borderRadius: '1.25rem', padding: '2rem', background: '#fff', boxShadow: '0 4px 24px rgba(13,31,20,0.06)', border: `1px solid ${BORDER}` }}>
+              <div className="reveal" style={{ borderRadius: '1.25rem', padding: '1.5rem', background: '#fff', boxShadow: '0 4px 24px rgba(13,31,20,0.06)', border: `1px solid ${BORDER}` }}>
                 <form style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }} onSubmit={e => { e.preventDefault(); showToast('✓ Mensaje enviado. Te respondemos pronto.'); e.target.reset(); }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  {/* Nombre y Email en 2 cols en desktop, 1 en móvil */}
+                  <div className="form-row">
                     {[{ label: 'Nombre', type: 'text', ph: 'Tu nombre' }, { label: 'Email', type: 'email', ph: 'tu@email.com' }].map(f => (
                       <div key={f.label}>
                         <label style={{ fontSize: '0.72rem', fontWeight: 700, color: MUTED, display: 'block', marginBottom: '0.375rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{f.label}</label>
-                        <input type={f.type} placeholder={f.ph} required style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '0.625rem', border: `1px solid ${BORDER}`, background: BG, fontSize: '0.875rem', fontFamily: 'inherit', color: TEXT, outline: 'none', transition: 'border-color 160ms ease' }}
+                        <input type={f.type} placeholder={f.ph} required style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '0.625rem', border: `1px solid ${BORDER}`, background: BG, fontSize: '0.875rem', fontFamily: 'inherit', color: TEXT, outline: 'none', transition: 'border-color 160ms ease', boxSizing: 'border-box' }}
                           onFocus={e => e.currentTarget.style.borderColor = `rgba(22,163,74,0.45)`}
                           onBlur={e => e.currentTarget.style.borderColor = BORDER}
                         />
@@ -539,7 +534,7 @@ export default function Buscador() {
                   </div>
                   <div>
                     <label style={{ fontSize: '0.72rem', fontWeight: 700, color: MUTED, display: 'block', marginBottom: '0.375rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Asunto</label>
-                    <select style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '0.625rem', border: `1px solid ${BORDER}`, background: BG, fontSize: '0.875rem', fontFamily: 'inherit', color: TEXT, outline: 'none', appearance: 'none' }}>
+                    <select style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '0.625rem', border: `1px solid ${BORDER}`, background: BG, fontSize: '0.875rem', fontFamily: 'inherit', color: TEXT, outline: 'none', appearance: 'none', boxSizing: 'border-box' }}>
                       <option>Duda sobre un producto</option>
                       <option>Reportar un error</option>
                       <option>Sugerencia de mejora</option>
@@ -549,7 +544,7 @@ export default function Buscador() {
                   </div>
                   <div>
                     <label style={{ fontSize: '0.72rem', fontWeight: 700, color: MUTED, display: 'block', marginBottom: '0.375rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Mensaje</label>
-                    <textarea rows={4} placeholder="Cuéntanos en qué podemos ayudarte…" required style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '0.625rem', border: `1px solid ${BORDER}`, background: BG, fontSize: '0.875rem', fontFamily: 'inherit', color: TEXT, outline: 'none', resize: 'none', transition: 'border-color 160ms ease' }}
+                    <textarea rows={4} placeholder="Cuéntanos en qué podemos ayudarte…" required style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '0.625rem', border: `1px solid ${BORDER}`, background: BG, fontSize: '0.875rem', fontFamily: 'inherit', color: TEXT, outline: 'none', resize: 'none', transition: 'border-color 160ms ease', boxSizing: 'border-box' }}
                       onFocus={e => e.currentTarget.style.borderColor = `rgba(22,163,74,0.45)`}
                       onBlur={e => e.currentTarget.style.borderColor = BORDER}
                     />
@@ -568,14 +563,8 @@ export default function Buscador() {
         {/* ══════════════════ FOOTER ══════════════════ */}
         <footer style={{ background: BG }}>
           <div style={{ width: '100%', height: '1px', background: BORDER }} />
-          <div style={{ ...container, paddingTop: '3.5rem', paddingBottom: '3rem' }}>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'minmax(200px, 1.5fr) repeat(3, 1fr)',
-              gap: '2.5rem',
-              marginBottom: '3rem',
-              alignItems: 'start',
-            }}>
+          <div style={{ ...container, paddingTop: '3rem', paddingBottom: '2.5rem' }}>
+            <div className="footer-grid" style={{ marginBottom: '2.5rem', alignItems: 'start' }}>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.875rem' }}>
                   <svg width="28" height="28" viewBox="0 0 32 32" fill="none" aria-hidden="true">
@@ -635,19 +624,18 @@ export default function Buscador() {
               </div>
             </div>
             <div style={{ height: '1px', background: BORDER, marginBottom: '1.5rem' }} />
-            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem' }}>
+            <div className="footer-bottom">
               <span style={{ fontSize: '0.8125rem', color: 'rgba(13,31,20,0.38)' }}>© 2026 CeliApp — Hecho con cuidado en Barcelona, España</span>
               <span style={{ fontSize: '0.8125rem', color: 'rgba(13,31,20,0.32)' }}>No sustituye el consejo médico. Verifica siempre el etiquetado.</span>
             </div>
           </div>
         </footer>
 
-        {/* ══════════════════ TOAST ══════════════════ */}
         {toastMsg && (
-          <div style={{ position: 'fixed', bottom: '1.5rem', right: '1.5rem', zIndex: 50 }}>
+          <div style={{ position: 'fixed', bottom: '1rem', right: '1rem', left: '1rem', zIndex: 50 }} className="toast-wrapper">
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.875rem 1.25rem', borderRadius: '0.875rem', background: '#0D1F14', color: '#F7FAF8', fontSize: '0.875rem', fontWeight: 500, boxShadow: '0 8px 32px rgba(13,31,20,0.22)' }}>
-              <span>{toastMsg}</span>
-              <button onClick={() => setToastMsg('')} style={{ color: 'rgba(247,250,248,0.4)', background: 'none', border: 'none', cursor: 'pointer', display: 'flex' }}>
+              <span style={{ flex: 1 }}>{toastMsg}</span>
+              <button onClick={() => setToastMsg('')} style={{ color: 'rgba(247,250,248,0.4)', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', flexShrink: 0 }}>
                 <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -658,13 +646,58 @@ export default function Buscador() {
 
         <style>{`
           @keyframes spin { to { transform: rotate(360deg); } }
+
+          /* Reveal animation */
           .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.55s ease, transform 0.55s ease; }
           .reveal.visible { opacity: 1; transform: none; }
+
+          /* Hero padding */
+          .section-hero { padding-top: 5rem; padding-bottom: 5.5rem; }
+
+          /* Secciones padding genérico */
+          .section-pad { padding-top: 5rem; padding-bottom: 5.5rem; }
+
+          /* Steps grid — 3 cols desktop, 1 col móvil */
+          .steps-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; }
+
+          /* Contacto grid — 2 cols desktop, 1 col móvil */
+          .contact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: clamp(2rem, 5vw, 4rem); align-items: start; }
+
+          /* Formulario contacto — 2 cols nombre/email */
+          .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+          /* Footer grid — 4 cols desktop */
+          .footer-grid { display: grid; grid-template-columns: minmax(180px, 1.5fr) repeat(3, 1fr); gap: 2rem; }
+
+          /* Footer bottom — fila en desktop */
+          .footer-bottom { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem; }
+
+          /* Toast — centrado en móvil */
+          .toast-wrapper { left: 1rem; right: 1rem; bottom: 1rem; }
+
+          /* ═══════════ TABLET (≤ 768px) ═══════════ */
           @media (max-width: 768px) {
-            .footer-grid { grid-template-columns: 1fr 1fr !important; }
+            .section-hero { padding-top: 3rem; padding-bottom: 3.5rem; }
+            .section-pad  { padding-top: 3.5rem; padding-bottom: 3.5rem; }
+            .steps-grid   { grid-template-columns: 1fr; }
+            .footer-grid  { grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+            .form-row     { grid-template-columns: 1fr; }
           }
+
+          /* ═══════════ MÓVIL (≤ 480px) ═══════════ */
           @media (max-width: 480px) {
-            .footer-grid { grid-template-columns: 1fr !important; }
+            .section-hero { padding-top: 2.5rem; padding-bottom: 2.5rem; }
+            .section-pad  { padding-top: 2.5rem; padding-bottom: 2.5rem; }
+            .footer-grid  { grid-template-columns: 1fr; }
+            .footer-bottom { flex-direction: column; align-items: flex-start; }
+            .toast-wrapper { left: 0.75rem; right: 0.75rem; bottom: 0.75rem; }
+            /* Buscador pill → stacked */
+            .search-inner { flex-wrap: wrap; border-radius: 1rem !important; padding: 0.5rem !important; gap: 0 !important; }
+            .search-inner input { width: 100%; order: 1; padding: 0.625rem 0.5rem !important; }
+            .search-inner span:first-child { order: 0; }
+            .search-inner button[type="button"] { order: 2; margin-left: auto; }
+            .search-inner button[type="submit"] { order: 3; width: 100%; justify-content: center; border-radius: 0.625rem !important; margin-top: 0.375rem; }
+            .stat-dot { display: none; }
           }
         `}</style>
       </div>
