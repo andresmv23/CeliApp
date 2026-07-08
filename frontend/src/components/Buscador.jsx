@@ -515,31 +515,29 @@ export default function Buscador() {
           </div>
         </section>
 
-        {/* ══════════════════ FOOTER — siluetas botánicas ══════════════════ */}
+        {/* ══════════════════ FOOTER ══════════════════ */}
         {/*
-          Opción A: siluetas planas de ingredientes distribuidas asimétricamente.
-          Sin colinas, sin paisaje, sin nada que recuerde a Yuka.
-          Fondo #F7FAF8 (mismo BG de la app). Dos opacidades para dar profundidad.
-          Elementos: espiga tachada (símbolo sin gluten), hoja de laurel,
-          granos de arroz, semilla de girasol, ramita de olivo.
+          Estructura correcta:
+          1. Línea divisoria full-width (de borde a borde)
+          2. Logo + links + copyright dentro del container
         */}
-        <footer style={{ background: BG, position: 'relative', overflow: 'hidden', paddingTop: '4rem' }}>
+        <footer style={{ background: BG }}>
+
+          {/* Línea divisoria — ocupa todo el ancho de la pantalla */}
+          <div style={{ width: '100%', height: '1px', background: BORDER }} />
 
           {/* Contenido del footer */}
-          <div style={{ ...container, position: 'relative', zIndex: 1, paddingBottom: '2rem' }}>
+          <div style={{ ...container, paddingTop: '1.75rem', paddingBottom: '2rem' }}>
             <div style={{
               display: 'flex',
               flexWrap: 'wrap',
               alignItems: 'center',
               justifyContent: 'space-between',
               gap: '1.5rem',
-              paddingBottom: '1.75rem',
-              marginBottom: '1.75rem',
-              borderBottom: `1px solid ${BORDER}`,
             }}>
               {/* Logo + nombre */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                <svg width="28" height="28" viewBox="0 0 32 32" fill="none" aria-hidden="true">
                   <rect width="32" height="32" rx="9" fill="#16a34a" />
                   <path d="M16 24 L16 10" stroke="white" strokeWidth="1.6" strokeLinecap="round" />
                   <ellipse cx="16" cy="13" rx="3" ry="1.8" fill="white" opacity="0.9" transform="rotate(-30 16 13)" />
@@ -548,11 +546,16 @@ export default function Buscador() {
                   <ellipse cx="16" cy="17" rx="3" ry="1.8" fill="white" opacity="0.75" transform="rotate(20 16 17)" />
                   <line x1="9" y1="9" x2="23" y2="23" stroke="white" strokeWidth="1.8" strokeLinecap="round" opacity="0.5" />
                 </svg>
-                <span style={{ fontFamily: "var(--font-display, 'Fraunces', Georgia, serif)", fontWeight: 700, color: TEXT, fontSize: '1.125rem' }}>CeliApp</span>
+                <span style={{
+                  fontFamily: "var(--font-display, 'Fraunces', Georgia, serif)",
+                  fontWeight: 700,
+                  color: TEXT,
+                  fontSize: '1rem',
+                }}>CeliApp</span>
               </div>
 
-              {/* Links */}
-              <div style={{ display: 'flex', gap: '2rem' }}>
+              {/* Links + copyright */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', flexWrap: 'wrap' }}>
                 {['Privacidad', 'Términos'].map(l => (
                   <a key={l} href="#"
                     style={{ fontSize: '0.875rem', color: MUTED, textDecoration: 'none', transition: 'color 180ms ease' }}
@@ -560,136 +563,10 @@ export default function Buscador() {
                     onMouseLeave={e => e.currentTarget.style.color = MUTED}
                   >{l}</a>
                 ))}
+                <span style={{ fontSize: '0.8125rem', color: 'rgba(13,31,20,0.38)' }}>© 2026 CeliApp</span>
               </div>
             </div>
-
-            <p style={{ fontSize: '0.8125rem', color: 'rgba(13,31,20,0.42)', marginBottom: '0' }}>© 2026 CeliApp</p>
           </div>
-
-          {/*
-            SVG botánico — Opción A
-            viewBox 1440×200. Siluetas planas, sin rellenos degradados.
-            Color base: rgba(22,163,74,0.10) para elementos lejanos (profundidad)
-                        rgba(22,163,74,0.20) para elementos cercanos
-            Elementos distribuidos asimétricamente:
-              - Izq:  espiga de trigo tachada (símbolo celiaquía) + hoja grande
-              - Centro-izq: ramita de olivo
-              - Centro-der: granos de arroz agrupados
-              - Der: semilla de girasol + hoja pequeña
-          */}
-          <svg
-            viewBox="0 0 1440 200"
-            xmlns="http://www.w3.org/2000/svg"
-            style={{ display: 'block', width: '100%', height: 'auto', marginTop: '1.5rem' }}
-            aria-hidden="true"
-          >
-            {/* ── ESPIGA TACHADA (izquierda, elemento principal) ── */}
-            {/* Tallo */}
-            <line x1="96" y1="200" x2="96" y2="108" stroke="rgba(22,163,74,0.22)" strokeWidth="2.5" strokeLinecap="round" />
-            {/* Granos izquierda */}
-            <ellipse cx="88" cy="148" rx="7" ry="4" fill="rgba(22,163,74,0.22)" transform="rotate(-30 88 148)" />
-            <ellipse cx="86" cy="132" rx="7" ry="4" fill="rgba(22,163,74,0.22)" transform="rotate(-28 86 132)" />
-            <ellipse cx="87" cy="117" rx="6" ry="3.5" fill="rgba(22,163,74,0.22)" transform="rotate(-25 87 117)" />
-            {/* Granos derecha */}
-            <ellipse cx="104" cy="144" rx="7" ry="4" fill="rgba(22,163,74,0.22)" transform="rotate(30 104 144)" />
-            <ellipse cx="106" cy="128" rx="7" ry="4" fill="rgba(22,163,74,0.22)" transform="rotate(28 106 128)" />
-            <ellipse cx="105" cy="114" rx="6" ry="3.5" fill="rgba(22,163,74,0.22)" transform="rotate(25 105 114)" />
-            {/* Punta */}
-            <ellipse cx="96" cy="108" rx="4" ry="6" fill="rgba(22,163,74,0.22)" />
-            {/* Línea tachada (símbolo sin gluten) */}
-            <line x1="72" y1="176" x2="120" y2="104" stroke="rgba(22,163,74,0.35)" strokeWidth="2.8" strokeLinecap="round" />
-            <circle cx="96" cy="140" r="28" fill="none" stroke="rgba(22,163,74,0.20)" strokeWidth="2.2" />
-
-            {/* ── HOJA GRANDE (izquierda, detrás de la espiga) ── */}
-            <path
-              d="M38 200 C42 170, 28 145, 22 125 C18 110, 26 92, 40 88 C54 84, 64 98, 60 118 C56 138, 48 158, 38 200 Z"
-              fill="rgba(22,163,74,0.11)"
-            />
-            {/* Nervio central */}
-            <path d="M38 200 C40 165, 35 130, 32 108" stroke="rgba(22,163,74,0.18)" strokeWidth="1.2" strokeLinecap="round" fill="none" />
-
-            {/* ── RAMITA DE OLIVO (centro-izquierda, difuminada) ── */}
-            {/* Rama principal */}
-            <path d="M380 200 C390 178, 400 155, 415 135 C428 118, 440 108, 452 102" stroke="rgba(22,163,74,0.13)" strokeWidth="2" strokeLinecap="round" fill="none" />
-            {/* Hojitas pares */}
-            {[
-              [395, 188, -20], [405, 172, -15], [416, 156, -12],
-              [426, 141, -10], [438, 127, -8], [449, 113, -6],
-            ].map(([x, y, r], i) => (
-              <g key={i}>
-                <ellipse cx={x - 6} cy={y} rx="8" ry="4" fill="rgba(22,163,74,0.13)" transform={`rotate(${r} ${x - 6} ${y})`} />
-                <ellipse cx={x + 6} cy={y} rx="8" ry="4" fill="rgba(22,163,74,0.13)" transform={`rotate(${-r} ${x + 6} ${y})`} />
-              </g>
-            ))}
-            {/* Aceitunas */}
-            <circle cx="410" cy="163" r="4" fill="rgba(22,163,74,0.13)" />
-            <circle cx="434" cy="135" r="4" fill="rgba(22,163,74,0.13)" />
-
-            {/* ── GRANOS DE ARROZ (centro-derecha) ── */}
-            {[
-              [820, 158, -35], [832, 145, -15], [844, 155, 20],
-              [826, 170, 40],  [840, 132, -5],  [854, 145, 30],
-            ].map(([x, y, r], i) => (
-              <ellipse key={i} cx={x} cy={y} rx="6" ry="11" fill="rgba(22,163,74,0.16)" transform={`rotate(${r} ${x} ${y})`} />
-            ))}
-            {/* Hoja de arroz */}
-            <path d="M828 185 C830 168, 838 150, 850 125" stroke="rgba(22,163,74,0.14)" strokeWidth="1.8" strokeLinecap="round" fill="none" />
-            <path d="M835 165 C842 158, 852 155, 858 148" stroke="rgba(22,163,74,0.12)" strokeWidth="1.2" strokeLinecap="round" fill="none" />
-            <path d="M832 152 C826 144, 822 138, 825 128" stroke="rgba(22,163,74,0.12)" strokeWidth="1.2" strokeLinecap="round" fill="none" />
-
-            {/* ── HOJA DE LAUREL (centro, sutil) ── */}
-            <path
-              d="M620 200 C624 182, 618 162, 614 148 C610 136, 612 122, 620 114 C628 106, 638 110, 640 124 C642 138, 636 156, 628 174 C624 184, 622 192, 620 200 Z"
-              fill="rgba(22,163,74,0.09)"
-            />
-            <path d="M620 200 C621 175, 618 148, 617 124" stroke="rgba(22,163,74,0.14)" strokeWidth="1" strokeLinecap="round" fill="none" />
-
-            {/* ── SEMILLA DE GIRASOL (derecha, elemento principal) ── */}
-            {/* Centro */}
-            <circle cx="1320" cy="148" r="18" fill="rgba(22,163,74,0.18)" />
-            <circle cx="1320" cy="148" r="11" fill="rgba(22,163,74,0.12)" />
-            {/* Pétalos */}
-            {Array.from({ length: 12 }, (_, i) => {
-              const angle = (i * 30 * Math.PI) / 180;
-              const px = 1320 + Math.cos(angle) * 28;
-              const py = 148 + Math.sin(angle) * 28;
-              return (
-                <ellipse
-                  key={i}
-                  cx={px}
-                  cy={py}
-                  rx="7"
-                  ry="4"
-                  fill="rgba(22,163,74,0.15)"
-                  transform={`rotate(${i * 30} ${px} ${py})`}
-                />
-              );
-            })}
-            {/* Tallo */}
-            <line x1="1320" y1="166" x2="1316" y2="200" stroke="rgba(22,163,74,0.18)" strokeWidth="2.5" strokeLinecap="round" />
-            {/* Hoja del girasol */}
-            <path
-              d="M1316 185 C1302 178, 1292 165, 1295 152 C1298 140, 1310 138, 1318 148"
-              fill="rgba(22,163,74,0.14)"
-            />
-
-            {/* ── HOJA PEQUEÑA (extremo derecho, sutil) ── */}
-            <path
-              d="M1420 200 C1422 185, 1416 170, 1412 160 C1408 150, 1410 140, 1418 135 C1426 130, 1434 136, 1434 148 C1434 160, 1428 176, 1420 200 Z"
-              fill="rgba(22,163,74,0.09)"
-            />
-            <path d="M1420 200 C1421 180, 1415 158, 1415 142" stroke="rgba(22,163,74,0.13)" strokeWidth="1" strokeLinecap="round" fill="none" />
-
-            {/* ── PUNTITOS decorativos (semillas dispersas, muy sutiles) ── */}
-            {[
-              [160, 188], [175, 172], [192, 183],
-              [545, 192], [560, 178], [575, 188],
-              [1060, 185], [1075, 170], [1090, 180],
-              [1240, 192], [1260, 182],
-            ].map(([x, y], i) => (
-              <circle key={i} cx={x} cy={y} r="3" fill="rgba(22,163,74,0.12)" />
-            ))}
-          </svg>
         </footer>
 
         {/* ══════════════════ TOAST ══════════════════ */}
@@ -708,6 +585,8 @@ export default function Buscador() {
 
         <style>{`
           @keyframes spin { to { transform: rotate(360deg); } }
+          .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.55s ease, transform 0.55s ease; }
+          .reveal.visible { opacity: 1; transform: none; }
         `}</style>
       </div>
     </>
