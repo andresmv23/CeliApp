@@ -144,6 +144,7 @@ export default function Buscador() {
   };
 
   const BG      = '#F7FAF8';
+  const BG_ALT  = '#F0F4F1';
   const TEXT    = '#0D1F14';
   const MUTED   = '#4B6355';
   const PRIMARY = '#16a34a';
@@ -426,7 +427,7 @@ export default function Buscador() {
         )}
 
         {/* ══════════════════ CÓMO FUNCIONA ══════════════════ */}
-        <section style={{ background: BG, paddingTop: '5rem', paddingBottom: '5.5rem' }} id="como-funciona">
+        <section style={{ background: BG_ALT, paddingTop: '5rem', paddingBottom: '5.5rem' }} id="como-funciona">
           <div style={container}>
             <div className="reveal" style={{ marginBottom: '3.5rem', maxWidth: '520px' }}>
               <p style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: PRIMARY, marginBottom: '0.75rem' }}>Cómo funciona</p>
@@ -450,7 +451,7 @@ export default function Buscador() {
         </section>
 
         {/* ══════════════════ REVIEWS ══════════════════ */}
-        <SectionReviews />
+        <SectionReviews bg={BG_ALT} />
 
         {/* ══════════════════ CONTACTO ══════════════════ */}
         <section style={{ background: BG, paddingTop: '5rem', paddingBottom: '5.5rem' }} id="sobre-celiapp">
@@ -463,7 +464,7 @@ export default function Buscador() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                   {[
                     { label: 'Email', val: 'hola@celiapp.es' },
-                    { label: 'Ubicación', val: 'Madrid, España' },
+                    { label: 'Ubicación', val: 'Barcelona, España' },
                     { label: 'Respuesta en', val: 'menos de 24 horas' },
                   ].map(c => (
                     <div key={c.label}>
@@ -521,10 +522,9 @@ export default function Buscador() {
           {/* Línea divisoria full-width */}
           <div style={{ width: '100%', height: '1px', background: BORDER }} />
 
-          {/* Contenido principal del footer — más espacio y más contenido */}
+          {/* Contenido principal del footer */}
           <div style={{ ...container, paddingTop: '3.5rem', paddingBottom: '3rem' }}>
 
-            {/* Fila superior: logo+tagline a la izquierda, columnas de links a la derecha */}
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'minmax(200px, 1.5fr) repeat(3, 1fr)',
@@ -561,7 +561,6 @@ export default function Buscador() {
                 }}>
                   Análisis de gluten al instante. Para que comer bien no sea una aventura.
                 </p>
-                {/* Badge sin gluten */}
                 <span style={{
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -638,7 +637,7 @@ export default function Buscador() {
               justifyContent: 'space-between',
               gap: '0.75rem',
             }}>
-              <span style={{ fontSize: '0.8125rem', color: 'rgba(13,31,20,0.38)' }}>© 2026 CeliApp — Hecho con cuidado en Madrid, España</span>
+              <span style={{ fontSize: '0.8125rem', color: 'rgba(13,31,20,0.38)' }}>© 2026 CeliApp — Hecho con cuidado en Barcelona, España</span>
               <span style={{ fontSize: '0.8125rem', color: 'rgba(13,31,20,0.32)' }}>No sustituye el consejo médico. Verifica siempre el etiquetado.</span>
             </div>
           </div>
