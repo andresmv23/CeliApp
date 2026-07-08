@@ -9,7 +9,7 @@ con explicación basada en ingredientes reales.
 - **Backend:** Python 3.11 + FastAPI + psycopg2 (connection pool) + JWT (python-jose)
 - **Frontend:** React 18 + Vite + Tailwind CSS v3
 - **Mobile:** Flutter (Dart) — en `celi_app_mobile/`
-- **Base de datos:** PostgreSQL (Railway en producción)
+- **Base de datos:** PostgreSQL (Render en producción)
 - **IA:** Perplexity API — `sonar` para búsqueda por EAN, `sonar-pro` para análisis por imagen
 - **Deploy:** Railway (backend) + Vercel (frontend)
 
