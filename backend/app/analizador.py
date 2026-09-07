@@ -1,6 +1,6 @@
 import re
-import json
-from typing import Dict, List
+from typing import Dict
+from .schemas import Analisis
 
 GLUTEN_OBVIO = [
     # Español
@@ -49,7 +49,6 @@ FALSOS_POSITIVOS = [
     "buckwheat",        # sin gluten
 ]
 
-
 def _contiene_gluten(texto: str, gluten: str) -> bool:
     """
     Comprueba si el ingrediente con gluten aparece como palabra completa,
@@ -65,6 +64,52 @@ def _contiene_gluten(texto: str, gluten: str) -> bool:
     patron = r"\b" + re.escape(gluten) + r"\b"
     return bool(re.search(patron, texto))
 
+def analizar_ingredientes_basico(ingredientes: str) -> Analisis:
+    """
+    Analiza exclusivamente la lista de ingredientes.
+
+    No analiza trazas, etiquetas de OFF ni información web.
+    Las trazas se gestionan fuera, en el orquestador, usando los datos
+    estructurados de Open Food Facts o de la fuente correspondiente.
+    """
+
+    if not ingredientes or len(ingredientes.strip()) < 5:
+        return Analisis(
+            es_apto=False,
+            estado="DUDOSO",
+            motivo=(
+                "No hay información suficiente de ingredientes para determinar "
+                "si el producto contiene gluten."
+            ),
+            url_info=None,
+            fuente="ANALISIS_INGREDIENTES",
+            confianza="baja",
+        )
+
+    texto = ingredientes.lower()
+
+    for gluten in GLUTEN_OBVIO:
+        if _contiene_gluten(texto, gluten):
+            return Analisis(
+                es_apto=False,
+                estado="NO_APTO",
+                motivo=f"Contiene un ingrediente con gluten: {gluten}.",
+                url_info=None,
+                fuente="ANALISIS_INGREDIENTES",
+                confianza="alta",
+            )
+
+    return Analisis(
+        es_apto=False,
+        estado="SIN_GLUTEN_NO_CERTIFICADO",
+        motivo=(
+            "No se detectan ingredientes con gluten, "
+            "pero no existe una confirmación explícita de que sea sin gluten."
+        ),
+        url_info=None,
+        fuente="ANALISIS_INGREDIENTES",
+        confianza="baja",
+    )
 
 def analisis_rapido(ingredientes: str) -> Dict:
     """

@@ -2,6 +2,7 @@ import os
 import json
 import requests
 from dotenv import load_dotenv
+from .schemas import Analisis, Producto
 
 load_dotenv()
 
@@ -290,3 +291,274 @@ def _error_vision(motivo: str) -> dict:
         "confianza": "baja",
         "analizado_por": "vision",
     }
+
+def verificar_gluten_web_v2(producto: Producto) -> Analisis:
+    print(
+        f"\n[IA WEB V2] Verificando: "
+        f"{producto.marca or 'Marca desconocida'} - "
+        f"{producto.nombre or 'Producto desconocido'}"
+    )
+
+    nombre = (producto.nombre or "").strip()
+    marca = (producto.marca or "").strip()
+
+    if not nombre or not marca:
+        return Analisis(
+            es_apto=False,
+            estado="DUDOSO",
+            motivo="Faltan el nombre o la marca para verificar el producto.",
+            url_info=None,
+            fuente="SIN_FUENTE_CONFIRMADA",
+            confianza="baja",
+        )
+
+    prompt = f"""
+Busca en Internet si ESTE producto exacto es apto para personas celíacas.
+
+PRODUCTO A VERIFICAR:
+Nombre exacto: "{nombre}"
+Marca exacta: "{marca}"
+Ingredientes conocidos: "{producto.ingredientes or ''}"
+Trazas conocidas: "{producto.trazas_declaradas or ''}"
+
+IMPORTANTE:
+Debes buscar usando principalmente el nombre exacto y la marca:
+"{nombre}" "{marca}" "sin gluten"
+
+No investigues la familia, línea o marca en general. Investiga únicamente
+esta variante concreta del producto.
+
+ACEPTA UNA FUENTE SOLO SI:
+- La marca es exactamente "{marca}".
+- El nombre mostrado corresponde claramente a "{nombre}".
+- Si existen varias variantes con nombres parecidos, sabor distinto, receta
+  distinta, peso distinto o formato distinto, ignóralas.
+- Una fuente que diga únicamente "Cocteleo", sin identificar claramente la
+  variante "Chilli Picante", NO sirve para clasificar este producto.
+- No uses ingredientes, alérgenos ni advertencias de productos similares.
+
+FUENTES A BUSCAR:
+1. Página oficial del fabricante.
+2. Fichas técnicas, catálogos, PDF o documentos de alérgenos del fabricante.
+3. Fichas de supermercados, distribuidores y comercios online.
+4. Imagen del envase disponible, solo si se puede leer con claridad.
+
+EVIDENCIA VÁLIDA:
+- Si una ficha de supermercado, distribuidor o comercio dice explícitamente
+  "sin gluten" o "gluten free" para "{nombre}" de "{marca}", es evidencia
+  válida para APTO.
+- Si la imagen del envase muestra claramente "sin gluten" o "gluten free",
+  es evidencia válida para APTO.
+- No rechaces una declaración de supermercado solo porque el fabricante no
+  muestre esa declaración en su web.
+- Si la fuente solo proporciona ingredientes limpios, sin declaración
+  explícita "sin gluten", el resultado es SIN_GLUTEN_NO_CERTIFICADO.
+
+CLASIFICACIÓN:
+- APTO: Una fuente válida declara explícitamente "sin gluten", "gluten free"
+  o certificación apta para celíacos para "{nombre}" de "{marca}".
+- NO_APTO: Una fuente válida del producto exacto muestra trigo, cebada,
+  centeno, espelta, kamut, triticale, malta, gluten o derivados.
+- TRAZAS: Una fuente válida del producto exacto declara trazas, puede contener
+  o contaminación cruzada de gluten o cereales con gluten.
+- SIN_GLUTEN_NO_CERTIFICADO: Hay una lista de ingredientes válida del producto
+  exacto sin gluten ni trazas declaradas, pero no existe una declaración
+  explícita de "sin gluten".
+- DUDOSO: No existe información verificable de esta variante exacta,
+  hay información contradictoria o no puedes distinguirla de otra variante.
+
+REGLAS ESTRICTAS:
+- Está prohibido devolver NO_APTO o TRAZAS usando datos de otro producto.
+- Si los datos con gluten pertenecen a una variante distinta, ignóralos.
+- Si la fuente identifica un producto parecido, pero no "{nombre}", devuelve
+  DUDOSO; nunca NO_APTO ni TRAZAS.
+- Para NO_APTO o TRAZAS, el motivo debe citar el ingrediente o advertencia
+  encontrada en la ficha del producto exacto.
+- Si el resultado es APTO por una ficha de supermercado o distribuidor, usa
+  fuente WEB_TERCEROS y confianza media.
+- Si el resultado es APTO por fabricante o certificación oficial, usa
+  fuente WEB_FABRICANTE y confianza alta.
+
+Responde únicamente JSON válido, sin texto adicional:
+{{
+  "estado": "APTO",
+  "motivo": "Explicación breve basada únicamente en el producto exacto",
+  "url_info": "URL de la fuente usada o null",
+  "fuente": "WEB_FABRICANTE",
+  "confianza": "alta",
+  "nombre_fuente": "Nombre exacto del producto mostrado en la fuente o null",
+  "marca_fuente": "Marca mostrada en la fuente o null"
+}}
+"""
+
+    try:
+        if producto.imagen_url:
+            response = requests.post(
+                PERPLEXITY_URL,
+                json={
+                    "model": "sonar-pro",
+                    "messages": [
+                        {
+                            "role": "user",
+                            "content": [
+                                {
+                                    "type": "image_url",
+                                    "image_url": {
+                                        "url": producto.imagen_url,
+                                    },
+                                },
+                                {
+                                    "type": "text",
+                                    "text": prompt,
+                                },
+                            ],
+                        }
+                    ],
+                    "temperature": 0.0,
+                },
+                headers={
+                    "Authorization": f"Bearer {API_KEY}",
+                    "Content-Type": "application/json",
+                },
+                timeout=45,
+            )
+            response.raise_for_status()
+            raw = response.json()["choices"][0]["message"]["content"]
+        else:
+            raw = _call_ia(prompt, timeout=30)
+
+    except Exception as e:
+        print(f"\n❌ Error verificando gluten en web: {e}")
+        raw = None
+
+    if not raw:
+        return Analisis(
+            es_apto=False,
+            estado="DUDOSO",
+            motivo="No se pudo verificar información web del producto.",
+            url_info=None,
+            fuente="SIN_FUENTE_CONFIRMADA",
+            confianza="baja",
+        )
+
+    print(f"\n[DEBUG WEB V2 RAW]: {raw}")
+
+    respuesta = _extraer_json(raw) or {}
+
+    estado = respuesta.get("estado", "DUDOSO")
+    estados_validos = {
+        "APTO",
+        "NO_APTO",
+        "TRAZAS",
+        "DUDOSO",
+        "SIN_GLUTEN_NO_CERTIFICADO",
+    }
+    if estado not in estados_validos:
+        estado = "DUDOSO"
+
+    fuente = respuesta.get("fuente", "SIN_FUENTE_CONFIRMADA")
+    fuentes_validas = {
+        "WEB_FABRICANTE",
+        "WEB_TERCEROS",
+        "SIN_FUENTE_CONFIRMADA",
+    }
+    if fuente not in fuentes_validas:
+        fuente = "SIN_FUENTE_CONFIRMADA"
+
+    confianza = respuesta.get("confianza", "baja")
+    if confianza not in {"alta", "media", "baja"}:
+        confianza = "baja"
+
+    nombre_fuente = (respuesta.get("nombre_fuente") or "").lower()
+    marca_fuente = (respuesta.get("marca_fuente") or "").lower()
+
+    palabras_nombre = [
+        palabra.lower()
+        for palabra in nombre.split()
+        if len(palabra) >= 4
+    ]
+
+    coincide_nombre = all(
+        palabra in nombre_fuente
+        for palabra in palabras_nombre
+    )
+    coincide_marca = marca.lower() in marca_fuente
+
+    if estado in {"NO_APTO", "TRAZAS"} and (
+        not respuesta.get("url_info")
+        or not coincide_nombre
+        or not coincide_marca
+    ):
+        print(
+            "\n⚠️ [IA WEB V2] Se descartó una clasificación basada "
+            "en una variante o fuente no verificable."
+        )
+        estado = "DUDOSO"
+        fuente = "SIN_FUENTE_CONFIRMADA"
+        confianza = "baja"
+        respuesta["motivo"] = (
+            "La información encontrada no identifica con claridad la misma "
+            "variante del producto, por lo que no puede usarse para "
+            "clasificarlo."
+        )
+        respuesta["url_info"] = None
+
+    return Analisis(
+        es_apto=estado == "APTO",
+        estado=estado,
+        motivo=respuesta.get("motivo")
+        or "No se encontró evidencia verificable sobre gluten.",
+        url_info=respuesta.get("url_info"),
+        fuente=fuente,
+        confianza=confianza,
+    )
+
+def buscar_producto_similar_por_ean_v2(ean: str) -> Producto | None:
+    print(f"\n[IA V2] Buscando referencias para EAN: {ean}")
+
+    prompt = f"""Busca en internet referencias del producto cuyo código EAN es "{ean}".
+
+Busca en fabricantes, supermercados, distribuidores y catálogos de producto.
+
+REGLAS:
+- Prioriza siempre fichas donde aparezca el EAN exacto "{ean}".
+- Si no aparece el EAN exacto, puedes devolver el producto más probable
+  únicamente si marca, nombre, formato y envase parecen coincidir.
+- No afirmes que el candidato corresponde con certeza al EAN si la fuente
+  no muestra ese EAN.
+- No determines aquí si contiene gluten ni si es apto para celíacos.
+- Si no existe un candidato razonable, devuelve encontrado: false.
+
+Responde únicamente JSON válido:
+{{
+  "encontrado": true,
+  "coincidencia_ean_exacta": true,
+  "nombre": "Nombre del producto o null",
+  "marca": "Marca o null",
+  "ingredientes": "Ingredientes publicados o null",
+  "trazas_declaradas": "Trazas publicadas o null",
+  "imagen_url": "URL directa de imagen o null",
+  "url_info": "URL de la ficha encontrada o null",
+  "confianza_identidad": "alta | media | baja"
+}}"""
+
+    raw = _call_ia(prompt, timeout=30)
+    datos = _extraer_json(raw) if raw else None
+
+    if not datos or not datos.get("encontrado"):
+        return None
+
+    nombre = datos.get("nombre")
+    marca = datos.get("marca")
+
+    if not nombre or not marca:
+        return None
+
+    return Producto(
+        ean=ean,
+        nombre=str(nombre).strip(),
+        marca=str(marca).strip(),
+        ingredientes=datos.get("ingredientes"),
+        trazas_declaradas=datos.get("trazas_declaradas"),
+        imagen_url=datos.get("imagen_url"),
+    )

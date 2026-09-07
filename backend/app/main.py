@@ -13,6 +13,7 @@ from app.routers import auth, productos, favoritos, admin, reviews
 from app.routers import google_auth
 from app.init_db import inicializar_base_datos
 
+
 app = FastAPI(title="CeliApp API")
 
 inicializar_base_datos()

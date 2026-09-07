@@ -1,9 +1,64 @@
 from pydantic import BaseModel, EmailStr
-from typing import List, Optional
+from typing import List, Optional, Literal
 from datetime import datetime
 
+EstadoGluten = Literal[
+    "APTO",
+    "NO_APTO",
+    "TRAZAS",
+    "DUDOSO",
+    "SIN_GLUTEN_NO_CERTIFICADO",
+]
 
-# ── Schemas existentes (sin cambios) ─────────────────────────────────────────
+EstadoGlutenOFF = Literal[
+    "SIN_GLUTEN",
+    "CON_GLUTEN",
+    "TRAZAS",
+    "NO_INFO",
+]
+
+ConfianzaAnalisis = Literal["alta", "media", "baja"]
+
+FuenteAnalisis = Literal[
+    "BD_LOCAL",
+    "OPEN_FOOD_FACTS",
+    "ANALISIS_INGREDIENTES",
+    "WEB_FABRICANTE",
+    "WEB_TERCEROS",
+    "SIN_FUENTE_CONFIRMADA",
+]
+
+class Producto(BaseModel):
+    ean: str
+    ingredientes: Optional[str] = None
+    imagen_url: Optional[str] = None
+    nombre: Optional[str] = None
+    marca: Optional[str] = None
+    trazas_declaradas: Optional[str] = None
+
+class ProductoOFF(BaseModel):
+    encontrado: bool
+    ean: Optional[str] = None
+    nombre: Optional[str] = None
+    marca: Optional[str] = None
+    ingredientes: Optional[str] = None
+    trazas_declaradas: Optional[str] = None
+    imagen_url: Optional[str] = None
+    gluten_segun_off: Optional[EstadoGlutenOFF] = None
+    url_fuente: Optional[str] = None
+
+class Analisis(BaseModel):
+    es_apto: bool
+    motivo: str
+    url_info: Optional[str] = None
+    fuente: FuenteAnalisis
+    estado: EstadoGluten
+    confianza: ConfianzaAnalisis
+
+
+class ProductoAnalizado(BaseModel):
+    producto: Producto
+    analisis: Analisis
 
 class AnalisisRequest(BaseModel):
     ingredientes: str

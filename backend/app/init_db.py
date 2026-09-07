@@ -65,7 +65,7 @@ def inicializar_base_datos():
                 nombre VARCHAR(255),
                 marca VARCHAR(100),
                 ingredientes TEXT,
-                estado_gluten VARCHAR(20) CHECK (estado_gluten IN ('APTO', 'NO_APTO', 'TRAZAS', 'DUDOSO')),
+                estado_gluten VARCHAR(20) CHECK (estado_gluten IN ('APTO', 'NO_APTO', 'TRAZAS', 'DUDOSO', 'SIN_GLUTEN_NO_CERTIFICADO')),
                 tipo_fuente VARCHAR(50),
                 justificacion TEXT,
                 url_fuente TEXT,
