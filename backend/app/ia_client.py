@@ -90,18 +90,18 @@ def encontrar_imagen_producto(nombre: str, marca: str) -> str | None:
     print(f"\n\U0001f5bc\ufe0f [IA] Buscando imagen: {marca} - {nombre}")
 
     prompt = f"""Busca en internet una imagen oficial de buena calidad del siguiente producto alimenticio:
-Nombre: "{nombre}"
-Marca: "{marca}"
+                Nombre: "{nombre}"
+                Marca: "{marca}"
 
-INSTRUCCIONES:
-- Busca preferentemente en la web del fabricante, supermercados online o tiendas especializadas.
-- Devuelve una URL directa a la imagen del producto (que termine en .jpg, .jpeg, .png, .webp o similar).
-- La imagen debe mostrar claramente el envase del producto.
-- Si no encuentras una imagen concreta y verificada de este producto, devuelve null.
-- No devuelvas URLs de paginas web, solo URLs directas a archivos de imagen.
+                INSTRUCCIONES:
+                - Busca preferentemente en la web del fabricante, supermercados online o tiendas especializadas.
+                - Devuelve una URL directa a la imagen del producto (que termine en .jpg, .jpeg, .png, .webp o similar).
+                - La imagen debe mostrar claramente el envase del producto.
+                - Si no encuentras una imagen concreta y verificada de este producto, devuelve null.
+                - No devuelvas URLs de paginas web, solo URLs directas a archivos de imagen.
 
-Responde UNICAMENTE con este JSON valido, sin texto adicional:
-{{"imagen_url": "https://... o null"}}"""
+                Responde UNICAMENTE con este JSON valido, sin texto adicional:
+                {{"imagen_url": "https://... o null"}}"""
 
     raw = _call_ia(prompt)
     if not raw:
@@ -313,86 +313,95 @@ def verificar_gluten_web_v2(producto: Producto) -> Analisis:
         )
 
     prompt = f"""
-Busca en Internet si ESTE producto exacto es apto para personas celíacas.
+        Busca en Internet si ESTE producto exacto es apto para personas celíacas.
 
-PRODUCTO A VERIFICAR:
-Nombre exacto: "{nombre}"
-Marca exacta: "{marca}"
-Ingredientes conocidos: "{producto.ingredientes or ''}"
-Trazas conocidas: "{producto.trazas_declaradas or ''}"
+        PRODUCTO A VERIFICAR:
+        Nombre exacto: "{nombre}"
+        Marca exacta: "{marca}"
+        Ingredientes conocidos: "{producto.ingredientes or ''}"
+        Trazas conocidas: "{producto.trazas_declaradas or ''}"
 
-IMPORTANTE:
-Debes buscar usando principalmente el nombre exacto y la marca:
-"{nombre}" "{marca}" "sin gluten"
+        IMPORTANTE:
+        Debes buscar usando principalmente el nombre exacto y la marca:
+        "{nombre}" "{marca}" "sin gluten"
 
-No investigues la familia, línea o marca en general. Investiga únicamente
-esta variante concreta del producto.
+        No investigues la familia, línea o marca en general. Investiga únicamente
+        esta variante concreta del producto.
 
-ACEPTA UNA FUENTE SOLO SI:
-- La marca es exactamente "{marca}".
-- El nombre mostrado corresponde claramente a "{nombre}".
-- Si existen varias variantes con nombres parecidos, sabor distinto, receta
-  distinta, peso distinto o formato distinto, ignóralas.
-- Una fuente que diga únicamente "Cocteleo", sin identificar claramente la
-  variante "Chilli Picante", NO sirve para clasificar este producto.
-- No uses ingredientes, alérgenos ni advertencias de productos similares.
+        ACEPTA UNA FUENTE SOLO SI:
+        - La marca es exactamente "{marca}".
+        - El nombre mostrado corresponde claramente a "{nombre}".
+        - Si existen varias variantes con nombres parecidos, sabor distinto, receta
+        distinta, peso distinto o formato distinto, ignóralas.
+        - Una fuente que diga únicamente "Cocteleo", sin identificar claramente la
+        variante "Chilli Picante", NO sirve para clasificar este producto.
+        - No uses ingredientes, alérgenos ni advertencias de productos similares.
 
-FUENTES A BUSCAR:
-1. Página oficial del fabricante.
-2. Fichas técnicas, catálogos, PDF o documentos de alérgenos del fabricante.
-3. Fichas de supermercados, distribuidores y comercios online.
-4. Imagen del envase disponible, solo si se puede leer con claridad.
+        FUENTES A BUSCAR:
+        1. Página oficial del fabricante.
+        2. Fichas técnicas, catálogos, PDF o documentos de alérgenos del fabricante.
+        3. Fichas de supermercados, distribuidores y comercios online.
+        4. Imagen del envase disponible, solo si se puede leer con claridad.
 
-EVIDENCIA VÁLIDA:
-- Si una ficha de supermercado, distribuidor o comercio dice explícitamente
-  "sin gluten" o "gluten free" para "{nombre}" de "{marca}", es evidencia
-  válida para APTO.
-- Si la imagen del envase muestra claramente "sin gluten" o "gluten free",
-  es evidencia válida para APTO.
-- No rechaces una declaración de supermercado solo porque el fabricante no
-  muestre esa declaración en su web.
-- Si la fuente solo proporciona ingredientes limpios, sin declaración
-  explícita "sin gluten", el resultado es SIN_GLUTEN_NO_CERTIFICADO.
+        EVIDENCIA VÁLIDA:
+        - Si una ficha de supermercado, distribuidor o comercio dice explícitamente
+        "sin gluten" o "gluten free" para "{nombre}" de "{marca}", es evidencia
+        válida para APTO.
+        - Si la imagen del envase muestra claramente "sin gluten" o "gluten free",
+        es evidencia válida para APTO.
+        - No rechaces una declaración de supermercado solo porque el fabricante no
+        muestre esa declaración en su web.
+        - Si la fuente solo proporciona ingredientes limpios, sin declaración
+        explícita "sin gluten", el resultado es SIN_GLUTEN_NO_CERTIFICADO.
 
-CLASIFICACIÓN:
-- APTO: Una fuente válida declara explícitamente "sin gluten", "gluten free"
-  o certificación apta para celíacos para "{nombre}" de "{marca}".
-- NO_APTO: Una fuente válida del producto exacto muestra trigo, cebada,
-  centeno, espelta, kamut, triticale, malta, gluten o derivados.
-- TRAZAS: Una fuente válida del producto exacto declara trazas, puede contener
-  o contaminación cruzada de gluten o cereales con gluten.
-- SIN_GLUTEN_NO_CERTIFICADO: Hay una lista de ingredientes válida del producto
-  exacto sin gluten ni trazas declaradas, pero no existe una declaración
-  explícita de "sin gluten".
-- DUDOSO: No existe información verificable de esta variante exacta,
-  hay información contradictoria o no puedes distinguirla de otra variante.
+        CLASIFICACIÓN:
+        - APTO: Una fuente válida declara explícitamente "sin gluten", "gluten free"
+        o certificación apta para celíacos para "{nombre}" de "{marca}".
+        - NO_APTO: Una fuente válida del producto exacto muestra trigo, cebada,
+        centeno, espelta, kamut, triticale, malta, gluten o derivados.
+        - TRAZAS: Una fuente válida del producto exacto declara trazas, puede contener
+        o contaminación cruzada de gluten o cereales con gluten.
+        - SIN_GLUTEN_NO_CERTIFICADO: Hay una lista de ingredientes válida del producto
+        exacto sin gluten ni trazas declaradas, pero no existe una declaración
+        explícita de "sin gluten".
+        - DUDOSO: No existe información verificable de esta variante exacta,
+        hay información contradictoria o no puedes distinguirla de otra variante.
 
-REGLAS ESTRICTAS:
-- Está prohibido devolver NO_APTO o TRAZAS usando datos de otro producto.
-- Si los datos con gluten pertenecen a una variante distinta, ignóralos.
-- Si la fuente identifica un producto parecido, pero no "{nombre}", devuelve
-  DUDOSO; nunca NO_APTO ni TRAZAS.
-- Para NO_APTO o TRAZAS, el motivo debe citar el ingrediente o advertencia
-  encontrada en la ficha del producto exacto.
-- Si el resultado es APTO por una ficha de supermercado o distribuidor, usa
-  fuente WEB_TERCEROS y confianza media.
-- Si el resultado es APTO por fabricante o certificación oficial, usa
-  fuente WEB_FABRICANTE y confianza alta.
+        REGLAS ESTRICTAS:
+        - Está prohibido devolver NO_APTO o TRAZAS usando datos de otro producto.
+        - Si los datos con gluten pertenecen a una variante distinta, ignóralos.
+        - Si la fuente identifica un producto parecido, pero no "{nombre}", devuelve
+        DUDOSO; nunca NO_APTO ni TRAZAS.
+        - Para NO_APTO o TRAZAS, el motivo debe citar el ingrediente o advertencia
+        encontrada en la ficha del producto exacto.
+        - Si el resultado es APTO por una ficha de supermercado o distribuidor, usa
+        fuente WEB_TERCEROS y confianza media.
+        - Si el resultado es APTO por fabricante o certificación oficial, usa
+        fuente WEB_FABRICANTE y confianza alta.
 
-Responde únicamente JSON válido, sin texto adicional:
-{{
-  "estado": "APTO",
-  "motivo": "Explicación breve basada únicamente en el producto exacto",
-  "url_info": "URL de la fuente usada o null",
-  "fuente": "WEB_FABRICANTE",
-  "confianza": "alta",
-  "nombre_fuente": "Nombre exacto del producto mostrado en la fuente o null",
-  "marca_fuente": "Marca mostrada en la fuente o null"
-}}
-"""
+        Responde únicamente JSON válido, sin texto adicional:
+        {{
+        "estado": "APTO",
+        "motivo": "Explicación breve basada únicamente en el producto exacto",
+        "url_info": "URL de la fuente usada o null",
+        "fuente": "WEB_FABRICANTE",
+        "confianza": "alta",
+        "nombre_fuente": "Nombre exacto del producto mostrado en la fuente o null",
+        "marca_fuente": "Marca mostrada en la fuente o null"
+        }}
+        """
 
-    try:
-        if producto.imagen_url:
+    imagen_url = (producto.imagen_url or "").strip()
+
+    usar_imagen = (
+        imagen_url.startswith("https://")
+        and len(imagen_url) <= 2048
+    )
+
+    raw = None
+
+    if usar_imagen:
+        try:
             response = requests.post(
                 PERPLEXITY_URL,
                 json={
@@ -402,14 +411,14 @@ Responde únicamente JSON válido, sin texto adicional:
                             "role": "user",
                             "content": [
                                 {
-                                    "type": "image_url",
-                                    "image_url": {
-                                        "url": producto.imagen_url,
-                                    },
-                                },
-                                {
                                     "type": "text",
                                     "text": prompt,
+                                },
+                                {
+                                    "type": "image_url",
+                                    "image_url": {
+                                        "url": imagen_url,
+                                    },
                                 },
                             ],
                         }
@@ -422,14 +431,27 @@ Responde únicamente JSON válido, sin texto adicional:
                 },
                 timeout=45,
             )
-            response.raise_for_status()
-            raw = response.json()["choices"][0]["message"]["content"]
-        else:
-            raw = _call_ia(prompt, timeout=30)
 
-    except Exception as e:
-        print(f"\n❌ Error verificando gluten en web: {e}")
-        raw = None
+            response.raise_for_status()
+
+            raw = response.json()["choices"][0]["message"]["content"]
+
+        except requests.exceptions.HTTPError as e:
+            detalle = e.response.text if e.response is not None else "Sin detalle"
+            print(f"\n⚠️ Imagen no aceptada por Perplexity: {e}")
+            print(f"📥 Detalle Perplexity: {detalle}")
+            print("↩️ Reintentando verificación web sin imagen...")
+
+        except requests.exceptions.RequestException as e:
+            print(f"\n⚠️ Error de conexión al enviar imagen: {e}")
+            print("↩️ Reintentando verificación web sin imagen...")
+
+        except (KeyError, IndexError, ValueError) as e:
+            print(f"\n⚠️ Respuesta inesperada con imagen: {e}")
+            print("↩️ Reintentando verificación web sin imagen...")
+
+    if not raw:
+        raw = _call_ia(prompt, timeout=30)
 
     if not raw:
         return Analisis(

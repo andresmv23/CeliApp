@@ -7,24 +7,6 @@ import SectionReviews from './SectionReviews';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
-const DEMO_RESULTS = {
-  apto: {
-    producto: { nombre: 'Queso Crema Light Hacendado', marca: 'Hacendado', ingredientes: 'Leche pasteurizada, nata, proteínas de leche, sal, corrector de acidez (ácido cítrico), espesantes (goma guar, goma xantana). Sin gluten. Sin trazas declaradas.' },
-    analisis: { es_apto: true, motivo: 'No contiene gluten ni trazas declaradas en etiqueta.' },
-    fuente: 'OpenFoodFacts',
-  },
-  noapto: {
-    producto: { nombre: 'Príncipe Galletas de Chocolate', marca: 'LU', ingredientes: 'Harina de trigo, azúcar, aceite de palma, cacao en polvo (7%), suero de leche, sal, gasificante (carbonato de sodio). Contiene GLUTEN (trigo).' },
-    analisis: { es_apto: false, motivo: 'Contiene harina de trigo. Ingrediente con gluten directo.' },
-    fuente: 'OpenFoodFacts',
-  },
-  dudoso: {
-    producto: { nombre: 'Orbit Spearmint Sugar Free', marca: 'Wrigley', ingredientes: 'Edulcorantes (sorbitol, manitol, maltitol), goma base, aromas, estabilizador (goma arábiga). Posibles trazas de gluten no confirmadas.' },
-    analisis: { es_apto: null, motivo: 'Trazas de gluten no confirmadas. Consulta con tu médico.' },
-    fuente: 'OpenFoodFacts',
-  },
-};
-
 function getStatusConfig(analisis) {
   if (!analisis) return null;
   if (analisis.es_apto === null || analisis.es_apto === undefined)
@@ -89,7 +71,6 @@ export default function Buscador() {
   const [error, setError]                 = useState(null);
   const [esFavorito, setEsFavorito]       = useState(false);
   const [toastMsg, setToastMsg]           = useState('');
-  const [demoMode, setDemoMode]           = useState(false);
   const [scannerOpen, setScannerOpen]     = useState(false);
   const [fotoOpen, setFotoOpen]           = useState(false);
   const [wrongCount, setWrongCount]       = useState(0);
@@ -104,28 +85,17 @@ export default function Buscador() {
     if (!ean.trim()) return;
     setLoading(true); setError(null); setResultado(null);
     setEsFavorito(false); setWrongCount(0);
-    const q = ean.trim().toLowerCase();
-
-    const runDemo = async (data) => {
-      await new Promise(r => setTimeout(r, 900));
-      setResultado(data); setDemoMode(true); setLoading(false);
-      setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
-    };
-
-    if (q === 'demo' || q === 'apto')   return runDemo(DEMO_RESULTS.apto);
-    if (q === 'noapto' || q === 'malo') return runDemo(DEMO_RESULTS.noapto);
-    if (q === 'dudoso')                 return runDemo(DEMO_RESULTS.dudoso);
 
     try {
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      const res = await axios.get(`${API_URL}/producto/${ean}`, { headers });
-      setResultado(res.data); setDemoMode(false);
+      const res = await axios.get(`${API_URL}/producto/v2/${ean}`, { headers });
+      setResultado(res.data);
       setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
     } catch (err) {
       if      (err.response?.status === 401) setError('Sesión caducada. Vuelve a entrar.');
-      else if (err.response?.status === 404) setError('Producto no encontrado. Prueba: demo · noapto · dudoso');
+      else if (err.response?.status === 404) setError('Producto no encontrado.');
       else if (err.response?.status === 429) setError('Límite alcanzado. Espera un momento.');
-      else                                   setError('Sin conexión al servidor. Prueba: demo · noapto · dudoso');
+      else                                   setError('Sin conexión al servidor.');
     } finally { setLoading(false); }
   };
 
@@ -133,7 +103,6 @@ export default function Buscador() {
     if (!resultado) return;
     if (!token)     { showToast('Inicia sesión para guardar favoritos'); return; }
     if (esFavorito) { showToast('Ya está en tus favoritos'); return; }
-    if (demoMode)   { setEsFavorito(true); showToast('Añadido a favoritos'); return; }
     try {
       await axios.post(`${API_URL}/favoritos`, { ean }, { headers: { Authorization: `Bearer ${token}` } });
       setEsFavorito(true); showToast('Añadido a favoritos');
@@ -167,11 +136,20 @@ export default function Buscador() {
     IA_GENERADA:          'IA Perplexity',
     IA_VISION:            'IA Vision',
     NO_ENCONTRADO:        'Sin fuente',
+    BD_LOCAL: 'Base de datos local',
+    ANALISIS_INGREDIENTES: 'Análisis de ingredientes',
+    WEB_FABRICANTE: 'Web del fabricante',
+    WEB_TERCEROS: 'Fuentes web',
+    SIN_FUENTE_CONFIRMADA: 'Sin fuente confirmada',
   };
 
-  const urlFuente = resultado?.analisis?.url_fuente || resultado?.producto?.url_fuente || null;
-  const fuenteTexto = fuenteLabel[resultado?.fuente] ?? resultado?.fuente ?? 'Desconocida';
+  const urlFuente = resultado?.analisis?.url_info ?? null;
 
+  const fuenteTexto =
+    fuenteLabel[resultado?.analisis?.fuente] ??
+    resultado?.analisis?.fuente ??
+    'Desconocida';
+  
   const container = {
     maxWidth: '1120px',
     margin: '0 auto',
@@ -271,7 +249,7 @@ export default function Buscador() {
                 </span>
                 <input
                   type="text"
-                  placeholder="Código EAN · demo · noapto · dudoso"
+                  placeholder="Introduce el código EAN"
                   value={ean}
                   onChange={e => setEan(e.target.value)}
                   style={{ flex: 1, minWidth: 0, padding: '0.75rem 0.5rem', background: 'transparent', border: 'none', outline: 'none', fontSize: '0.9375rem', fontFamily: 'inherit', color: TEXT }}
