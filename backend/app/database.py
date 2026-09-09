@@ -47,93 +47,12 @@ def release_connection(conn) -> None:
         print(f"⚠️  Error devolviendo conexión al pool: {e}")
 
 
-def guardar_producto(ean, datos_producto, analisis_result, fuente_datos):
-    conn = get_db_connection()
-    if not conn:
-        print("❌ No hay conexión a DB, imposible guardar.")
-        return
-
-    try:
-        cur = conn.cursor()
-
-        nombre = (
-            datos_producto.get("nombre")
-            or datos_producto.get("product_name")
-            or "Desconocido"
-        )
-        marca = (
-            datos_producto.get("marca") or datos_producto.get("brands") or "Desconocida"
-        )
-        ingredientes = (
-            datos_producto.get("ingredientes")
-            or datos_producto.get("ingredients_text")
-            or ""
-        )
-
-        estado_raw = analisis_result.get("estado", "DUDOSO")
-        if analisis_result.get("es_apto") is True and estado_raw == "DUDOSO":
-            estado_raw = "APTO"
-
-        estados_validos = ["APTO", "NO_APTO", "TRAZAS", "DUDOSO"]
-        estado_final = estado_raw if estado_raw in estados_validos else "DUDOSO"
-
-        # url_fuente: solo se persiste si viene una URL real de la fuente.
-        # Sin fallback inventado para no contaminar la BD con URLs incorrectas.
-        url_fuente = datos_producto.get("url_fuente") or datos_producto.get("url") or None
-
-        imagen_url = datos_producto.get("imagen_url", "")
-
-        sql = """
-            INSERT INTO productos (ean, nombre, marca, ingredientes, estado_gluten, tipo_fuente, justificacion, url_fuente, imagen_url)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-            ON CONFLICT (ean) DO UPDATE SET
-                nombre = EXCLUDED.nombre,
-                marca = EXCLUDED.marca,
-                ingredientes = EXCLUDED.ingredientes,
-                estado_gluten = EXCLUDED.estado_gluten,
-                tipo_fuente = EXCLUDED.tipo_fuente,
-                justificacion = EXCLUDED.justificacion,
-                url_fuente = EXCLUDED.url_fuente,
-                imagen_url = EXCLUDED.imagen_url,
-                fecha_registro = CURRENT_TIMESTAMP;
-        """
-
-        cur.execute(
-            sql,
-            (
-                ean,
-                nombre[:255],
-                marca[:100],
-                ingredientes,
-                estado_final,
-                fuente_datos,
-                analisis_result.get("motivo", "")[:1000],
-                url_fuente,
-                imagen_url,
-            ),
-        )
-
-        conn.commit()
-        cur.close()
-        print(f"💾 [DB] Producto {ean} guardado correctamente (Estado: {estado_final}).")
-
-    except Exception as e:
-        print(f"❌ Error CRÍTICO guardando en DB: {e}")
-        conn.rollback()
-    finally:
-        release_connection(conn)
-
-def guardar_producto_v2(producto_analizado: ProductoAnalizado) -> bool:
-    """
-    Guarda el resultado completo del flujo nuevo.
-
-    Recibe ProductoAnalizado, que agrupa Producto y Analisis.
-    No sustituye todavía a guardar_producto, usada por producción.
-    """
+def guardar_producto(producto_analizado: ProductoAnalizado) -> bool:
+    """Guarda el resultado completo del flujo de producto."""
     conn = get_db_connection()
 
     if not conn:
-        print("❌ No hay conexión a DB, imposible guardar producto v2.")
+        print("❌ No hay conexión a DB, imposible guardar producto.")
         return False
 
     try:
@@ -153,7 +72,7 @@ def guardar_producto_v2(producto_analizado: ProductoAnalizado) -> bool:
         estado_db = analisis.estado
         if estado_db not in estados_validos:
             print(
-                f"⚠️ [DB V2] Estado no válido '{estado_db}'. "
+                f"⚠️ [DB] Estado no válido '{estado_db}'. "
                 "Se guardará como DUDOSO."
             )
             estado_db = "DUDOSO"
@@ -214,14 +133,14 @@ def guardar_producto_v2(producto_analizado: ProductoAnalizado) -> bool:
         conn.commit()
 
         print(
-            f"💾 [DB V2] Producto {producto.ean} guardado "
+            f"💾 [DB] Producto {producto.ean} guardado "
             f"(estado aplicación: {analisis.estado}; estado BD: {estado_db})."
         )
         return True
 
     except Exception as error:
         conn.rollback()
-        print(f"❌ Error guardando producto v2: {error}")
+        print(f"❌ Error guardando producto: {error}")
         return False
 
     finally:
