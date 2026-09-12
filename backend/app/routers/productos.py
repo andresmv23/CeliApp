@@ -62,6 +62,13 @@ def guardar_en_historial(user_id: int, ean: str) -> None:
         release_connection(conn)
 
 
+def _registrar_historial_si_corresponde(
+    current_user, ean: str, registrar_historial: bool
+) -> None:
+    if registrar_historial and current_user:
+        guardar_en_historial(current_user["id"], ean)
+
+
 def _enriquecer_producto(producto: Producto) -> Producto:
     """
     Completa ingredientes e imagen mediante IA cuando OFF o la búsqueda web
@@ -100,19 +107,10 @@ def _enriquecer_producto(producto: Producto) -> Producto:
     )
 
 
-# ── Endpoints ────────────────────────────────────────────────────────────────────
-
-@router.post("/analizar", response_model=AnalisisResponse)
-def analizar_ingredientes(request: AnalisisRequest):
-    return analisis_rapido(request.ingredientes)
-
-
-@router.get("/producto/{ean}", response_model=ProductoAnalizado)
-@limiter.limit("10/minute")
-def buscar_producto_inteligente(
-    request: Request,
+def _buscar_producto_inteligente(
     ean: str,
-    current_user=Depends(get_optional_user),
+    current_user=None,
+    registrar_historial: bool = True,
 ) -> ProductoAnalizado:
     # 1. BD local (caché)
     conn = get_db_connection()
@@ -164,9 +162,9 @@ def buscar_producto_inteligente(
                 ),
             )
 
-            if current_user:
-                guardar_en_historial(current_user["id"], ean)
-
+            _registrar_historial_si_corresponde(
+                current_user, ean, registrar_historial
+            )
             return resultado
 
     # 2. Open Food Facts
@@ -197,16 +195,11 @@ def buscar_producto_inteligente(
                 confianza="alta",
             )
 
-            resultado = ProductoAnalizado(
-                producto=producto,
-                analisis=analisis,
-            )
-
+            resultado = ProductoAnalizado(producto=producto, analisis=analisis)
             guardar_producto(resultado)
-
-            if current_user:
-                guardar_en_historial(current_user["id"], ean)
-
+            _registrar_historial_si_corresponde(
+                current_user, ean, registrar_historial
+            )
             return resultado
 
         if resultado_off.gluten_segun_off == "CON_GLUTEN":
@@ -222,16 +215,11 @@ def buscar_producto_inteligente(
                 confianza="alta",
             )
 
-            resultado = ProductoAnalizado(
-                producto=producto,
-                analisis=analisis,
-            )
-
+            resultado = ProductoAnalizado(producto=producto, analisis=analisis)
             guardar_producto(resultado)
-
-            if current_user:
-                guardar_en_historial(current_user["id"], ean)
-
+            _registrar_historial_si_corresponde(
+                current_user, ean, registrar_historial
+            )
             return resultado
 
         if resultado_off.gluten_segun_off == "TRAZAS":
@@ -247,52 +235,33 @@ def buscar_producto_inteligente(
                 confianza="alta",
             )
 
-            resultado = ProductoAnalizado(
-                producto=producto,
-                analisis=analisis,
-            )
-
+            resultado = ProductoAnalizado(producto=producto, analisis=analisis)
             guardar_producto(resultado)
-
-            if current_user:
-                guardar_en_historial(current_user["id"], ean)
-
+            _registrar_historial_si_corresponde(
+                current_user, ean, registrar_historial
+            )
             return resultado
 
         producto = _enriquecer_producto(producto)
 
         # 2b. OFF no tiene información concluyente: ingredientes
-        analisis = analizar_ingredientes_basico(
-            producto.ingredientes or ""
-        )
+        analisis = analizar_ingredientes_basico(producto.ingredientes or "")
 
         if analisis.estado == "NO_APTO":
-            resultado = ProductoAnalizado(
-                producto=producto,
-                analisis=analisis,
-            )
-
+            resultado = ProductoAnalizado(producto=producto, analisis=analisis)
             guardar_producto(resultado)
-
-            if current_user:
-                guardar_en_historial(current_user["id"], ean)
-
+            _registrar_historial_si_corresponde(
+                current_user, ean, registrar_historial
+            )
             return resultado
 
         # 2c. OFF identificó el producto, pero falta verificación
         print(f"\n[IA] Verificando gluten del producto OFF {ean}...")
         analisis = verificar_gluten_web(producto)
 
-        resultado = ProductoAnalizado(
-            producto=producto,
-            analisis=analisis,
-        )
-
+        resultado = ProductoAnalizado(producto=producto, analisis=analisis)
         guardar_producto(resultado)
-
-        if current_user:
-            guardar_en_historial(current_user["id"], ean)
-
+        _registrar_historial_si_corresponde(current_user, ean, registrar_historial)
         return resultado
 
     # 3. OFF no encuentra el producto:
@@ -305,18 +274,11 @@ def buscar_producto_inteligente(
         producto = _enriquecer_producto(producto)
         analisis = verificar_gluten_web(producto)
 
-        resultado = ProductoAnalizado(
-            producto=producto,
-            analisis=analisis,
-        )
-
+        resultado = ProductoAnalizado(producto=producto, analisis=analisis)
         guardar_producto(resultado)
-
-        if current_user:
-            guardar_en_historial(current_user["id"], ean)
-
+        _registrar_historial_si_corresponde(current_user, ean, registrar_historial)
         return resultado
-    
+
     # 4. Ninguna fuente encontró el producto
     resultado = ProductoAnalizado(
         producto=Producto(
@@ -340,10 +302,45 @@ def buscar_producto_inteligente(
         ),
     )
 
-    if current_user:
-        guardar_en_historial(current_user["id"], ean)
-
+    _registrar_historial_si_corresponde(current_user, ean, registrar_historial)
     return resultado
+
+
+# ── Endpoints ────────────────────────────────────────────────────────────────────
+
+@router.post("/analizar", response_model=AnalisisResponse)
+def analizar_ingredientes(request: AnalisisRequest):
+    return analisis_rapido(request.ingredientes)
+
+
+@router.get("/producto/{ean}/detalle", response_model=ProductoAnalizado)
+@limiter.limit("10/minute")
+def obtener_detalle_producto(
+    request: Request,
+    ean: str,
+    current_user=Depends(get_optional_user),
+) -> ProductoAnalizado:
+    """Devuelve el detalle del producto sin registrar una nueva búsqueda."""
+    return _buscar_producto_inteligente(
+        ean=ean,
+        current_user=current_user,
+        registrar_historial=False,
+    )
+
+
+@router.get("/producto/{ean}", response_model=ProductoAnalizado)
+@limiter.limit("10/minute")
+def buscar_producto_inteligente(
+    request: Request,
+    ean: str,
+    current_user=Depends(get_optional_user),
+) -> ProductoAnalizado:
+    """Busca un producto y registra la consulta para usuarios autenticados."""
+    return _buscar_producto_inteligente(
+        ean=ean,
+        current_user=current_user,
+        registrar_historial=True,
+    )
 
 
 @router.post("/analizar-imagen", response_model=ImagenAnalisisResponse)
