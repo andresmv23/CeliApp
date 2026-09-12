@@ -30,7 +30,7 @@ def _call_ia(prompt: str, timeout: int = 25) -> str | None:
         response.raise_for_status()
         return response.json()["choices"][0]["message"]["content"]
     except Exception as e:
-        print(f"\n\u274c Error IA: {e}")
+        print(f"\n❌ Error IA: {e}")
         return None
 
 
@@ -51,7 +51,7 @@ def encontrar_ingredientes_producto(nombre: str, marca: str) -> str | None:
     Busca la lista de ingredientes oficial de un producto dado su nombre y marca.
     Devuelve la cadena de ingredientes o None si no la encuentra.
     """
-    print(f"\n\U0001f9ea [IA] Buscando ingredientes: {marca} - {nombre}")
+    print(f"\n🧪 [IA] Buscando ingredientes: {marca} - {nombre}")
 
     prompt = f"""Busca en internet la lista oficial de ingredientes del siguiente producto alimenticio:
 Nombre: "{nombre}"
@@ -87,7 +87,7 @@ def encontrar_imagen_producto(nombre: str, marca: str) -> str | None:
     Busca una URL de imagen de calidad para un producto dado su nombre y marca.
     Devuelve la URL directa a la imagen o None si no la encuentra.
     """
-    print(f"\n\U0001f5bc\ufe0f [IA] Buscando imagen: {marca} - {nombre}")
+    print(f"\n🖼️ [IA] Buscando imagen: {marca} - {nombre}")
 
     prompt = f"""Busca en internet una imagen oficial de buena calidad del siguiente producto alimenticio:
                 Nombre: "{nombre}"
@@ -120,75 +120,8 @@ def encontrar_imagen_producto(nombre: str, marca: str) -> str | None:
 
 
 # ───────────────────────────────────────────────────────────────────────────────
-def consultar_ia_experto_total(ean: str, nombre_producto: str = "", marca: str = ""):
-    print(f"\n\U0001f916 IA Deep Search investigando EAN: {ean}...")
-
-    contexto = ""
-    if nombre_producto:
-        contexto += f"Nombre del producto: \"{nombre_producto}\".\n"
-    if marca:
-        contexto += f"Marca: \"{marca}\".\n"
-
-    prompt = f"""Investiga si el siguiente producto alimenticio es apto para celíacos (libre de gluten).
-EAN: {ean}
-{contexto}
-INSTRUCCIONES ESTRICTAS:
-- Busca información EXCLUSIVAMENTE sobre este producto con este EAN exacto.
-- Si encuentras la página del fabricante, tienda oficial o base de datos con este EAN, extrae si declara "sin gluten", "gluten free", o si lista cualquier cereal con gluten o sus derivados entre sus ingredientes o alérgenos.
-- Si el fabricante declara explícitamente "sin gluten" o "gluten free" en el envase o en su web, marca APTO con confianza alta.
-- Si los ingredientes o alérgenos contienen cualquier cereal con gluten o sus derivados, marca NO_APTO.
-- Si hay trazas declaradas de gluten o cereales con gluten, marca NO_APTO.
-- Si no encuentras información específica y verificada sobre ESTE producto exacto, devuelve encontrado: false.
-- NUNCA uses productos de nombre similar o de otras marcas como referencia. Solo este EAN.
-Responde ÚnicAMENTE con este JSON válido, sin texto adicional:
-{{
-    "encontrado": true,
-    "nombre": "Nombre real del producto",
-    "marca": "Marca del fabricante",
-    "imagen_url": "URL directa a imagen del producto o null",
-    "ingredientes": "Lista completa de ingredientes tal como aparece en el envase o la web, o null",
-    "es_apto": true,
-    "estado": "APTO",
-    "justificacion": "Explica de forma natural y concisa por qué el producto es o no es apto para celíacos, basandote en sus ingredientes reales y declaraciones del fabricante.",
-    "url_fuente": "URL de la página web donde encontraste la información",
-    "confianza": "alta"
-}}
-Los valores posibles de estado son: APTO, NO_APTO, DUDOSO.
-Si no encuentras información verificada sobre este producto exacto, devuelve encontrado: false y estado: DUDOSO."""
-
-    raw = _call_ia(prompt, timeout=30)
-    if not raw:
-        return {
-            "encontrado": False,
-            "estado": "DUDOSO",
-            "es_apto": False,
-            "imagen_url": None,
-            "ingredientes": None,
-            "justificacion": "Error técnico IA",
-            "url_fuente": None,
-            "confianza": "baja",
-        }
-
-    print(f"\n[DEBUG] Respuesta RAW:\n{raw}")
-    resultado = _extraer_json(raw)
-    if resultado:
-        return resultado
-
-    return {
-        "encontrado": False,
-        "estado": "DUDOSO",
-        "es_apto": False,
-        "imagen_url": None,
-        "ingredientes": None,
-        "justificacion": "Error técnico IA",
-        "url_fuente": None,
-        "confianza": "baja",
-    }
-
-
-# ───────────────────────────────────────────────────────────────────────────────
 def consultar_ia_vision_imagen(imagen_base64: str, ean: str = "") -> dict:
-    print(f"\n\U0001f4f7 Analizando imagen con sonar-pro (EAN ref: '{ean}')...")
+    print(f"\n📷 Analizando imagen con sonar-pro (EAN ref: '{ean}')...")
 
     referencia_ean = f"EAN de referencia: {ean}." if ean else ""
 
@@ -209,7 +142,7 @@ CRITERIOS:
 - NO_APTO: Contiene cualquier ingrediente con gluten o trazas declaradas
 - DUDOSO: No puedes leer los ingredientes con claridad, o hay ambigüedad real
 
-Responde ÚnicAMENTE con este JSON válido, sin texto adicional:
+Responde ÚNICAMENTE con este JSON válido, sin texto adicional:
 {{
     "encontrado": true,
     "nombre": "Nombre del producto identificado",
@@ -262,18 +195,18 @@ Si no puedes identificar el producto con claridad, devuelve encontrado: false y 
         raise ValueError("No se encontró JSON en la respuesta de sonar-pro")
 
     except requests.exceptions.Timeout:
-        print("\n\u274c Timeout en sonar-pro Vision")
+        print("\n❌ Timeout en sonar-pro Vision")
         return _error_vision("Tiempo de respuesta agotado. Inténtalo de nuevo.")
 
     except requests.exceptions.HTTPError as e:
         status_code = e.response.status_code if e.response else 0
-        print(f"\n\u274c HTTP Error sonar-pro: {status_code}")
+        print(f"\n❌ HTTP Error sonar-pro: {status_code}")
         if status_code == 400:
             return _error_vision("La imagen no pudo procesarse. Asegúrate de enfocar bien la etiqueta.")
         return _error_vision(f"Error del servidor de IA ({status_code}).")
 
     except Exception as e:
-        print(f"\n\u274c Error inesperado Vision: {e}")
+        print(f"\n❌ Error inesperado Vision: {e}")
         return _error_vision("Error técnico al analizar la imagen.")
 
 
@@ -292,9 +225,10 @@ def _error_vision(motivo: str) -> dict:
         "analizado_por": "vision",
     }
 
-def verificar_gluten_web_v2(producto: Producto) -> Analisis:
+
+def verificar_gluten_web(producto: Producto) -> Analisis:
     print(
-        f"\n[IA WEB V2] Verificando: "
+        f"\n[IA WEB] Verificando: "
         f"{producto.marca or 'Marca desconocida'} - "
         f"{producto.nombre or 'Producto desconocido'}"
     )
@@ -463,7 +397,7 @@ def verificar_gluten_web_v2(producto: Producto) -> Analisis:
             confianza="baja",
         )
 
-    print(f"\n[DEBUG WEB V2 RAW]: {raw}")
+    print(f"\n[DEBUG WEB RAW]: {raw}")
 
     respuesta = _extraer_json(raw) or {}
 
@@ -512,7 +446,7 @@ def verificar_gluten_web_v2(producto: Producto) -> Analisis:
         or not coincide_marca
     ):
         print(
-            "\n⚠️ [IA WEB V2] Se descartó una clasificación basada "
+            "\n⚠️ [IA WEB] Se descartó una clasificación basada "
             "en una variante o fuente no verificable."
         )
         estado = "DUDOSO"
@@ -535,8 +469,9 @@ def verificar_gluten_web_v2(producto: Producto) -> Analisis:
         confianza=confianza,
     )
 
-def buscar_producto_similar_por_ean_v2(ean: str) -> Producto | None:
-    print(f"\n[IA V2] Buscando referencias para EAN: {ean}")
+
+def buscar_producto_similar_por_ean(ean: str) -> Producto | None:
+    print(f"\n[IA] Buscando referencias para EAN: {ean}")
 
     prompt = f"""Busca en internet referencias del producto cuyo código EAN es "{ean}".
 

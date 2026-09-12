@@ -88,7 +88,7 @@ export default function Buscador() {
 
     try {
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      const res = await axios.get(`${API_URL}/producto/v2/${ean}`, { headers });
+      const res = await axios.get(`${API_URL}/producto/${ean}`, { headers });
       setResultado(res.data);
       setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
     } catch (err) {
@@ -287,19 +287,6 @@ export default function Buscador() {
                 {error}
               </div>
             )}
-
-            <div className="reveal" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.5rem', marginBottom: '2.5rem', transitionDelay: '0.26s' }}>
-              <span style={{ fontSize: '0.8125rem', color: 'rgba(13,31,20,0.45)', fontWeight: 500 }}>Recientes:</span>
-              {['Avena Quaker', 'Maizena', 'Pan Bimbo'].map(label => (
-                <button key={label} onClick={() => setEan(label)}
-                  style={{ padding: '0.35rem 0.85rem', borderRadius: '9999px', fontSize: '0.8125rem', fontWeight: 500, fontFamily: 'inherit', background: '#fff', border: `1px solid ${BORDER}`, color: 'rgba(13,31,20,0.65)', cursor: 'pointer', transition: 'border-color 160ms ease, box-shadow 160ms ease' }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = `rgba(22,163,74,0.35)`; e.currentTarget.style.boxShadow = `0 2px 8px rgba(22,163,74,0.07)`; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.boxShadow = 'none'; }}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
 
             <div className="reveal hero-stats" style={{ transitionDelay: '0.32s' }}>
               <p style={{
