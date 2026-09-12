@@ -1,5 +1,6 @@
-/* Fuente Satoshi desde Fontshare — DEBE ir antes de @tailwind */
+/* Fuentes del sistema visual de CeliApp: interfaz y titulares editoriales. */
 @import url('https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,700,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,400..700,0..100,0..1&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -75,6 +76,25 @@ body {
 .input-base:focus {
   border-color: rgba(26,127,94,0.3);
   box-shadow: 0 0 0 4px rgba(26,127,94,0.10);
+}
+
+/* ─── Utilidades compartidas de transición ─────────────── */
+@keyframes celiapp-reveal {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes celiapp-ticker {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.celiapp-reveal {
+  animation: celiapp-reveal 0.55s ease both;
+}
+
+.celiapp-ticker {
+  animation: celiapp-ticker 22s linear infinite;
 }
 
 /* ─── Grain overlay para hero ───────────────────────────── */
