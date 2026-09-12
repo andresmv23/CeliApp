@@ -175,7 +175,7 @@ export default function Perfil() {
   const abrirProducto = async (ean) => {
     setModal({ open: true, loading: true, error: '', producto: null, ean });
     try {
-      const response = await axios.get(`${API_URL}/producto/${ean}`, { headers: { Authorization: `Bearer ${token}` } });
+      const response = await axios.get(`${API_URL}/producto/${ean}/detalle`, { headers: { Authorization: `Bearer ${token}` } });
       setModal({ open: true, loading: false, error: '', producto: response.data, ean });
     } catch {
       setModal({ open: true, loading: false, error: 'No se pudo cargar el detalle de este producto. Inténtalo de nuevo.', producto: null, ean });
