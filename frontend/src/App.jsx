@@ -130,8 +130,8 @@ function Navbar() {
             ) : (
               <NavLink to="/login" className="hidden items-center gap-2 rounded-full bg-accent px-[1.125rem] py-2 text-sm font-semibold tracking-[0.01em] text-white shadow-[0_1px_3px_rgba(13,31,20,0.12)] transition hover:-translate-y-px hover:bg-green-700 hover:shadow-[0_4px_12px_rgba(22,163,74,0.22)] sm:inline-flex">
                 Iniciar sesión
-                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 013 3H6a3 3 0 013 3v1" />
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 013 3v1" />
                 </svg>
               </NavLink>
             )}
@@ -228,6 +228,7 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <MainLayout />
+      </AuthProvider>
     </BrowserRouter>
   );
 }
