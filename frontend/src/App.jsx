@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, NavLink, useNavigate, Navigate, useSearch
 import Buscador from './components/Buscador';
 import Login from './components/Login';
 import Perfil from './components/Perfil';
+import SobreCeliApp from './components/SobreCeliApp';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
 function OAuthCallback() {
@@ -51,7 +52,7 @@ function Logo() {
 function UserIcon({ className = 'h-4 w-4' }) {
   return (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} aria-hidden="true">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6.75a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 20.118a7.5 7.5 0 0115 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.5-1.632z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6.75a3.75 3.75 0 11-7.5 0 0-7.5 0zM4.5 20.118a7.5 7.5 0 0115 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.5-1.632z" />
     </svg>
   );
 }
@@ -71,7 +72,7 @@ function Navbar() {
   const navLinks = [
     { to: '/', label: 'Buscador', end: true },
     { to: '/#como-funciona', label: 'Cómo funciona', end: false },
-    { to: '/#sobre-celiapp', label: 'Sobre CeliApp', end: false },
+    { to: '/sobre-celiapp', label: 'Sobre CeliApp', end: true },
   ];
 
   const navLinkClass = ({ isActive }) => [
@@ -121,7 +122,7 @@ function Navbar() {
                   className="hidden items-center gap-2 rounded-full border-[1.5px] border-ink/10 px-3.5 py-2 text-sm font-medium text-[#4B6355] transition hover:border-red-600/30 hover:bg-red-600/5 hover:text-red-600 lg:inline-flex"
                 >
                   <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 013 3v1" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 013 3H6a3 3 0 013 3v1" />
                   </svg>
                   Cerrar sesión
                 </button>
@@ -130,7 +131,7 @@ function Navbar() {
               <NavLink to="/login" className="hidden items-center gap-2 rounded-full bg-accent px-[1.125rem] py-2 text-sm font-semibold tracking-[0.01em] text-white shadow-[0_1px_3px_rgba(13,31,20,0.12)] transition hover:-translate-y-px hover:bg-green-700 hover:shadow-[0_4px_12px_rgba(22,163,74,0.22)] sm:inline-flex">
                 Iniciar sesión
                 <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 013 3v1" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 013 3H6a3 3 0 013 3v1" />
                 </svg>
               </NavLink>
             )}
@@ -145,7 +146,7 @@ function Navbar() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               ) : (
-                <svg className="h-[22px] w-[22px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="h-[22px] w-[22px]" fill="none" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               )}
@@ -204,6 +205,7 @@ function MainLayout() {
       <main className="w-full">
         <Routes>
           <Route path="/" element={<Buscador />} />
+          <Route path="/sobre-celiapp" element={<SobreCeliApp />} />
           <Route path="/login" element={<Login />} />
           <Route path="/oauth-callback" element={<OAuthCallback />} />
           <Route
@@ -226,7 +228,6 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <MainLayout />
-      </AuthProvider>
     </BrowserRouter>
   );
 }
