@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 function CheckIcon({ className = 'h-5 w-5' }) {
@@ -18,10 +19,10 @@ function ArrowIcon() {
 
 function StatusPreview() {
   return (
-    <aside aria-label="Ejemplo de resultado apto" className="overflow-hidden rounded-2xl border border-line bg-paper shadow-card">
+    <aside aria-label="Ejemplo de resultado apto" className="motion-safe:animate-fade-in-up overflow-hidden rounded-2xl border border-line bg-paper shadow-card motion-safe:[animation-delay:180ms]">
       <div className="border-b border-brand-100 bg-brand-50 p-5">
         <div className="flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-apto text-paper">
+          <span className="motion-safe:animate-pulse-dot flex h-10 w-10 items-center justify-center rounded-full bg-apto text-paper">
             <CheckIcon />
           </span>
           <div>
@@ -60,15 +61,31 @@ const commitments = [
 ];
 
 export default function SobreCeliApp() {
+  useEffect(() => {
+    const elements = document.querySelectorAll('[data-reveal]');
+    const observer = new IntersectionObserver(
+      (entries) => entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        }
+      }),
+      { threshold: 0.12 },
+    );
+
+    elements.forEach((element) => observer.observe(element));
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <main className="bg-paper font-sans text-ink">
       <section className="border-b border-line bg-surface px-4 py-12 sm:py-16 lg:py-20">
         <div className="mx-auto grid max-w-5xl items-center gap-10 lg:grid-cols-2 lg:gap-16">
-          <div>
+          <div className="motion-safe:animate-fade-in-up">
             <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">Sobre CeliApp</p>
             <h1 className="mt-4 text-3xl font-semibold tracking-tight text-ink sm:text-4xl">Confianza para decidir con más claridad.</h1>
             <p className="mt-5 max-w-xl text-base leading-7 text-muted">CeliApp es una aplicación creada para facilitar la consulta de productos a personas que conviven con la celiaquía. Porque hacer la compra debería ser más sencillo que descifrar cada etiqueta.</p>
-            <Link to="/" className="mt-7 inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-3 text-sm font-semibold text-paper transition hover:bg-brand-700 focus:outline-none focus:ring-4 focus:ring-brand-100">
+            <Link to="/" className="mt-7 inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-3 text-sm font-semibold text-paper transition duration-200 hover:-translate-y-0.5 hover:bg-brand-700 hover:shadow-card focus:outline-none focus:ring-4 focus:ring-brand-100">
               Verificar un producto
               <ArrowIcon />
             </Link>
@@ -80,7 +97,7 @@ export default function SobreCeliApp() {
       </section>
 
       <section className="border-b border-line px-4 py-12 sm:py-16">
-        <div className="mx-auto grid max-w-5xl gap-8 lg:grid-cols-3 lg:gap-12">
+        <div data-reveal className="reveal mx-auto grid max-w-5xl gap-8 lg:grid-cols-3 lg:gap-12">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">Por qué nació</p>
             <h2 className="mt-3 text-2xl font-semibold tracking-tight text-ink">De una duda repetida, a una herramienta útil.</h2>
@@ -94,15 +111,15 @@ export default function SobreCeliApp() {
 
       <section className="px-4 py-12 sm:py-16">
         <div className="mx-auto max-w-5xl">
-          <div className="max-w-2xl">
+          <div data-reveal className="reveal max-w-2xl">
             <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">Cómo entendemos la confianza</p>
             <h2 className="mt-3 text-2xl font-semibold tracking-tight text-ink">Ser claros también significa reconocer los límites.</h2>
           </div>
           <dl className="mt-8 divide-y divide-line border-y border-line">
-            {commitments.map(({ title, description }) => (
-              <div key={title} className="grid gap-3 py-6 sm:grid-cols-3 sm:gap-8">
+            {commitments.map(({ title, description }, index) => (
+              <div key={title} data-reveal className="reveal grid gap-3 py-6 sm:grid-cols-3 sm:gap-8" style={{ transitionDelay: `${index * 90}ms` }}>
                 <dt className="flex items-center gap-3 text-base font-semibold text-ink">
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600 transition duration-200 group-hover:scale-105">
                     <CheckIcon className="h-4 w-4" />
                   </span>
                   {title}
@@ -115,7 +132,7 @@ export default function SobreCeliApp() {
       </section>
 
       <section className="border-y border-line bg-surface px-4 py-12 sm:py-16">
-        <div className="mx-auto grid max-w-5xl gap-8 lg:grid-cols-3 lg:gap-12">
+        <div data-reveal className="reveal mx-auto grid max-w-5xl gap-8 lg:grid-cols-3 lg:gap-12">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">Quién está detrás</p>
             <h2 className="mt-3 text-2xl font-semibold tracking-tight text-ink">Andrés Mejía Valdez</h2>
@@ -124,7 +141,7 @@ export default function SobreCeliApp() {
           <div className="max-w-2xl space-y-5 text-base leading-7 text-muted lg:col-span-2">
             <p>Soy Andrés Mejía Valdez, desarrollador full-stack y creador de CeliApp. Es un proyecto personal e independiente que me ha permitido convertir una necesidad cercana en un producto real.</p>
             <p>He desarrollado CeliApp de principio a fin, trabajando la experiencia de usuario, el frontend, la API, la base de datos y el despliegue. Es mi forma de seguir aprendiendo, asumir retos técnicos y construir tecnología útil que pueda aportar valor en la vida cotidiana.</p>
-            <Link to="/" className="inline-flex items-center gap-2 text-sm font-semibold text-brand-600 transition hover:text-brand-700 focus:outline-none focus:underline">
+            <Link to="/" className="inline-flex items-center gap-2 text-sm font-semibold text-brand-600 transition duration-200 hover:translate-x-1 hover:text-brand-700 focus:outline-none focus:underline">
               Probar CeliApp
               <ArrowIcon />
             </Link>
@@ -132,12 +149,18 @@ export default function SobreCeliApp() {
         </div>
       </section>
 
-      <section className="px-4 py-10 sm:py-12">
+      <section data-reveal className="reveal px-4 py-10 sm:py-12">
         <div className="mx-auto flex max-w-5xl flex-col gap-4 rounded-xl border border-cream-300 bg-cream-100 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <p className="max-w-3xl text-sm leading-6 text-ink"><span className="font-semibold">Consulta responsable.</span> CeliApp no sustituye el etiquetado del fabricante. Ante cualquier duda, revisa siempre el envase.</p>
           <Link to="/" className="shrink-0 text-sm font-semibold text-brand-700 underline decoration-brand-300 underline-offset-4 transition hover:text-brand-800">Volver al buscador</Link>
         </div>
       </section>
+
+      <style>{`
+        .reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.5s ease, transform 0.5s ease; }
+        .reveal.is-visible { opacity: 1; transform: translateY(0); }
+        @media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; transition: none; } }
+      `}</style>
     </main>
   );
 }
