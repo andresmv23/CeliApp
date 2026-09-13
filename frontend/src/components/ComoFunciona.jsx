@@ -12,26 +12,27 @@ function AlertIcon() {
   return <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m0 3h.008M10.29 3.86L2.82 16.33A2.25 2.25 0 004.75 19.7h14.5a2.25 2.25 0 001.93-3.37L13.71 3.86a2 2 0 00-3.42 0z" /></svg>;
 }
 
-function CameraIcon() {
-  return <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8} aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" /><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 0 1 9 0z" /></svg>;
+function BarcodeIcon() {
+  return <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8} aria-hidden="true"><path strokeLinecap="round" d="M4 5v14M7 5v14M10 5v14M13 5v14M17 5v14M20 5v14" /></svg>;
 }
 
-const steps = [
-  { number: '1', title: 'Busca el producto', description: 'Escribe el código EAN que aparece bajo el código de barras o utiliza la cámara de tu móvil para escanearlo.' },
-  { number: '2', title: 'Consulta la información disponible', description: 'CeliApp reúne los datos disponibles del producto y revisa los ingredientes para ayudarte a interpretarlos.' },
-  { number: '3', title: 'Revisa el resultado', description: 'Recibes un estado claro con una explicación. Si faltan datos para una respuesta fiable, el resultado será DUDOSO.' },
+const checks = [
+  { title: 'Identifica el producto', text: 'El código EAN funciona como identificador del artículo. Al introducirlo o escanearlo, la consulta se realiza sobre ese producto concreto, no sobre una categoría genérica.', icon: <BarcodeIcon /> },
+  { title: 'Muestra la información encontrada', text: 'CeliApp presenta los ingredientes y datos disponibles para que puedas ver qué información se ha usado en el resultado.', icon: <SearchIcon /> },
+  { title: 'Evita afirmar cuando faltan datos', text: 'Si los datos son incompletos, ambiguos o no permiten una conclusión fiable, CeliApp muestra DUDOSO en lugar de marcar el producto como apto.', icon: <AlertIcon /> },
 ];
 
 const results = [
-  { label: 'APTO', icon: <CheckIcon />, className: 'border-brand-200 bg-brand-50 text-brand-800', description: 'No se han identificado ingredientes con gluten en la información disponible del producto.' },
-  { label: 'NO APTO', icon: <AlertIcon />, className: 'border-red-200 bg-red-50 text-red-900', description: 'La información disponible indica la presencia de gluten o de un ingrediente que requiere evitarse.' },
-  { label: 'DUDOSO', icon: <AlertIcon />, className: 'border-amber-200 bg-amber-50 text-amber-900', description: 'No hay información suficiente para dar una respuesta fiable. Revisa el envase antes de decidir.' },
+  { label: 'APTO', icon: <CheckIcon />, className: 'border-brand-200 bg-brand-50 text-brand-800', description: 'Los datos disponibles no señalan ingredientes con gluten. Aun así, comprueba el envase si han cambiado la receta o tienes alguna duda.' },
+  { label: 'NO APTO', icon: <AlertIcon />, className: 'border-red-200 bg-red-50 text-red-900', description: 'Los datos disponibles señalan gluten o un ingrediente que debe evitarse en una dieta sin gluten.' },
+  { label: 'DUDOSO', icon: <AlertIcon />, className: 'border-amber-200 bg-amber-50 text-amber-900', description: 'No hay datos suficientes o son poco claros. No se convierte una falta de información en una recomendación positiva.' },
 ];
 
 const faqs = [
-  { question: '¿Qué significa que un producto sea DUDOSO?', answer: 'Significa que la información disponible no permite dar una respuesta fiable. En ese caso, revisa el etiquetado del envase o consulta al fabricante.' },
-  { question: '¿CeliApp sustituye la lectura de la etiqueta?', answer: 'No. CeliApp sirve como ayuda para consultar productos, pero la información del fabricante y el envase son siempre la referencia final.' },
-  { question: '¿Qué hago si no encuentro un producto?', answer: 'Prueba a introducir de nuevo el código EAN. Si el producto no está disponible, revisa directamente los ingredientes y la información de alérgenos del envase.' },
+  { question: '¿Por qué un producto puede aparecer como DUDOSO?', answer: 'Porque la aplicación no dispone de ingredientes completos, la información es ambigua o no permite comprobar el producto con seguridad. DUDOSO es una señal para revisar el envase, no una respuesta afirmativa.' },
+  { question: '¿Puede cambiar el resultado de un producto?', answer: 'Sí. Los fabricantes pueden modificar recetas, alérgenos, certificaciones o etiquetado. Por eso conviene comprobar el envase de cada unidad que vas a consumir.' },
+  { question: '¿Qué información debo revisar en la etiqueta?', answer: 'Revisa la lista de ingredientes, la información de alérgenos y cualquier advertencia. En una dieta sin gluten, presta especial atención al trigo, cebada, centeno, malta y a la avena que no indique expresamente que es sin gluten.' },
+  { question: '¿CeliApp sustituye la información del fabricante?', answer: 'No. CeliApp es una herramienta de apoyo para interpretar información. La etiqueta y la información facilitada por el fabricante son la referencia final antes de consumir un producto.' },
 ];
 
 export default function ComoFunciona() {
@@ -40,11 +41,11 @@ export default function ComoFunciona() {
       <section className="border-b border-line bg-surface px-4 py-12 sm:py-16 lg:py-20">
         <div className="mx-auto max-w-4xl text-center">
           <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">Cómo funciona CeliApp</p>
-          <h1 className="mx-auto mt-4 max-w-3xl text-3xl font-semibold tracking-tight text-ink sm:text-4xl">Cómo comprobar si un producto contiene gluten</h1>
-          <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-muted">Consulta un código de barras, entiende la información disponible y revisa el resultado antes de elegir un producto.</p>
+          <h1 className="mx-auto mt-4 max-w-3xl text-3xl font-semibold tracking-tight text-ink sm:text-4xl">Cómo evaluamos la información de un producto</h1>
+          <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-muted">CeliApp está diseñada para que entiendas qué información hay detrás de cada resultado y cuándo debes detenerte a comprobar el envase.</p>
           <Link to="/" className="mt-7 inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-3 text-sm font-semibold text-paper transition hover:-translate-y-0.5 hover:bg-brand-700 hover:shadow-card focus:outline-none focus:ring-4 focus:ring-brand-100">
             <SearchIcon />
-            Verificar un producto
+            Consultar un producto
           </Link>
         </div>
       </section>
@@ -52,21 +53,22 @@ export default function ComoFunciona() {
       <section className="px-4 py-12 sm:py-16">
         <div className="mx-auto max-w-5xl">
           <div className="max-w-2xl">
-            <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">El proceso</p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-ink">Tres pasos para consultar un producto</h2>
+            <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">Transparencia</p>
+            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-ink">Una respuesta útil no es solo un color</h2>
+            <p className="mt-3 text-sm leading-6 text-muted">Una aplicación fiable también debe dejar claro sus límites. Por eso CeliApp no pretende sustituir la etiqueta: te ayuda a localizar y entender la información disponible.</p>
           </div>
-          <ol className="mt-8 grid gap-5 md:grid-cols-3">
-            {steps.map(({ number, title, description }, index) => (
-              <li key={number} className="rounded-2xl border border-line bg-paper p-6 shadow-card transition duration-200 hover:-translate-y-1 hover:shadow-card-hover">
+          <div className="mt-8 grid gap-5 md:grid-cols-3">
+            {checks.map(({ title, text, icon }, index) => (
+              <article key={title} className="rounded-2xl border border-line bg-paper p-6 shadow-card transition duration-200 hover:-translate-y-1 hover:shadow-card-hover">
                 <div className="flex items-center justify-between">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-50 text-sm font-bold text-brand-700">{number}</span>
-                  {index === 0 ? <CameraIcon /> : index === 1 ? <SearchIcon /> : <CheckIcon />}
+                  <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-50 text-brand-700">{icon}</span>
+                  <span className="text-xs font-semibold text-brand-600">{String(index + 1).padStart(2, '0')}</span>
                 </div>
                 <h3 className="mt-5 text-base font-semibold text-ink">{title}</h3>
-                <p className="mt-2 text-sm leading-6 text-muted">{description}</p>
-              </li>
+                <p className="mt-2 text-sm leading-6 text-muted">{text}</p>
+              </article>
             ))}
-          </ol>
+          </div>
         </div>
       </section>
 
@@ -74,13 +76,13 @@ export default function ComoFunciona() {
         <div className="mx-auto max-w-5xl">
           <div className="grid gap-8 lg:grid-cols-3 lg:gap-12">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">El resultado</p>
-              <h2 className="mt-3 text-2xl font-semibold tracking-tight text-ink">Qué significa cada respuesta</h2>
-              <p className="mt-3 text-sm leading-6 text-muted">El resultado muestra lo que se ha podido comprobar con la información disponible del producto.</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">Interpretación</p>
+              <h2 className="mt-3 text-2xl font-semibold tracking-tight text-ink">Qué significa cada resultado</h2>
+              <p className="mt-3 text-sm leading-6 text-muted">Cada estado comunica un grado de certeza distinto. El objetivo es que sepas cuándo puedes avanzar y cuándo necesitas verificar más información.</p>
             </div>
-            <div className="grid gap-4 sm:grid-cols-3 lg:col-span-2 lg:grid-cols-1">
+            <div className="grid gap-4 lg:col-span-2">
               {results.map(({ label, icon, className, description }) => (
-                <article key={label} className={`flex gap-4 rounded-xl border p-4 ${className}`}>
+                <article key={label} className={`flex gap-4 rounded-xl border p-5 ${className}`}>
                   <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-paper/75">{icon}</span>
                   <div>
                     <h3 className="text-sm font-bold">{label}</h3>
@@ -96,20 +98,20 @@ export default function ComoFunciona() {
       <section className="px-4 py-12 sm:py-16">
         <div className="mx-auto grid max-w-5xl gap-8 lg:grid-cols-3 lg:gap-12">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">Uso responsable</p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-ink">Revisa siempre el envase</h2>
+            <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">Decisión informada</p>
+            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-ink">Por qué el envase sigue siendo esencial</h2>
           </div>
           <div className="lg:col-span-2">
             <div className="rounded-xl border border-cream-300 bg-cream-100 p-5">
               <div className="flex gap-3">
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-paper text-dudoso"><AlertIcon /></span>
                 <div>
-                  <p className="text-sm font-semibold text-ink">La etiqueta del fabricante es la referencia final</p>
-                  <p className="mt-2 text-sm leading-6 text-muted">Las recetas y los datos de los productos pueden cambiar. Si tienes dudas, consulta los ingredientes, los alérgenos y cualquier advertencia del envase antes de consumirlo.</p>
+                  <p className="text-sm font-semibold text-ink">Las recetas pueden cambiar sin que cambie el código de barras</p>
+                  <p className="mt-2 text-sm leading-6 text-muted">Un mismo producto puede modificar sus ingredientes o advertencias con el tiempo. Antes de consumirlo, compara siempre el resultado con la etiqueta de la unidad que tienes delante.</p>
                 </div>
               </div>
             </div>
-            <p className="mt-5 text-sm leading-6 text-muted">Para una dieta sin gluten, presta atención a ingredientes como trigo, cebada, centeno, malta y avena que no indique expresamente que es sin gluten.</p>
+            <p className="mt-5 text-sm leading-6 text-muted">Comprueba los ingredientes, los alérgenos y cualquier advertencia del fabricante. Esta revisión es especialmente importante si el resultado es DUDOSO o si se trata de un producto nuevo para ti.</p>
           </div>
         </div>
       </section>
@@ -117,7 +119,7 @@ export default function ComoFunciona() {
       <section className="border-t border-line bg-surface px-4 py-12 sm:py-16">
         <div className="mx-auto max-w-3xl">
           <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">Preguntas frecuentes</p>
-          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-ink">Dudas habituales al consultar productos</h2>
+          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-ink">Para quienes quieren saber más</h2>
           <div className="mt-7 divide-y divide-line border-y border-line">
             {faqs.map(({ question, answer }) => (
               <details key={question} className="group py-5">
