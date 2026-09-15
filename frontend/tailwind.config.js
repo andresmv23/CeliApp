@@ -13,8 +13,8 @@ export default {
         apto: '#1a7f5e', noapto: '#dc2626', dudoso: '#b45309',
       },
       fontFamily: {
-        sans: ['Satoshi', 'system-ui', 'sans-serif'],
-        display: ['Fraunces', 'Georgia', 'Cambria', 'Times New Roman', 'serif'],
+        sans: ['IBM Plex Sans', 'system-ui', 'sans-serif'],
+        display: ['IBM Plex Sans', 'system-ui', 'sans-serif'],
       },
       borderRadius: { xl: '0.75rem', '2xl': '1rem', '3xl': '1.5rem' },
       boxShadow: {
