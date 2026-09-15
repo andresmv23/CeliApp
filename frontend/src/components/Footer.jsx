@@ -1,9 +1,9 @@
 import { NavLink } from 'react-router-dom';
 
 const productLinks = [
-  { label: 'Cómo funciona', to: '/como-funciona' },
-  { label: 'Verificar producto', to: '/' },
-  { label: 'Análisis por foto', to: '/' },
+  { label: 'Cómo funciona', href: '#como-funciona' },
+  { label: 'Verificar producto', href: '#inicio' },
+  { label: 'Análisis por foto', href: '#inicio' },
   { label: 'Favoritos', to: '/perfil' },
 ];
 
@@ -24,6 +24,10 @@ function FooterColumn({ title, children }) {
 
 const linkClass = 'text-sm text-[#4B6355] transition hover:text-ink';
 
+function FooterLink({ label, to, href }) {
+  return to ? <NavLink to={to} className={linkClass}>{label}</NavLink> : <a href={href} className={linkClass}>{label}</a>;
+}
+
 export default function Footer() {
-  return <footer className="bg-surface"><div className="h-px w-full bg-ink/10" /><div className="mx-auto max-w-[1120px] px-4 py-10 sm:py-12"><div className="mb-10 grid items-start gap-8 sm:grid-cols-2 lg:grid-cols-[minmax(180px,1.5fr)_repeat(3,1fr)]"><div><div className="mb-3.5"><Brand /></div><p className="mb-5 max-w-[220px] text-sm leading-relaxed text-[#4B6355]">Análisis de gluten al instante. Para que comer bien no sea una aventura.</p><span className="inline-flex items-center gap-1.5 rounded-full border border-accent/20 bg-accent/10 px-3 py-1 text-[0.72rem] font-bold uppercase tracking-[0.07em] text-accent"><svg className="h-2.5 w-2.5" viewBox="0 0 12 12" fill="none" aria-hidden="true"><circle cx="6" cy="6" r="5.5" stroke="currentColor" strokeWidth="1" /><path d="M3.5 6l1.8 1.8L8.5 4.2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>Sin gluten verificado</span></div><FooterColumn title="Producto">{productLinks.map(({ label, to }) => <NavLink key={label} to={to} className={linkClass}>{label}</NavLink>)}</FooterColumn><FooterColumn title="Empresa"><NavLink to="/sobre-celiapp" className={linkClass}>Sobre CeliApp</NavLink><a href="#contacto" className={linkClass}>Contacto</a></FooterColumn><FooterColumn title="Legal">{legalLinks.map(({ label, to }) => <NavLink key={label} to={to} className={linkClass}>{label}</NavLink>)}</FooterColumn></div><div className="mb-6 h-px bg-ink/10" /><div className="flex flex-col items-start justify-between gap-2 text-[0.8125rem] sm:flex-row sm:flex-wrap"><span className="text-ink/40">© 2026 CeliApp — Hecho con cuidado en Barcelona, España</span><span className="text-ink/35">No sustituye el consejo médico. Verifica siempre el etiquetado.</span></div></div></footer>;
+  return <footer className="bg-surface"><div className="h-px w-full bg-ink/10" /><div className="mx-auto max-w-[1120px] px-4 py-10 sm:py-12"><div className="mb-10 grid items-start gap-8 sm:grid-cols-2 lg:grid-cols-[minmax(180px,1.5fr)_repeat(3,1fr)]"><div><div className="mb-3.5"><Brand /></div><p className="mb-5 max-w-[220px] text-sm leading-relaxed text-[#4B6355]">Análisis de gluten al instante. Para que comer bien no sea una aventura.</p><span className="inline-flex items-center gap-1.5 rounded-full border border-accent/20 bg-accent/10 px-3 py-1 text-[0.72rem] font-bold uppercase tracking-[0.07em] text-accent"><svg className="h-2.5 w-2.5" viewBox="0 0 12 12" fill="none" aria-hidden="true"><circle cx="6" cy="6" r="5.5" stroke="currentColor" strokeWidth="1" /><path d="M3.5 6l1.8 1.8L8.5 4.2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>Sin gluten verificado</span></div><FooterColumn title="Producto">{productLinks.map((link) => <FooterLink key={link.label} {...link} />)}</FooterColumn><FooterColumn title="Empresa"><NavLink to="/sobre-celiapp" className={linkClass}>Sobre CeliApp</NavLink><a href="#contacto" className={linkClass}>Contacto</a><span className="text-sm text-[#4B6355]/50">Blog</span><span className="text-sm text-[#4B6355]/50">Colaboraciones</span></FooterColumn><FooterColumn title="Legal">{legalLinks.map(({ label, to }) => <NavLink key={label} to={to} className={linkClass}>{label}</NavLink>)}</FooterColumn></div><div className="mb-6 h-px bg-ink/10" /><div className="flex flex-col items-start justify-between gap-2 text-[0.8125rem] sm:flex-row sm:flex-wrap"><span className="text-ink/40">© 2026 CeliApp — Hecho con cuidado en Barcelona, España</span><span className="text-ink/35">No sustituye el consejo médico. Verifica siempre el etiquetado.</span></div></div></footer>;
 }
