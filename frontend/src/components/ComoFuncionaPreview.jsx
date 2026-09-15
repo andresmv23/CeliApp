@@ -23,7 +23,7 @@ export default function ComoFuncionaPreview() {
         <p className="mb-3 text-[0.72rem] font-bold uppercase tracking-[0.1em] text-accent">Cómo funciona</p>
         <h2 className="font-display text-[clamp(1.75rem,4vw,3rem)] font-bold leading-[1.1] tracking-[-0.02em] text-ink">Tres pasos.<br />Resultado inmediato.</h2>
       </div>
-      <div className="grid overflow-hidden rounded-3xl bg-ink/10 md:grid-cols-3 md:gap-px">
+      <div className="grid border-y border-ink/10 bg-ink/10 md:grid-cols-3 md:gap-px">
         {steps.map(({ number, title, description }) => <div key={number} className="reveal bg-white px-6 py-7"><span className="mb-4 block text-[0.72rem] font-extrabold uppercase tracking-[0.12em] text-accent">{number}</span><h3 className="mb-2 text-base font-bold leading-snug text-ink">{title}</h3><p className="text-sm leading-relaxed text-[#4B6355]">{description}</p></div>)}
       </div>
     </div>
