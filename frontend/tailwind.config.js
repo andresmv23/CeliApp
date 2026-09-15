@@ -24,7 +24,7 @@ export default {
         'input-focus': '0 0 0 4px rgba(26,127,94,0.14)',
       },
       keyframes: {
-        'fade-in-up': { '0%': { opacity: '0', transform: 'translateY(14px)' }, '100%': { opacity: '0', transform: 'translateY(0)' } },
+        'fade-in-up': { '0%': { opacity: '0', transform: 'translateY(14px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
         'fade-in': { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
         shimmer: { '0%': { backgroundPosition: '-200% 0' }, '100%': { backgroundPosition: '200% 0' } },
         'count-up': { '0%': { opacity: '0', transform: 'translateY(8px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
