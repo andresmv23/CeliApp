@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BrowserRouter, Routes, Route, NavLink, useNavigate, Navigate, useSearchParams } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, NavLink, useNavigate, Navigate, useSearchParams, useLocation } from 'react-router-dom';
 import Buscador from './components/Buscador';
 import Login from './components/Login';
 import Perfil from './components/Perfil';
@@ -10,6 +10,16 @@ import Terminos from './components/Terminos';
 import Cookies from './components/Cookies';
 import AvisoLegal from './components/AvisoLegal';
 import { AuthProvider, useAuth } from './context/AuthContext';
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [pathname]);
+
+  return null;
+}
 
 function OAuthCallback() {
   const { login } = useAuth();
@@ -79,7 +89,7 @@ function Navbar() {
         </div>
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           {isAuthenticated ? <><NavLink to="/perfil" className="hidden items-center gap-2 rounded-full border-[1.5px] border-accent/25 bg-accent/5 px-3.5 py-2 text-sm font-semibold text-accent transition hover:border-accent/40 hover:bg-accent/10 sm:inline-flex"><UserIcon />Mi perfil</NavLink><button onClick={signOut} className="hidden items-center gap-2 rounded-full border-[1.5px] border-ink/10 px-3.5 py-2 text-sm font-medium text-[#4B6355] transition hover:border-red-600/30 hover:bg-red-600/5 hover:text-red-600 lg:inline-flex">Cerrar sesión</button></> : <NavLink to="/login" className="hidden items-center gap-2 rounded-full bg-accent px-[1.125rem] py-2 text-sm font-semibold tracking-[0.01em] text-white shadow-[0_1px_3px_rgba(13,31,20,0.12)] transition hover:-translate-y-px hover:bg-green-700 hover:shadow-[0_4px_12px_rgba(22,163,74,0.22)] sm:inline-flex">Iniciar sesión</NavLink>}
-          <button aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'} onClick={() => setMenuOpen((open) => !open)} className="flex rounded-lg p-1.5 text-ink transition hover:bg-ink/5 md:hidden">{menuOpen ? <svg className="h-[22px] w-[22px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg> : <svg className="h-[22px] w-[22px]" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>}</button>
+          <button aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'} onClick={() => setMenuOpen((open) => !open)} className="flex rounded-lg p-1.5 text-ink transition hover:bg-ink/5 md:hidden">{menuOpen ? <svg className="h-[22px] w-[22px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg> : <svg className="h-[22px] w-[22px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>}</button>
         </div>
       </div>
     </div>
@@ -93,7 +103,7 @@ function ProtectedRoute({ children }) {
 }
 
 function MainLayout() {
-  return <div className="min-h-screen w-full overflow-x-hidden bg-surface text-ink"><Navbar /><main className="w-full"><Routes><Route path="/" element={<Buscador />} /><Route path="/como-funciona" element={<ComoFunciona />} /><Route path="/sobre-celiapp" element={<SobreCeliApp />} /><Route path="/privacidad" element={<Privacidad />} /><Route path="/terminos" element={<Terminos />} /><Route path="/cookies" element={<Cookies />} /><Route path="/aviso-legal" element={<AvisoLegal />} /><Route path="/login" element={<Login />} /><Route path="/oauth-callback" element={<OAuthCallback />} /><Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} /><Route path="*" element={<Navigate to="/" />} /></Routes></main></div>;
+  return <div className="min-h-screen w-full overflow-x-hidden bg-surface text-ink"><ScrollToTop /><Navbar /><main className="w-full"><Routes><Route path="/" element={<Buscador />} /><Route path="/como-funciona" element={<ComoFunciona />} /><Route path="/sobre-celiapp" element={<SobreCeliApp />} /><Route path="/privacidad" element={<Privacidad />} /><Route path="/terminos" element={<Terminos />} /><Route path="/cookies" element={<Cookies />} /><Route path="/aviso-legal" element={<AvisoLegal />} /><Route path="/login" element={<Login />} /><Route path="/oauth-callback" element={<OAuthCallback />} /><Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} /><Route path="*" element={<Navigate to="/" />} /></Routes></main></div>;
 }
 
 export default function App() {
