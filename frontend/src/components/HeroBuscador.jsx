@@ -3,7 +3,7 @@ function CameraIcon({ className = '', strokeWidth = 2 }) {
 }
 
 function SearchIcon() {
-  return <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75} aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 0 14 0z" /></svg>;
+  return <svg className="block h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75} aria-hidden="true"><circle cx="10.75" cy="10.75" r="5.75" /><path strokeLinecap="round" d="m15 15 4 4" /></svg>;
 }
 
 export default function HeroBuscador({ ean, setEan, loading, error, onBuscar, onAbrirScanner }) {
@@ -15,7 +15,7 @@ export default function HeroBuscador({ ean, setEan, loading, error, onBuscar, on
       <form className="reveal mb-4 max-w-[680px] [transition-delay:200ms]" onSubmit={onBuscar}>
         <div className="flex flex-wrap items-center gap-1.5 rounded-lg border border-ink/15 bg-white p-1.5">
           <label className="flex min-w-0 flex-1 items-center gap-3 px-3 py-1.5 text-ink/35">
-            <SearchIcon />
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center overflow-visible"><SearchIcon /></span>
             <input type="text" inputMode="numeric" autoComplete="off" placeholder="Introduce el código EAN" value={ean} onChange={(event) => setEan(event.target.value)} className="min-w-0 flex-1 bg-transparent py-2 text-[0.9375rem] text-ink outline-none placeholder:text-ink/40" />
           </label>
           <button type="button" onClick={onAbrirScanner} title="Escanear código de barras" aria-label="Escanear código de barras" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-ink/40 transition-colors hover:bg-accent/10 hover:text-accent"><CameraIcon className="h-5 w-5" strokeWidth={1.75} /></button>
