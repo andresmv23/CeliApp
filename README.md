@@ -1,105 +1,162 @@
-# 🌾 CeliApp – Asistente inteligente para personas celíacas
+# CeliApp
 
-CeliApp es una aplicación **full-stack en producción** que ayuda a personas con celiaquía a comprobar en segundos si un producto es seguro para su consumo, escaneando el código de barras o introduciendo el EAN manualmente.
+CeliApp es una aplicación full-stack creada para ayudar a las personas celíacas a consultar productos y revisar si la información disponible indica que son aptos, no aptos o no concluyentes para una dieta sin gluten.
 
-- 🌐 Web en producción: https://celi-app-lemon.vercel.app/
-- 🧩 Stack: **React + Tailwind CSS + FastAPI + PostgreSQL**
-- ☁️ Infraestructura: **Frontend en Vercel, API y base de datos en Railway**
+> Proyecto en fase beta. CeliApp es una herramienta de apoyo y no sustituye la lectura del etiquetado oficial, la consulta con el fabricante ni el criterio de un profesional sanitario.
 
----
+## Funcionalidades
 
-## 🎯 Problema que resuelve
+- Consulta de productos mediante código EAN.
+- Integración con Open Food Facts para localizar productos e información declarada.
+- Análisis de ingredientes y clasificación en `APTO`, `NO APTO` o `DUDOSO`.
+- Distinción entre gluten confirmado, ausencia de gluten declarada e información insuficiente.
+- Análisis alternativo mediante una fotografía nítida donde se vean el nombre y la marca del producto.
+- Búsqueda de información adicional sobre ingredientes mediante IA.
+- Escaneo del código de barras desde la cámara del dispositivo.
+- Autenticación mediante Google.
+- Gestión de productos favoritos e historial de consultas.
+- Panel de administración y moderación.
 
-Leer etiquetas cada vez que una persona celíaca va al supermercado es lento, agotador y propenso a errores.  
-Muchos productos no tienen el sello “Sin gluten”, pero sí ingredientes o trazas que hay que interpretar con cuidado.
+## Arquitectura
 
-CeliApp permite:
+El proyecto está dividido en tres partes principales:
 
-- Escanear un producto (EAN-13) y obtener una evaluación clara:
-  - `APTO`
-  - `NO_APTO`
-  - `DUDOSO`
-- Ver un resumen explicativo de por qué el producto es o no seguro.
-- Consultar el **historial de búsquedas** y guardar **favoritos** para accesos rápidos.
+```text
+CeliApp/
+├── backend/           # API y lógica de negocio con FastAPI
+├── frontend/          # Aplicación web con React y Vite
+├── celi_app_mobile/   # Cliente móvil
+├── docker-compose.yml # Configuración de servicios locales
+└── README.md
+```
 
----
+El frontend se comunica con la API del backend. El backend consulta fuentes externas, procesa la información del producto y devuelve un análisis estructurado al cliente.
 
-## 🧠 Arquitectura y flujo
+## Tecnologías
 
-1. **Frontend (React + Tailwind)**  
-   - SPA con Context API para manejar autenticación y estado global.  
-   - Escáner web de código de barras y formulario manual de EAN.  
-   - Vistas principales:
-     - Buscador de productos
-     - Resultado de aptitud
-     - Perfil con historial y favoritos
+### Frontend
 
-2. **Backend (FastAPI)**  
-   - API REST con endpoints para:
-     - Autenticación y registro de usuarios (JWT)
-     - Consulta de producto por EAN
-     - Gestión de historial de escaneos
-     - Gestión de favoritos
-   - Integración con servicios externos para obtener la ficha del producto.
-   - Uso de un modelo LLM (Perplexity API) para analizar ingredientes y detectar posibles trazas de gluten difíciles de interpretar.
+- React
+- Vite
+- Axios
+- Tailwind CSS
+- Integración con cámara y lector de códigos
 
-3. **Base de datos (PostgreSQL)**  
-   - Desplegada en Railway.
-   - Tablas principales:
-     - `users`
-     - `historial_busquedas`
-     - `favoritos`
-   - Cada escaneo del usuario queda registrado con:
-     - EAN
-     - nombre del producto
-     - resultado (`APTO` / `NO_APTO` / `DUDOSO`)
-     - marca temporal
+### Backend
 
-4. **Infraestructura**  
-   - Frontend desplegado en **Vercel**.
-   - API y base de datos desplegadas en **Railway**.
-   - Variables de entorno separadas para desarrollo y producción.
+- Python
+- FastAPI
+- Pydantic
+- SQLAlchemy
+- PostgreSQL
+- Integraciones con Open Food Facts y servicios de IA
 
----
+### Infraestructura
 
-## 🧩 Tecnologías destacadas
+- Vercel para el frontend.
+- Render para la API.
+- Neon para PostgreSQL.
+- Docker Compose para el entorno local.
 
-- **Frontend**
-  - React
-  - Tailwind CSS
-  - Axios
-  - Context API / Hooks
+## Flujo de análisis
 
-- **Backend**
-  - FastAPI
-  - Pydantic
-  - Autenticación JWT
-  - Integración con APIs externas
-  - Cliente HTTP para llamada a modelo LLM (Perplexity)
+1. El usuario introduce un código EAN o escanea el código de barras.
+2. CeliApp busca el producto en sus fuentes disponibles, empezando por Open Food Facts.
+3. El backend analiza la información del producto y sus ingredientes.
+4. La aplicación muestra el resultado, la fuente consultada, los ingredientes y la imagen disponible.
+5. Si el resultado no es concluyente o el usuario quiere una segunda comprobación, puede hacer una foto nítida del nombre y la marca.
+6. La IA utiliza esa información para buscar el producto y revisar sus ingredientes en fuentes públicas.
 
-- **DevOps / Infra**
-  - Vercel (frontend)
-  - Railway (API + PostgreSQL)
-  - Gestión de variables de entorno
-  - Logs y pruebas en entorno real
+La ausencia de información no se interpreta automáticamente como presencia de gluten. Cuando los datos no permiten confirmar una conclusión, CeliApp muestra un estado dudoso o no confirmado.
 
----
+## Inteligencia artificial
 
-## 👤 Rol y responsabilidades
+CeliApp utiliza Sonar para búsquedas generales y Sonar Pro para los análisis basados en imágenes. El análisis fotográfico está pensado para identificar el producto a partir de una imagen clara de su nombre y marca; no es necesario fotografiar la lista completa de ingredientes.
 
-Proyecto desarrollado de principio a fin:
+Las imágenes se utilizan para realizar el análisis y no se presentan como un sistema de almacenamiento permanente de fotografías de usuarios.
 
-- Diseño de la arquitectura **full‑stack** (frontend, backend y base de datos).
-- Implementación de la API REST y modelo de datos relacional en PostgreSQL.
-- Desarrollo de la interfaz web orientada a **claridad y confianza** para usuarios celíacos.
-- Integración con modelo LLM para análisis semántico de ingredientes.
-- Despliegue y configuración de la infraestructura en producción.
+## Requisitos
 
----
+- Node.js 18 o superior.
+- Python 3.11 o superior.
+- Docker y Docker Compose, opcionalmente.
+- Una base de datos PostgreSQL.
+- Claves de las integraciones externas utilizadas por el backend.
 
-## 🔜 Próximos pasos
+## Instalación local
 
-- Pulir la experiencia móvil (PWA / app nativa).
-- Ampliar fuentes de datos de productos.
-- Sistema de feedback de usuarios sobre la precisión de los resultados.
-- Panel interno para analizar estadísticas de uso.
+### Con Docker Compose
+
+```bash
+git clone https://github.com/andresmv23/CeliApp.git
+cd CeliApp
+docker compose up --build
+```
+
+Los puertos y servicios concretos dependen de la configuración incluida en `docker-compose.yml`.
+
+### Ejecución manual
+
+Backend:
+
+```bash
+cd backend
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn main:app --reload
+```
+
+Frontend:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+En Windows PowerShell, la activación del entorno virtual puede realizarse con:
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+## Variables de entorno
+
+Configura las variables necesarias en los archivos `.env` correspondientes. Los nombres exactos pueden variar según la versión del proyecto y deben mantenerse fuera del control de versiones.
+
+Entre las configuraciones habituales se encuentran:
+
+- URL de conexión a PostgreSQL.
+- URL base de la API.
+- Credenciales de autenticación con Google.
+- Claves de los servicios de IA.
+- Configuración de CORS.
+- Secretos utilizados para firmar sesiones o tokens.
+
+No subas claves privadas, tokens ni archivos `.env` al repositorio.
+
+## Despliegue
+
+La configuración actual utiliza:
+
+- Vercel para publicar el frontend.
+- Render para ejecutar el backend.
+- Neon como proveedor de PostgreSQL.
+
+Antes de desplegar, comprueba que la URL pública de la API, las variables de entorno, CORS y las credenciales de autenticación estén configuradas para el entorno correspondiente.
+
+## Estado del proyecto
+
+CeliApp se encuentra en desarrollo activo y actualmente se presenta como una beta funcional. La aplicación continúa evolucionando en aspectos como validación de fuentes, análisis asistido por IA, experiencia móvil, moderación y observabilidad.
+
+## Responsabilidad
+
+La información mostrada por CeliApp depende de las fuentes consultadas y puede estar incompleta, desactualizada o contener errores. Ante una duda sobre un producto, especialmente en caso de celiaquía o alergias, debe prevalecer siempre el etiquetado oficial del producto, la información del fabricante y el consejo de un profesional sanitario.
+
+## Autor
+
+Proyecto personal de Andrés Mejía Valdez.
+
+- Repositorio: https://github.com/andresmv23/CeliApp
+- Frontend: https://celi-app-lemon.vercel.app/
