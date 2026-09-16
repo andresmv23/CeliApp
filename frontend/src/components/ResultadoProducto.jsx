@@ -2,7 +2,11 @@ function HeartIcon({ filled = false }) {
   return <svg className="h-5 w-5" fill={filled ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8} aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" /></svg>;
 }
 
-export default function ResultadoProducto({ resultado, cfg, fuenteTexto, urlFuente, esFavorito, onToggleFavorito, onNuevaBusqueda, resultRef }) {
+function CameraIcon() {
+  return <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8} aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" /><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" /></svg>;
+}
+
+export default function ResultadoProducto({ resultado, cfg, fuenteTexto, urlFuente, esFavorito, onToggleFavorito, onNuevaBusqueda, onAnalizarFoto, resultRef }) {
   const statusBackground = cfg.label === 'APTO' ? 'bg-green-50' : cfg.label === 'NO APTO' ? 'bg-rose-50' : 'bg-amber-50';
   const producto = resultado.producto;
 
@@ -27,7 +31,8 @@ export default function ResultadoProducto({ resultado, cfg, fuenteTexto, urlFuen
             </div>
           </div>
           <div className="mb-4 rounded-lg border border-ink/5 bg-surface p-4"><p className="mb-2 text-[0.6875rem] font-bold uppercase tracking-[0.1em] text-ink/45">Ingredientes</p><p className="text-[0.8125rem] leading-relaxed text-ink/80">{producto?.ingredientes ?? 'No disponible.'}</p></div>
-          <button onClick={onNuevaBusqueda} className="text-[0.8125rem] font-medium text-ink/45 transition-colors hover:text-accent">Nueva búsqueda</button>
+          <div className="mb-5 rounded-lg border border-accent/20 bg-accent/[0.06] p-4 sm:flex sm:items-center sm:justify-between sm:gap-4"><div className="mb-3 sm:mb-0"><p className="text-sm font-bold text-ink">¿Necesitas una comprobación adicional?</p><p className="mt-1 text-[0.8125rem] leading-relaxed text-ink/60">Haz una foto nítida donde se vean el nombre y la marca. La IA buscará información actualizada del producto para revisarlo.</p></div><button type="button" onClick={onAnalizarFoto} className="flex w-full shrink-0 items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-green-700 sm:w-auto"><CameraIcon />Analizar con foto</button></div>
+          <button onClick={onNuevaBusqueda} className="group inline-flex items-center gap-1 text-[0.8125rem] font-bold text-accent transition-colors hover:text-green-700"><span className="border-b-2 border-accent/35 pb-0.5 transition-colors group-hover:border-green-700">Nueva búsqueda</span><svg className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5l6 7.5-6 7.5M19.5 12h-15" /></svg></button>
         </div>
       </div>
     </div>
