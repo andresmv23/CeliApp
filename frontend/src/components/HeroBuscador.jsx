@@ -1,5 +1,5 @@
 function CameraIcon({ className = '', strokeWidth = 2 }) {
-  return <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={strokeWidth} aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" /><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" /></svg>;
+  return <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={strokeWidth} aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 01-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" /><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0z" /></svg>;
 }
 
 function SearchIcon() {
@@ -23,7 +23,7 @@ export default function HeroBuscador({ ean, setEan, loading, error, onBuscar, on
         </div>
       </form>
       {error && <div className="mb-4 flex max-w-[680px] items-start gap-2.5 rounded-lg border border-red-600/15 bg-red-600/5 px-4 py-3.5 text-sm text-red-600">{error}</div>}
-      <div className="reveal [transition-delay:320ms]"><p className="flex flex-wrap gap-x-6 gap-y-1 text-[0.8125rem] font-medium tracking-[0.01em] text-ink/45"><span>Análisis basado en la información disponible</span><span className="hidden text-ink/10 sm:inline">·</span><span>Consulta siempre la etiqueta del fabricante</span><span className="hidden text-ink/10 sm:inline">·</span><span>Gratis, sin suscripción</span></p></div>
+      <div className="reveal [transition-delay:320ms]"><p className="flex flex-wrap gap-x-6 gap-y-1 text-[0.8125rem] font-medium tracking-[0.01em] text-ink/45"><span>Gratis, sin suscripción</span></p></div>
     </div>
   </section>;
 }
