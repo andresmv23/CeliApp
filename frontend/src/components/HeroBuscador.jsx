@@ -6,7 +6,7 @@ function SearchIcon() {
   return <svg className="block h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75} aria-hidden="true"><circle cx="10.75" cy="10.75" r="5.75" /><path strokeLinecap="round" d="m15 15 4 4" /></svg>;
 }
 
-export default function HeroBuscador({ ean, setEan, loading, error, onBuscar, onAbrirScanner, onAbrirFoto, mostrarAlternativaFoto }) {
+export default function HeroBuscador({ ean, setEan, loading, error, onBuscar, onAbrirScanner }) {
   return <section id="inicio" className="overflow-hidden bg-surface px-4 py-10 sm:py-12 md:py-14 lg:py-20">
     <div className="mx-auto max-w-[1120px]">
       <div className="reveal mb-6"><span className="inline-flex items-center gap-1.5 rounded-full border border-accent/20 bg-accent/10 px-3 py-1 text-[0.72rem] font-bold uppercase tracking-[0.09em] text-accent">Beta 1.0 — Gratis</span></div>
@@ -23,8 +23,7 @@ export default function HeroBuscador({ ean, setEan, loading, error, onBuscar, on
         </div>
       </form>
       {error && <div className="mb-4 flex max-w-[680px] items-start gap-2.5 rounded-lg border border-red-600/15 bg-red-600/5 px-4 py-3.5 text-sm text-red-600">{error}</div>}
-      {mostrarAlternativaFoto && <div className="mb-5 max-w-[680px] rounded-lg border border-ink/10 bg-white p-4 sm:flex sm:items-center sm:justify-between sm:gap-5"><div className="mb-3 sm:mb-0"><p className="text-sm font-bold text-ink">¿El resultado no es el esperado?</p><p className="mt-1 text-[0.8125rem] leading-relaxed text-ink/55">Fotografía el envase o la lista de ingredientes para que la IA realice un análisis adicional.</p></div><button type="button" onClick={onAbrirFoto} className="flex w-full shrink-0 items-center justify-center gap-2 rounded-lg border border-accent/25 bg-accent/10 px-4 py-2.5 text-sm font-bold text-accent transition-colors hover:bg-accent hover:text-white sm:w-auto"><CameraIcon className="h-[18px] w-[18px]" strokeWidth={1.8} />Analizar con foto</button></div>}
-      <div className="reveal [transition-delay:320ms]"><p className="flex flex-wrap gap-x-6 gap-y-1 text-[0.8125rem] font-medium tracking-[0.01em] text-ink/45"><span>+50.000 productos analizados</span><span className="hidden text-ink/10 sm:inline">·</span><span>99% de precisión</span><span className="hidden text-ink/10 sm:inline">·</span><span>Gratis, sin suscripción</span></p></div>
+      <div className="reveal [transition-delay:320ms]"><p className="flex flex-wrap gap-x-6 gap-y-1 text-[0.8125rem] font-medium tracking-[0.01em] text-ink/45"><span>Análisis basado en la información disponible</span><span className="hidden text-ink/10 sm:inline">·</span><span>Consulta siempre la etiqueta del fabricante</span><span className="hidden text-ink/10 sm:inline">·</span><span>Gratis, sin suscripción</span></p></div>
     </div>
   </section>;
 }
