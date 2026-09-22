@@ -38,6 +38,7 @@ export default function Scanner({ onScanSuccess, onClose }) {
   const fileInputRef = useRef(null);
   const controlsRef = useRef(null);
   const detectedRef = useRef(null);
+  const stoppedRef = useRef(false);
 
   const [error, setError] = useState(null);
   const [scanning, setScanning] = useState(false);
@@ -47,15 +48,33 @@ export default function Scanner({ onScanSuccess, onClose }) {
     if (!videoRef.current) return undefined;
 
     let active = true;
-
+    let controls = null;
     const codeReader = createCodeReader({
       delayBetweenScanAttempts: 150,
       delayBetweenScanSuccess: 1000,
     });
 
+    const stopScanner = () => {
+      if (stoppedRef.current) return;
+
+      stoppedRef.current = true;
+      controls?.stop();
+      controlsRef.current?.stop();
+      controlsRef.current = null;
+
+      const stream = videoRef.current?.srcObject;
+      if (stream instanceof MediaStream) {
+        stream.getTracks().forEach((track) => track.stop());
+      }
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = null;
+      }
+    };
+
     const startScanner = async () => {
       try {
-        const controls = await codeReader.decodeFromConstraints(
+        controls = await codeReader.decodeFromConstraints(
           {
             audio: false,
             video: {
@@ -65,30 +84,27 @@ export default function Scanner({ onScanSuccess, onClose }) {
             },
           },
           videoRef.current,
-          (result, scanError) => {
-            if (!active) return;
+          (result) => {
+            if (!active || !result) return;
 
-            if (result) {
-              const code = result.getText();
+            const code = result.getText();
 
-              if (code && code !== detectedRef.current) {
-                detectedRef.current = code;
-                active = false;
-                controls.stop();
-                onScanSuccess(code);
-              }
-
-              return;
+            if (code && code !== detectedRef.current) {
+              detectedRef.current = code;
+              active = false;
+              stopScanner();
+              onScanSuccess(code);
             }
           },
         );
 
+        controlsRef.current = controls;
+
         if (!active) {
-          controls.stop();
+          stopScanner();
           return;
         }
 
-        controlsRef.current = controls;
         setScanning(true);
       } catch (cameraError) {
         if (active) {
@@ -101,8 +117,7 @@ export default function Scanner({ onScanSuccess, onClose }) {
 
     return () => {
       active = false;
-      controlsRef.current?.stop();
-      codeReader.reset();
+      stopScanner();
     };
   }, [onScanSuccess]);
 
@@ -116,12 +131,11 @@ export default function Scanner({ onScanSuccess, onClose }) {
     setError(null);
 
     const codeReader = createCodeReader();
+    let imageUrl = null;
 
     try {
-      const imageUrl = URL.createObjectURL(file);
+      imageUrl = URL.createObjectURL(file);
       const result = await codeReader.decodeFromImageUrl(imageUrl);
-
-      URL.revokeObjectURL(imageUrl);
 
       if (result?.getText()) {
         onScanSuccess(result.getText());
@@ -132,6 +146,7 @@ export default function Scanner({ onScanSuccess, onClose }) {
     } catch {
       setError('No se detectó un código EAN en la imagen. Comprueba que se vea completo y nítido.');
     } finally {
+      if (imageUrl) URL.revokeObjectURL(imageUrl);
       codeReader.reset();
       setGalleryLoading(false);
     }
